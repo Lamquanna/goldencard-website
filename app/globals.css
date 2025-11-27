@@ -1,0 +1,585 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Montserrat font is loaded via next/font/google in app/fonts.ts with Vietnamese support */
+
+:root {
+  /* Refined gold palette with warmer tones */
+  --gc-gold: #d4af37;
+  --gc-gold-600: #b89129;
+  --gc-gold-700: #9a771f;
+  --gc-gold-50: #fdfbf3;
+  --gc-gold-100: #faf6e6;
+  
+  /* Complete gold palette for premium design */
+  --gold-50: #FDFBF7;
+  --gold-100: #F8F4E8;
+  --gold-200: #F0E6C8;
+  --gold-300: #E8D8A8;
+  --gold-400: #E0CA88;
+  --gold-500: #D4AF37;
+  --gold-600: #B8932F;
+  --gold-700: #9C7727;
+  --gold-800: #6D5419;
+  --gold-900: #3E2F0E;
+  
+  /* Complete gray palette */
+  --gray-50: #F8F7F4;
+  --gray-100: #E8E6E1;
+  --gray-200: #D1CDC3;
+  --gray-300: #3A3A3A;
+  --gray-400: #2A2A2A;
+  --gray-500: #1A1A1A;
+  --gray-600: #0F0F0F;
+  --gray-700: #0A0A0A;
+  --gray-800: #000000;
+  --gray-900: #000000;
+  
+  /* Enhanced base colors */
+  --gc-bg: #fafafa;
+  --gc-surface: #ffffff;
+  --gc-text: #0a0a0a;
+  --gc-text-secondary: #404040;
+  --gc-muted: #737373;
+  --gc-accent: #059669;
+  --gc-accent-light: #d1fae5;
+  --gc-blue: #3b82f6;
+  --gc-error: #dc2626;
+  
+  /* Depth and shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-gold: 0 4px 16px -2px rgb(212 175 55 / 0.15);
+  --shadow-gold-lg: 0 12px 24px -4px rgb(212 175 55 / 0.2);
+  
+  --radius: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  --background: var(--gc-bg);
+  --foreground: var(--gc-text);
+  --card: var(--gc-surface);
+  --card-foreground: var(--gc-text);
+  --popover: var(--gc-surface);
+  --popover-foreground: var(--gc-text);
+  --primary: var(--gc-gold);
+  --primary-foreground: #18181b;
+  --secondary: #f4f4f5;
+  --secondary-foreground: var(--gc-text);
+  --muted: #f4f4f5;
+  --muted-foreground: var(--gc-muted);
+  --accent: var(--gc-accent);
+  --accent-foreground: #ffffff;
+  --destructive: var(--gc-error);
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: var(--gc-gold);
+  --chart-1: #d4af37;
+  --chart-2: #10b981;
+  --chart-3: #3b82f6;
+  --chart-4: #9a771f;
+  --chart-5: #f59e0b;
+  --sidebar: var(--gc-gold-50);
+  --sidebar-foreground: var(--gc-text);
+  --sidebar-primary: var(--gc-gold);
+  --sidebar-primary-foreground: #18181b;
+  --sidebar-accent: var(--gc-accent);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #f5f0e1;
+  --sidebar-ring: var(--gc-gold);
+  color-scheme: only light;
+}
+
+/* Global font weight increase by 50% */
+body {
+  font-weight: 600;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+  color: #000000;
+}
+
+p, span, div {
+  font-weight: 600;
+}
+
+.dark {
+  /* WHITE THEME - Clean, Bright Green Energy Design */
+  --gc-bg: #ffffff;
+  --gc-surface: #fafafa;
+  --gc-text: #000000;
+  --gc-muted: #546E7A;
+
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #4CAF50;
+  --primary-foreground: #ffffff;
+  --secondary: #F8F9FA;
+  --secondary-foreground: #1a1a1a;
+  --muted: #F8F9FA;
+  --muted-foreground: #546E7A;
+  --accent: #4CAF50;
+  --accent-foreground: #ffffff;
+  --destructive: #DC2626;
+  --destructive-foreground: #ffffff;
+  --border: #E0E0E0;
+  --input: #E0E0E0;
+  --ring: #4CAF50;
+  --sidebar: #FAFAFA;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #4CAF50;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #42A5F5;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #E0E0E0;
+  --sidebar-ring: #4CAF50;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-feature-settings: "liga", "kern";
+  font-weight: 500;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* Phase 1 Typography Optimization - Huawei Solar Style */
+h1 {
+  font-size: clamp(2.125rem, 4.25vw, 3.375rem); /* -15% from original */
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem; /* -25% spacing */
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3.2vw, 2.375rem); /* -20% from original */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem; /* -17% spacing */
+}
+
+h3 {
+  font-size: clamp(1.35rem, 2.7vw, 1.8rem); /* -10% from original */
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem; /* -20% spacing */
+}
+
+h4 {
+  font-size: clamp(1.125rem, 1.8vw, 1.35rem); /* -10% from original */
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0.75rem; /* -25% spacing */
+}
+
+/* Smooth scrolling for anchor links */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   PREMIUM UI UTILITIES
+   Cinematic effects and brand-specific styles
+   ============================================ */
+
+/* Golden Energy Brand Highlight with Gradient */
+.golden-energy-text {
+  background: linear-gradient(90deg, #005776 0%, #005776 50%, #ED683C 50%, #ED683C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.golden-energy-text-subtle {
+  background: linear-gradient(90deg, #005776 0%, #005776 50%, #ED683C 50%, #ED683C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* For split text styling - "Golden" in light ocean blue #00A3CC, "Energy" in orange #ED683C */
+/* Using Playfair Display serif font for Golden Energy branding */
+.golden-text {
+  color: #00A3CC;
+  font-weight: 700;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.energy-text {
+  color: #ED683C;
+  font-weight: 700;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* Glassmorphism Effects */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Shadows */
+.shadow-lux {
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-float {
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-glow-gold {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+}
+
+/* ============================================
+   GLOBAL TEXT IMPROVEMENTS FOR READABILITY
+   ============================================ */
+
+/* Override gray text colors to black for better readability on light backgrounds */
+.text-gray-300 {
+  font-weight: 500 !important;
+  color: #1A1A1A !important; /* Almost black for maximum readability */
+}
+
+.text-gray-400 {
+  font-weight: 500 !important;
+  color: #1A1A1A !important; /* Almost black for maximum readability */
+}
+
+.text-gray-500 {
+  font-weight: 500 !important;
+  color: #2C3E50 !important; /* Dark gray for labels */
+}
+
+.shadow-glow-gold-lg {
+  box-shadow: 0 0 45px rgba(212, 175, 55, 0.4);
+}
+
+.shadow-glow-teal {
+  box-shadow: 0 0 30px rgba(20, 184, 166, 0.3);
+}
+
+/* Text Gradients */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #b89129 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #d4af37 0%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-elegant {
+  background: linear-gradient(135deg, #1f2937 0%, #737373 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Background Gradients - UPGRADED for Awwwards-level premium feel */
+.bg-gradient-radial {
+  background: radial-gradient(circle at center, var(--tw-gradient-stops));
+}
+
+.bg-gradient-mesh {
+  background: 
+    radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(20, 184, 166, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(250, 250, 249, 1) 0px, transparent 50%);
+}
+
+/* Premium Dark Backgrounds - Brighter & More Dynamic */
+.bg-premium-dark {
+  background: linear-gradient(
+    180deg,
+    #0f1419 0%,
+    #151a21 50%,
+    #1a1f26 100%
+  );
+}
+
+.bg-premium-dark-radial {
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(76, 175, 80, 0.06) 0%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(248, 249, 250, 1) 100%
+  );
+}
+
+.bg-hero-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(248, 249, 250, 1) 50%,
+    rgba(232, 245, 233, 1) 100%
+  );
+  position: relative;
+}
+
+.bg-hero-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(76, 175, 80, 0.08) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    circle at 70% 80%,
+    rgba(66, 165, 245, 0.06) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Glow Orbs - Light theme with green/blue accents */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.glow-orb-gold {
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.15) 40%, transparent 70%);
+}
+
+.glow-orb-teal {
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.25) 0%, rgba(76, 175, 80, 0.12) 40%, transparent 70%);
+}
+
+.glow-orb-blue {
+  background: radial-gradient(circle, rgba(66, 165, 245, 0.25) 0%, rgba(66, 165, 245, 0.12) 40%, transparent 70%);
+}
+
+.glow-orb-orange {
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.25) 0%, rgba(255, 193, 7, 0.12) 40%, transparent 70%);
+}
+
+/* Ambient Light Effects */
+.ambient-light {
+  position: relative;
+  overflow: hidden;
+}
+
+.ambient-light::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(212, 175, 55, 0.15) 0%,
+    rgba(16, 185, 129, 0.08) 25%,
+    transparent 50%
+  );
+  animation: ambient-rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ambient-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Smooth Transitions */
+.transition-smooth {
+  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.transition-spring {
+  transition: all 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover States */
+.hover-lift {
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+}
+
+/* Gradient Borders */
+.border-gradient-gold {
+  border: 2px solid transparent;
+  background-image: 
+    linear-gradient(white, white),
+    linear-gradient(135deg, #d4af37, #b89129);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.border-gradient-brand {
+  border: 2px solid transparent;
+  background-image: 
+    linear-gradient(white, white),
+    linear-gradient(135deg, #d4af37, #14b8a6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out;
+}
+
+/* Typography Utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Scroll Snap */
+.snap-section {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.snap-section > * {
+  scroll-snap-align: start;
+}

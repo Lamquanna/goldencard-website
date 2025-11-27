@@ -1,0 +1,974 @@
+{
+  "home": {
+    "vi": {
+      "hero": {
+        "title_line1": "Golden",
+        "title_line2": "Energy",
+        "tagline": "Năng lượng sạch, tương lai xanh, chất lượng vàng",
+        "scroll_text": "CUỘN XUỐNG"
+      },
+      "sections": {
+        "about": {
+          "title": "Chúng tôi là Golden Energy",
+          "subtitle": "GIỚI THIỆU",
+          "description": "Với hơn 15 năm kinh nghiệm, chúng tôi đã đồng hành cùng 500+ gia đình và doanh nghiệp trên hành trình chuyển đổi năng lượng xanh. Sứ mệnh của chúng tôi là mang đến cho các bạn giải pháp năng lượng sạch, bền vững, giúp tiết kiệm chi phí và bảo vệ môi trường cho thế hệ tương lai.",
+          "cta": "Tìm hiểu thêm"
+        },
+        "design": {
+          "title": "Thiết kế",
+          "subtitle": "THIẾT KẾ RIÊNG CHO BẠN",
+          "description": "Chúng tôi hiểu rằng mỗi công trình đều độc nhất. Đội ngũ kỹ sư của chúng tôi sẽ phân tích kỹ lưỡng nhu cầu của các bạn, thiết kế hệ thống điện mặt trời tối ưu nhất về hiệu suất và thẩm mỹ.",
+          "stats": {
+            "projects": { "value": "500+", "label": "Dự án" },
+            "capacity": { "value": "50MW", "label": "Công suất" },
+            "experience": { "value": "15+", "label": "Năm" },
+            "savings": { "value": "70%", "label": "Tiết kiệm" }
+          }
+        },
+        "technology": {
+          "title": "Công nghệ",
+          "subtitle": "CÔNG NGHỆ HÀNG ĐẦU",
+          "description": "Chúng tôi tin tưởng và sử dụng thiết bị chất lượng cao từ Huawei, Growatt, Jinko Solar. Với các bạn, chúng tôi không bao giờ thỏa hiệp về chất lượng để tạo ra hệ thống bền vững, an toàn và hiệu suất cao nhất."
+        },
+        "installation": {
+          "title": "Lắp đặt",
+          "subtitle": "LẮP ĐẶT CHUYÊN NGHIỆP",
+          "description": "Đội ngũ kỹ thuật viên của chúng tôi có hơn 15 năm kinh nghiệm thực chiến. Chúng tôi cam kết lắp đặt chính xác, an toàn từng chi tiết nhỏ nhất, mang đến cho các bạn hệ thống hoạt động hoàn hảo ngay từ ngày đầu tiên."
+        },
+        "maintenance": {
+          "title": "Bảo trì",
+          "subtitle": "HỖ TRỢ 24/7",
+          "description": "Chúng tôi luôn bên cạnh các bạn với dịch vụ bảo trì 24/7. Hệ thống giám sát từ xa giúp chúng tôi phát hiện và xử lý sự cố nhanh chóng, đảm bảo hệ thống của các bạn hoạt động liên tục không gián đoạn.",
+          "cta": "Xem tất cả dịch vụ"
+        },
+        "projects": {
+          "title": "Dự án tiêu biểu",
+          "subtitle": "NIỀM TỰ HÀO CỦA CHÚNG TÔI",
+          "description": "Từ nhà ở gia đình đến các tòa nhà thương mại lớn, chúng tôi đã cùng các bạn xây dựng hàng trăm dự án năng lượng xanh trên khắp Việt Nam với tổng công suất hơn 50MW.",
+          "featured": [
+            { "name": "Resort Phú Quốc", "capacity": "5.2MW" },
+            { "name": "Nhà máy Bình Dương", "capacity": "8.5MW" },
+            { "name": "Văn phòng TP.HCM", "capacity": "2.1MW" }
+          ]
+        },
+        "goldencard": {
+          "title": "GoldenCard",
+          "subtitle": "CÔNG NGHỆ MỚI",
+          "description": "Từ thành công trong lĩnh vực năng lượng xanh, chúng tôi mở rộng sang giải pháp thẻ từ thông minh cho khách sạn, resort & spa. Chúng tôi cam kết mang đến cho các bạn công nghệ hiện đại nhất.",
+          "cta": "Khám phá GoldenCard"
+        },
+        "contact": {
+          "title": "Liên hệ với chúng tôi",
+          "subtitle": "LIÊN HỆ",
+          "description": "Đội ngũ chuyên gia của chúng tôi sẵn sàng lắng nghe và tư vấn giải pháp năng lượng mặt trời phù hợp nhất cho các bạn. Liên hệ ngay để nhận tư vấn miễn phí và báo giá chi tiết.",
+          "office_title": "Trụ sở chính",
+          "office_address": "625 Trần Xuân Soạn,\nPhường Tân Hưng,\nTP. Hồ Chí Minh",
+          "email_title": "Email",
+          "phone_title": "Hotline",
+          "cta": "Gửi tin nhắn"
+        }
+      }
+    },
+    "en": {
+      "hero": {
+        "title_line1": "Golden",
+        "title_line2": "Energy",
+        "tagline": "Clean Energy, Green Future, Golden Quality",
+        "scroll_text": "SCROLL DOWN"
+      },
+      "sections": {
+        "about": {
+          "title": "We are Golden Energy",
+          "subtitle": "ABOUT US",
+          "description": "With over 15 years of experience, we have partnered with 500+ families and businesses on their green energy journey. Our mission is to bring you clean, sustainable energy solutions that save costs and protect the environment for future generations.",
+          "cta": "Learn More"
+        },
+        "design": {
+          "title": "Design",
+          "subtitle": "DESIGNED FOR YOU",
+          "description": "We understand that every project is unique. Our team of engineers will carefully analyze your needs and design the most optimal solar power system for performance and aesthetics.",
+          "stats": {
+            "projects": { "value": "500+", "label": "Projects" },
+            "capacity": { "value": "50MW", "label": "Capacity" },
+            "experience": { "value": "15+", "label": "Years" },
+            "savings": { "value": "70%", "label": "Savings" }
+          }
+        },
+        "technology": {
+          "title": "Technology",
+          "subtitle": "LEADING TECHNOLOGY",
+          "description": "We trust and use high-quality equipment from Huawei, Growatt, and Jinko Solar. For you, we never compromise on quality to create sustainable, safe, and highly efficient systems."
+        },
+        "installation": {
+          "title": "Installation",
+          "subtitle": "PROFESSIONAL INSTALLATION",
+          "description": "Our technical team has over 15 years of hands-on experience. We are committed to accurate and safe installation of every smallest detail, bringing you a perfectly functioning system from day one."
+        },
+        "maintenance": {
+          "title": "Maintenance",
+          "subtitle": "24/7 SUPPORT",
+          "description": "We are always by your side with 24/7 maintenance service. Remote monitoring helps us detect and resolve issues quickly, ensuring your system operates continuously without interruption.",
+          "cta": "View All Services"
+        },
+        "projects": {
+          "title": "Featured Projects",
+          "subtitle": "OUR PRIDE",
+          "description": "From residential homes to large commercial buildings, we have built hundreds of green energy projects with you across Vietnam with a total capacity of over 50MW.",
+          "featured": [
+            { "name": "Phu Quoc Resort", "capacity": "5.2MW" },
+            { "name": "Binh Duong Factory", "capacity": "8.5MW" },
+            { "name": "HCMC Office", "capacity": "2.1MW" }
+          ]
+        },
+        "goldencard": {
+          "title": "GoldenCard",
+          "subtitle": "NEW TECHNOLOGY",
+          "description": "From our success in green energy, we expand into smart card solutions for hotels, resorts & spas. We are committed to bringing you the most modern technology.",
+          "cta": "Discover GoldenCard"
+        },
+        "contact": {
+          "title": "Contact Us",
+          "subtitle": "CONTACT",
+          "description": "Our team of experts is ready to listen and advise you on the most suitable solar energy solution. Contact us now for free consultation and detailed quote.",
+          "office_title": "Head Office",
+          "office_address": "625 Tran Xuan Soan,\nTan Hung Ward,\nHo Chi Minh City",
+          "email_title": "Email",
+          "phone_title": "Hotline",
+          "cta": "Send Message"
+        }
+      }
+    },
+    "zh": {
+      "hero": {
+        "title_line1": "Golden",
+        "title_line2": "Energy",
+        "tagline": "清洁能源，绿色未来，黄金品质",
+        "scroll_text": "向下滚动"
+      },
+      "sections": {
+        "about": {
+          "title": "我们是Golden Energy",
+          "subtitle": "关于我们",
+          "description": "凭借超过15年的经验，我们已与500多个家庭和企业携手踏上绿色能源之旅。我们的使命是为您带来清洁、可持续的能源解决方案，帮助节省成本并为子孙后代保护环境。",
+          "cta": "了解更多"
+        },
+        "design": {
+          "title": "设计",
+          "subtitle": "为您设计",
+          "description": "我们理解每个项目都是独一无二的。我们的工程师团队将仔细分析您的需求，设计性能和美观度最优的太阳能系统。",
+          "stats": {
+            "projects": { "value": "500+", "label": "项目" },
+            "capacity": { "value": "50MW", "label": "容量" },
+            "experience": { "value": "15+", "label": "年" },
+            "savings": { "value": "70%", "label": "节省" }
+          }
+        },
+        "technology": {
+          "title": "技术",
+          "subtitle": "领先技术",
+          "description": "我们信任并使用华为、固德威和晶科太阳能的高品质设备。对于您，我们从不在质量上妥协，以创建可持续、安全和高效的系统。"
+        },
+        "installation": {
+          "title": "安装",
+          "subtitle": "专业安装",
+          "description": "我们的技术团队拥有超过15年的实战经验。我们承诺精确、安全地安装每一个最小的细节，从第一天起为您带来完美运行的系统。"
+        },
+        "maintenance": {
+          "title": "维护",
+          "subtitle": "24/7支持",
+          "description": "我们始终陪伴在您身边，提供24/7维护服务。远程监控帮助我们快速检测和解决问题，确保您的系统持续不间断运行。",
+          "cta": "查看所有服务"
+        },
+        "projects": {
+          "title": "精选项目",
+          "subtitle": "我们的骄傲",
+          "description": "从住宅到大型商业建筑，我们与您在越南各地建设了数百个绿色能源项目，总容量超过50MW。",
+          "featured": [
+            { "name": "富国度假村", "capacity": "5.2MW" },
+            { "name": "平阳工厂", "capacity": "8.5MW" },
+            { "name": "胡志明市办公室", "capacity": "2.1MW" }
+          ]
+        },
+        "goldencard": {
+          "title": "GoldenCard",
+          "subtitle": "新技术",
+          "description": "凭借在绿色能源领域的成功，我们扩展到酒店、度假村和水疗中心的智能卡解决方案。我们致力于为您带来最现代的技术。",
+          "cta": "探索GoldenCard"
+        },
+        "contact": {
+          "title": "联系我们",
+          "subtitle": "联系",
+          "description": "我们的专家团队随时准备倾听并为您提供最合适的太阳能解决方案建议。立即联系我们获取免费咨询和详细报价。",
+          "office_title": "总部",
+          "office_address": "625陈春渲路,\n新兴坊,\n胡志明市",
+          "email_title": "电子邮件",
+          "phone_title": "热线",
+          "cta": "发送消息"
+        }
+      }
+    }
+  },
+  "services": {
+    "vi": {
+      "hero": {
+        "headline": "Dịch vụ chiến lược—thẻ từ, CNTT và năng lượng mặt trời",
+        "subheadline": "GoldenCard cung cấp giải pháp trọn gói từ sản xuất thẻ bảo mật cao đến triển khai hệ thống CNTT và vận hành điện mặt trời hiệu quả",
+        "trust_bullets": [
+          "Thẻ ngân hàng EMV đạt chuẩn Visa, Mastercard, PCI-DSS",
+          "Phần mềm CNTT tùy chỉnh với kiến trúc microservices mở rộng dễ dàng",
+          "Hệ thống điện mặt trời tiết kiệm 30-50% chi phí, hoàn vốn 5-7 năm",
+          "Bảo hành 25 năm tấm pin, 10 năm inverter, bảo trì định kỳ miễn phí"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Nhận báo giá chi tiết",
+          "primary_alt_1": "Tư vấn dịch vụ ngay",
+          "primary_alt_2": "Đặt lịch khảo sát",
+          "secondary_recommended": "Xem dự án mẫu",
+          "secondary_alt_1": "Tải tài liệu kỹ thuật",
+          "secondary_alt_2": "So sánh dịch vụ"
+        }
+      },
+      "service_highlights": {
+        "magnetic_cards": {
+          "headline": "Thẻ từ chất lượng cao",
+          "short_benefits": [
+            "Tùy biến hoàn toàn thiết kế, màu sắc và thông tin in ấn",
+            "Vật liệu PVC 0.76mm đạt chuẩn ISO 7810, tương thích mọi đầu đọc",
+            "Mã hóa HiCo/LoCo với dữ liệu ổn định 10+ năm",
+            "Giao hàng nhanh từ 100 đến hàng triệu thẻ"
+          ]
+        },
+        "bank_cards": {
+          "headline": "Thẻ ngân hàng đạt chuẩn quốc tế",
+          "short_benefits": [
+            "Tuân thủ EMV, Visa, Mastercard và PCI Card Production Security",
+            "Chip thông minh với xác thực giao dịch an toàn tuyệt đối",
+            "Hỗ trợ NFC cho thanh toán không chạm tiện lợi",
+            "Quy trình sản xuất khép kín đảm bảo tuyệt mật thông tin"
+          ]
+        },
+        "it_services": {
+          "headline": "Giải pháp CNTT tùy chỉnh",
+          "short_benefits": [
+            "Thiết kế riêng theo quy trình nghiệp vụ của từng doanh nghiệp",
+            "Kiến trúc microservices, cloud-native dễ mở rộng",
+            "Bảo mật đa lớp, mã hóa dữ liệu và kiểm soát truy cập nghiêm ngặt",
+            "Tích hợp liền mạch ERP, CRM qua RESTful API"
+          ]
+        },
+        "solar_solutions": {
+          "headline": "Hệ thống điện mặt trời tiết kiệm chi phí",
+          "short_benefits": [
+            "Tiết kiệm 30-50% hóa đơn điện ngay từ năm đầu",
+            "Tấm pin Mono PERC 450W+, hiệu suất >21%, tối ưu khí hậu nhiệt đới",
+            "Inverter hàng đầu (SMA, Fronius, Huawei), hiệu suất >98%",
+            "Hoàn vốn 5-7 năm, tuổi thọ hệ thống 25+ năm"
+          ]
+        }
+      },
+      "image_alts": {
+        "magnetic_card_product": "Mẫu thẻ từ PVC cao cấp với thiết kế tùy chỉnh và dải từ tính được mã hóa",
+        "bank_card_chip": "Cận cảnh chip EMV trên thẻ ngân hàng, thể hiện công nghệ bảo mật cao",
+        "it_dashboard": "Giao diện phần mềm quản lý hiện đại với biểu đồ và dashboard trực quan",
+        "solar_installation": "Hệ thống tấm pin mặt trời được lắp đặt trên mái nhà máy, kỹ sư đang kiểm tra",
+        "service_comparison_chart": "Biểu đồ so sánh lợi ích của các gói dịch vụ GoldenCard"
+      }
+    },
+    "en": {
+      "hero": {
+        "headline": "Strategic Services—Cards, IT, and Solar Energy",
+        "subheadline": "GoldenCard delivers end-to-end solutions from high-security card production to IT system deployment and efficient solar power operation",
+        "trust_bullets": [
+          "EMV bank cards meeting Visa, Mastercard, and PCI-DSS standards",
+          "Custom IT software with scalable microservices architecture",
+          "Solar systems saving 30-50% costs, 5-7 year payback period",
+          "25-year panel warranty, 10-year inverter, free regular maintenance"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Get Detailed Quote",
+          "primary_alt_1": "Consult on Services Now",
+          "primary_alt_2": "Schedule Site Survey",
+          "secondary_recommended": "View Sample Projects",
+          "secondary_alt_1": "Download Technical Docs",
+          "secondary_alt_2": "Compare Services"
+        }
+      },
+      "service_highlights": {
+        "magnetic_cards": {
+          "headline": "High-Quality Magnetic Cards",
+          "short_benefits": [
+            "Full customization of design, colors, and printed information",
+            "0.76mm PVC material meeting ISO 7810, compatible with all readers",
+            "HiCo/LoCo encoding with stable data storage for 10+ years",
+            "Fast delivery from 100 to millions of cards"
+          ]
+        },
+        "bank_cards": {
+          "headline": "Internationally Certified Bank Cards",
+          "short_benefits": [
+            "Compliant with EMV, Visa, Mastercard, and PCI Card Production Security",
+            "Smart chip with absolutely secure transaction authentication",
+            "NFC support for convenient contactless payments",
+            "Closed production process ensuring information confidentiality"
+          ]
+        },
+        "it_services": {
+          "headline": "Custom IT Solutions",
+          "short_benefits": [
+            "Designed specifically for each enterprise's business workflows",
+            "Microservices, cloud-native architecture easily scalable",
+            "Multi-layer security with data encryption and strict access control",
+            "Seamless ERP, CRM integration via RESTful API"
+          ]
+        },
+        "solar_solutions": {
+          "headline": "Cost-Saving Solar Power Systems",
+          "short_benefits": [
+            "Save 30-50% on electricity bills from first year",
+            "Mono PERC 450W+ panels, >21% efficiency, optimized for tropics",
+            "Leading inverters (SMA, Fronius, Huawei), >98% efficiency",
+            "5-7 year payback, 25+ year system lifespan"
+          ]
+        }
+      },
+      "image_alts": {
+        "magnetic_card_product": "Sample premium PVC magnetic card with custom design and encoded magnetic stripe",
+        "bank_card_chip": "Close-up of EMV chip on bank card, showcasing high-security technology",
+        "it_dashboard": "Modern management software interface with charts and intuitive dashboard",
+        "solar_installation": "Solar panel system installed on factory roof, engineer inspecting",
+        "service_comparison_chart": "Comparison chart showing benefits of GoldenCard service packages"
+      }
+    },
+    "zh": {
+      "hero": {
+        "headline": "战略服务——卡片、IT 和太阳能",
+        "subheadline": "GoldenCard 提供从高安全性卡片生产到 IT 系统部署和高效太阳能运营的端到端解决方案",
+        "trust_bullets": [
+          "符合 Visa、Mastercard 和 PCI-DSS 标准的 EMV 银行卡",
+          "具有可扩展微服务架构的定制 IT 软件",
+          "太阳能系统节省 30-50% 成本，5-7年回本期",
+          "25年电池板保修，10年逆变器，免费定期维护"
+        ],
+        "cta_variants": {
+          "primary_recommended": "获取详细报价",
+          "primary_alt_1": "立即咨询服务",
+          "primary_alt_2": "预约现场勘察",
+          "secondary_recommended": "查看样本项目",
+          "secondary_alt_1": "下载技术文档",
+          "secondary_alt_2": "比较服务"
+        }
+      },
+      "service_highlights": {
+        "magnetic_cards": {
+          "headline": "高质量磁条卡",
+          "short_benefits": [
+            "设计、颜色和印刷信息完全可定制",
+            "0.76mm PVC 材料符合 ISO 7810，兼容所有读卡器",
+            "HiCo/LoCo 编码，数据稳定存储10年以上",
+            "从100张到数百万张快速交付"
+          ]
+        },
+        "bank_cards": {
+          "headline": "国际认证银行卡",
+          "short_benefits": [
+            "符合 EMV、Visa、Mastercard 和 PCI 卡片生产安全标准",
+            "智能芯片，交易认证绝对安全",
+            "支持 NFC 便捷非接触支付",
+            "封闭式生产流程确保信息保密"
+          ]
+        },
+        "it_services": {
+          "headline": "定制 IT 解决方案",
+          "short_benefits": [
+            "专为每个企业的业务流程设计",
+            "微服务、云原生架构易于扩展",
+            "多层安全，数据加密和严格的访问控制",
+            "通过 RESTful API 无缝集成 ERP、CRM"
+          ]
+        },
+        "solar_solutions": {
+          "headline": "节省成本的太阳能系统",
+          "short_benefits": [
+            "第一年起节省 30-50% 电费",
+            "单晶 PERC 450W+ 电池板，效率>21%，热带气候优化",
+            "领先逆变器（SMA、Fronius、Huawei），效率>98%",
+            "5-7年回本，系统寿命25年以上"
+          ]
+        }
+      },
+      "image_alts": {
+        "magnetic_card_product": "定制设计和编码磁条的高级 PVC 磁条卡样品",
+        "bank_card_chip": "银行卡上 EMV 芯片的特写，展示高安全技术",
+        "it_dashboard": "现代管理软件界面，包含图表和直观仪表板",
+        "solar_installation": "工厂屋顶上安装的太阳能电池板系统，工程师正在检查",
+        "service_comparison_chart": "显示 GoldenCard 服务套餐优势的比较图表"
+      }
+    }
+  },
+  "goldenenergy": {
+    "vi": {
+      "hero": {
+        "headline": "GoldenEnergy—Giải pháp năng lượng sạch cho doanh nghiệp Việt Nam",
+        "subheadline": "Thiết kế, lắp đặt và vận hành hệ thống điện mặt trời tiết kiệm chi phí, bảo vệ môi trường và xây dựng hình ảnh doanh nghiệp xanh bền vững",
+        "trust_bullets": [
+          "100+ dự án thành công từ quy mô nhỏ đến 2 MWp",
+          "Tiết kiệm 30-50% hóa đơn điện, hoàn vốn 5-7 năm",
+          "Giảm phát thải CO2, nâng cao hình ảnh doanh nghiệp xanh",
+          "Bảo hành 25 năm tấm pin, 10 năm inverter, giám sát từ xa",
+          "Thi công chuyên nghiệp, vận hành ổn định với uptime >99%"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Tư vấn miễn phí dự án",
+          "primary_alt_1": "Đặt lịch khảo sát địa điểm",
+          "primary_alt_2": "Yêu cầu báo giá chi tiết",
+          "secondary_recommended": "Xem dự án tiêu biểu",
+          "secondary_alt_1": "Tải tài liệu kỹ thuật",
+          "secondary_alt_2": "Tính toán tiết kiệm"
+        }
+      },
+      "mission": {
+        "headline": "Sứ mệnh: Đẩy mạnh chuyển đổi năng lượng xanh tại Việt Nam",
+        "key_points": [
+          "Năng lượng mặt trời vừa tiết kiệm chi phí, vừa là trách nhiệm với môi trường",
+          "Đội ngũ kỹ sư giàu kinh nghiệm, kiểm soát chất lượng từng bước",
+          "Giải pháp bền vững, an toàn và hiệu quả kinh tế cao nhất",
+          "Từ khảo sát, thiết kế, thi công đến nghiệm thu—quy trình chuyên nghiệp"
+        ]
+      },
+      "featured_projects": {
+        "headline": "Dự án tiêu biểu—Chất lượng được chứng minh",
+        "project_1": {
+          "title": "Nhà máy Bình Dương—1.5 MWp",
+          "kpis": [
+            "Tiết kiệm 40% chi phí điện hàng năm",
+            "Sản lượng 2.1 triệu kWh/năm",
+            "Giảm 800 tấn CO2 mỗi năm",
+            "Thi công 3 tháng, uptime 99.2% từ 2022"
+          ]
+        },
+        "project_2": {
+          "title": "Trung tâm thương mại TP.HCM—500 kWp",
+          "kpis": [
+            "Cung cấp 700,000 kWh/năm",
+            "Đáp ứng 35% nhu cầu điện toàn hệ thống",
+            "Giám sát từ xa và cảnh báo tự động",
+            "Tích hợp trên mái và bãi đỗ xe"
+          ]
+        },
+        "project_3": {
+          "title": "Khu công nghiệp Đồng Nai—2 MWp",
+          "kpis": [
+            "Hoàn vốn dự kiến trong 6 năm",
+            "Tiết kiệm hàng tỷ đồng mỗi năm",
+            "Inverter chuỗi và giám sát AI",
+            "Cụm nhà xưởng quy mô lớn"
+          ]
+        }
+      },
+      "image_alts": {
+        "hero_solar_farm": "Hệ thống điện mặt trời quy mô lớn trên mái nhà máy công nghiệp, góc rộng thể hiện hàng ngàn tấm pin",
+        "engineer_inspection": "Kỹ sư GoldenEnergy đang kiểm tra và bảo trì tấm pin năng lượng mặt trời trên mái tòa nhà",
+        "monitoring_dashboard": "Giao diện ứng dụng di động giám sát điện mặt trời với biểu đồ sản lượng và cảnh báo thời gian thực",
+        "binh_duong_project": "Dự án điện mặt trời 1.5 MWp tại nhà máy Bình Dương—tấm pin trải dài trên mái xưởng sản xuất",
+        "shopping_mall_installation": "Hệ thống 500 kWp tích hợp trên mái và bãi đỗ xe của trung tâm thương mại, thiết kế thẩm mỹ",
+        "dong_nai_industrial": "Cụm nhà xưởng khu công nghiệp Đồng Nai với hệ thống điện mặt trời 2 MWp quy mô lớn"
+      }
+    },
+    "en": {
+      "hero": {
+        "headline": "GoldenEnergy—Clean Energy Solutions for Vietnamese Businesses",
+        "subheadline": "Design, install, and operate solar power systems that reduce costs, protect the environment, and build a sustainable green corporate image",
+        "trust_bullets": [
+          "100+ successful projects from small scale to 2 MWp",
+          "Save 30-50% on electricity bills, 5-7 year payback",
+          "Reduce CO2 emissions, enhance green corporate image",
+          "25-year panel warranty, 10-year inverter, remote monitoring",
+          "Professional installation, stable operation with >99% uptime"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Free Project Consultation",
+          "primary_alt_1": "Schedule Site Survey",
+          "primary_alt_2": "Request Detailed Quote",
+          "secondary_recommended": "View Featured Projects",
+          "secondary_alt_1": "Download Technical Docs",
+          "secondary_alt_2": "Calculate Savings"
+        }
+      },
+      "mission": {
+        "headline": "Mission: Accelerate Green Energy Transition in Vietnam",
+        "key_points": [
+          "Solar energy saves costs and fulfills environmental responsibility",
+          "Experienced engineering team with quality control at every step",
+          "Sustainable, safe, and economically efficient solutions",
+          "Professional process from survey, design, construction to acceptance"
+        ]
+      },
+      "featured_projects": {
+        "headline": "Featured Projects—Proven Quality",
+        "project_1": {
+          "title": "Binh Duong Factory—1.5 MWp",
+          "kpis": [
+            "Save 40% on annual electricity costs",
+            "Output 2.1 million kWh/year",
+            "Reduce 800 tons CO2 per year",
+            "3-month construction, 99.2% uptime since 2022"
+          ]
+        },
+        "project_2": {
+          "title": "Ho Chi Minh City Shopping Center—500 kWp",
+          "kpis": [
+            "Provide 700,000 kWh/year",
+            "Meet 35% of total system electricity needs",
+            "Remote monitoring and automatic alerts",
+            "Integrated on roof and parking areas"
+          ]
+        },
+        "project_3": {
+          "title": "Dong Nai Industrial Zone—2 MWp",
+          "kpis": [
+            "Expected payback in 6 years",
+            "Save billions of dong annually",
+            "String inverters and AI monitoring",
+            "Large-scale factory cluster"
+          ]
+        }
+      },
+      "image_alts": {
+        "hero_solar_farm": "Large-scale solar power system on industrial factory roof, wide angle showing thousands of panels",
+        "engineer_inspection": "GoldenEnergy engineer inspecting and maintaining solar panels on building rooftop",
+        "monitoring_dashboard": "Mobile app interface for solar monitoring with real-time output charts and alerts",
+        "binh_duong_project": "1.5 MWp solar project at Binh Duong factory—panels spanning manufacturing facility roof",
+        "shopping_mall_installation": "500 kWp system integrated on shopping center roof and parking area, aesthetic design",
+        "dong_nai_industrial": "Dong Nai industrial zone factory cluster with large-scale 2 MWp solar system"
+      }
+    },
+    "zh": {
+      "hero": {
+        "headline": "GoldenEnergy——越南企业的清洁能源解决方案",
+        "subheadline": "设计、安装和运营太阳能系统，降低成本、保护环境并建立可持续的绿色企业形象",
+        "trust_bullets": [
+          "100多个成功项目，从小规模到2兆瓦",
+          "节省 30-50% 电费，5-7年回本",
+          "减少二氧化碳排放，提升绿色企业形象",
+          "25年电池板保修，10年逆变器，远程监控",
+          "专业安装，稳定运行，正常运行时间>99%"
+        ],
+        "cta_variants": {
+          "primary_recommended": "免费项目咨询",
+          "primary_alt_1": "预约现场勘察",
+          "primary_alt_2": "申请详细报价",
+          "secondary_recommended": "查看精选项目",
+          "secondary_alt_1": "下载技术文档",
+          "secondary_alt_2": "计算节省"
+        }
+      },
+      "mission": {
+        "headline": "使命：加速越南的绿色能源转型",
+        "key_points": [
+          "太阳能既节省成本又履行环境责任",
+          "经验丰富的工程团队，每一步都进行质量控制",
+          "可持续、安全且经济高效的解决方案",
+          "从勘察、设计、施工到验收的专业流程"
+        ]
+      },
+      "featured_projects": {
+        "headline": "精选项目——经过验证的质量",
+        "project_1": {
+          "title": "平阳工厂——1.5 兆瓦",
+          "kpis": [
+            "每年节省 40% 电费",
+            "年产量 210万千瓦时",
+            "每年减少 800吨二氧化碳",
+            "3个月施工，自2022年起正常运行时间99.2%"
+          ]
+        },
+        "project_2": {
+          "title": "胡志明市购物中心——500 千瓦",
+          "kpis": [
+            "每年提供 70万千瓦时",
+            "满足系统总用电需求的 35%",
+            "远程监控和自动警报",
+            "集成在屋顶和停车区域"
+          ]
+        },
+        "project_3": {
+          "title": "同奈工业区——2 兆瓦",
+          "kpis": [
+            "预计6年内回本",
+            "每年节省数十亿越南盾",
+            "串式逆变器和AI监控",
+            "大型工厂集群"
+          ]
+        }
+      },
+      "image_alts": {
+        "hero_solar_farm": "工业厂房屋顶上的大规模太阳能系统，广角显示数千块电池板",
+        "engineer_inspection": "GoldenEnergy 工程师在建筑屋顶检查和维护太阳能电池板",
+        "monitoring_dashboard": "太阳能监控移动应用界面，包含实时输出图表和警报",
+        "binh_duong_project": "平阳工厂1.5兆瓦太阳能项目——电池板覆盖制造设施屋顶",
+        "shopping_mall_installation": "购物中心屋顶和停车区集成的500千瓦系统，美观设计",
+        "dong_nai_industrial": "同奈工业区工厂集群，配备大规模2兆瓦太阳能系统"
+      }
+    }
+  },
+  "contact": {
+    "vi": {
+      "hero": {
+        "headline": "Bắt đầu dự án của bạn ngay hôm nay",
+        "subheadline": "Đội ngũ chuyên gia GoldenCard sẵn sàng tư vấn miễn phí về giải pháp phù hợp nhất cho nhu cầu của doanh nghiệp. Quy trình minh bạch, báo giá chi tiết, phản hồi nhanh.",
+        "trust_bullets": [
+          "Tư vấn miễn phí và báo giá chi tiết trong vòng 24 giờ",
+          "Quy trình làm việc minh bạch từ khảo sát đến nghiệm thu",
+          "Hỗ trợ kỹ thuật 24/7, đội ngũ chuyên gia giàu kinh nghiệm",
+          "Cam kết giao hàng đúng hạn và chính sách bảo hành rõ ràng"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Gửi yêu cầu tư vấn",
+          "primary_alt_1": "Gọi hotline ngay",
+          "primary_alt_2": "Đặt lịch gặp mặt",
+          "secondary_recommended": "Tải tài liệu giới thiệu",
+          "secondary_alt_1": "Xem câu hỏi thường gặp",
+          "secondary_alt_2": "Chat trực tuyến"
+        }
+      },
+      "form_microcopy": {
+        "heading": "Liên hệ tư vấn",
+        "description": "Điền thông tin dưới đây để nhận tư vấn miễn phí. Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.",
+        "field_labels": {
+          "name": "Họ và tên *",
+          "email": "Email liên hệ *",
+          "phone": "Số điện thoại *",
+          "company": "Tên công ty",
+          "message": "Mô tả ngắn về nhu cầu của bạn *"
+        },
+        "placeholders": {
+          "name": "Nguyễn Văn A",
+          "email": "email@congty.vn",
+          "phone": "+84 901 234 567",
+          "company": "Công ty TNHH ABC",
+          "message": "Tôi muốn tư vấn về giải pháp điện mặt trời cho nhà máy..."
+        },
+        "button_submit": "Gửi yêu cầu tư vấn",
+        "success_message": "Cảm ơn bạn! Chúng tôi đã nhận được yêu cầu và sẽ liên hệ lại trong vòng 24 giờ làm việc.",
+        "error_message": "Đã có lỗi xảy ra. Vui lòng thử lại hoặc gọi hotline: +84 28 1234 5678",
+        "privacy_note": "Thông tin của bạn được bảo mật và chỉ dùng để liên hệ tư vấn."
+      },
+      "contact_info": {
+        "heading": "Thông tin liên hệ trực tiếp",
+        "hotline": "0903 117 277",
+        "email": "info@goldencard.vn",
+        "address": "625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP. Hồ Chí Minh",
+        "hours": "Giờ làm việc: 8:00 - 17:30 (Thứ 2 - Thứ 6)"
+      },
+      "image_alts": {
+        "contact_hero": "Đội ngũ tư vấn GoldenCard đang họp với khách hàng, thảo luận về giải pháp thẻ và năng lượng",
+        "office_location": "Văn phòng GoldenCard tại TP. Hồ Chí Minh với không gian làm việc hiện đại",
+        "customer_service": "Nhân viên tư vấn GoldenCard đang tư vấn qua điện thoại cho khách hàng",
+        "form_illustration": "Biểu tượng form liên hệ với icon email, điện thoại và tin nhắn"
+      }
+    },
+    "en": {
+      "hero": {
+        "headline": "Start Your Project Today",
+        "subheadline": "GoldenCard's expert team is ready to provide free consultation on the most suitable solutions for your business needs. Transparent process, detailed quotation, fast response.",
+        "trust_bullets": [
+          "Free consultation and detailed quote within 24 hours",
+          "Transparent work process from survey to acceptance",
+          "24/7 technical support with experienced expert team",
+          "Commitment to on-time delivery and clear warranty policies"
+        ],
+        "cta_variants": {
+          "primary_recommended": "Submit Consultation Request",
+          "primary_alt_1": "Call Hotline Now",
+          "primary_alt_2": "Schedule Meeting",
+          "secondary_recommended": "Download Brochure",
+          "secondary_alt_1": "View FAQ",
+          "secondary_alt_2": "Chat Online"
+        }
+      },
+      "form_microcopy": {
+        "heading": "Contact for Consultation",
+        "description": "Fill in the information below to receive free consultation. We will respond within 24 business hours.",
+        "field_labels": {
+          "name": "Full Name *",
+          "email": "Contact Email *",
+          "phone": "Phone Number *",
+          "company": "Company Name",
+          "message": "Brief Description of Your Needs *"
+        },
+        "placeholders": {
+          "name": "John Doe",
+          "email": "email@company.com",
+          "phone": "+84 901 234 567",
+          "company": "ABC Company Ltd.",
+          "message": "I would like consultation on solar solutions for my factory..."
+        },
+        "button_submit": "Submit Consultation Request",
+        "success_message": "Thank you! We have received your request and will contact you within 24 business hours.",
+        "error_message": "An error occurred. Please try again or call hotline: +84 28 1234 5678",
+        "privacy_note": "Your information is confidential and used only for consultation purposes."
+      },
+      "contact_info": {
+        "heading": "Direct Contact Information",
+        "hotline": "0903 117 277",
+        "email": "info@goldencard.vn",
+        "address": "625 Tran Xuan Soan, Tan Hung Ward, District 7, Ho Chi Minh City",
+        "hours": "Business Hours: 8:00 AM - 5:30 PM (Mon - Fri)"
+      },
+      "image_alts": {
+        "contact_hero": "GoldenCard consulting team meeting with client, discussing card and energy solutions",
+        "office_location": "GoldenCard office in Ho Chi Minh City with modern workspace",
+        "customer_service": "GoldenCard consultant providing phone consultation to customer",
+        "form_illustration": "Contact form icon with email, phone, and message symbols"
+      }
+    },
+    "zh": {
+      "hero": {
+        "headline": "立即开始您的项目",
+        "subheadline": "GoldenCard 专家团队随时为您的业务需求提供免费咨询，提供最合适的解决方案。透明流程、详细报价、快速响应。",
+        "trust_bullets": [
+          "24小时内提供免费咨询和详细报价",
+          "从勘察到验收的透明工作流程",
+          "经验丰富的专家团队提供24/7技术支持",
+          "承诺准时交付和明确的保修政策"
+        ],
+        "cta_variants": {
+          "primary_recommended": "提交咨询请求",
+          "primary_alt_1": "立即拨打热线",
+          "primary_alt_2": "预约会议",
+          "secondary_recommended": "下载手册",
+          "secondary_alt_1": "查看常见问题",
+          "secondary_alt_2": "在线聊天"
+        }
+      },
+      "form_microcopy": {
+        "heading": "联系咨询",
+        "description": "填写以下信息以获得免费咨询。我们将在24个工作小时内回复。",
+        "field_labels": {
+          "name": "全名 *",
+          "email": "联系邮箱 *",
+          "phone": "电话号码 *",
+          "company": "公司名称",
+          "message": "您需求的简要说明 *"
+        },
+        "placeholders": {
+          "name": "张三",
+          "email": "email@company.com",
+          "phone": "+84 901 234 567",
+          "company": "ABC 有限公司",
+          "message": "我想咨询工厂太阳能解决方案..."
+        },
+        "button_submit": "提交咨询请求",
+        "success_message": "谢谢！我们已收到您的请求，将在24个工作小时内与您联系。",
+        "error_message": "发生错误。请重试或拨打热线：+84 28 1234 5678",
+        "privacy_note": "您的信息是保密的，仅用于咨询目的。"
+      },
+      "contact_info": {
+        "heading": "直接联系信息",
+        "hotline": "0903 117 277",
+        "email": "info@goldencard.vn",
+        "address": "625 Trần Xuân Soạn, Tân Hưng, 第7区, 胡志明市",
+        "hours": "营业时间：上午8:00 - 下午5:30（周一至周五）"
+      },
+      "image_alts": {
+        "contact_hero": "GoldenCard 咨询团队与客户会面，讨论卡片和能源解决方案",
+        "office_location": "胡志明市 GoldenCard 办公室，现代化工作空间",
+        "customer_service": "GoldenCard 顾问为客户提供电话咨询",
+        "form_illustration": "联系表单图标，包含电子邮件、电话和消息符号"
+      }
+    }
+  },
+  "about": {
+    "vi": {
+      "hero": {
+        "headline": "Về GoldenCard—20+ năm đồng hành cùng doanh nghiệp Việt Nam",
+        "subheadline": "Chúng tôi là đối tác tin cậy cung cấp giải pháp toàn diện về thẻ từ, thẻ ngân hàng, CNTT và năng lượng mặt trời cho các tập đoàn, ngân hàng và doanh nghiệp hàng đầu.",
+        "trust_bullets": [
+          "20+ năm kinh nghiệm với hơn 20,000 đối tác",
+          "200+ khách hàng tin dùng, doanh thu 20 tỷ đồng/năm",
+          "Chứng nhận ISO 9001:2015, PCI Card Production Security",
+          "Đội ngũ 50+ kỹ sư và chuyên gia giàu kinh nghiệm"
+        ]
+      },
+      "values": {
+        "headline": "Giá trị cốt lõi",
+        "key_values": [
+          "Trách nhiệm—Tuyệt đối bảo mật thông tin khách hàng",
+          "Kinh nghiệm—20+ năm trong lĩnh vực công nghệ thông tin",
+          "Đáp ứng mọi nhu cầu—Onsite nhanh chóng trong vòng 30-60 phút",
+          "Chuyên nghiệp—Đội ngũ nhiệt tình, hài hòa và chuyên nghiệp"
+        ]
+      },
+      "image_alts": {
+        "team_photo": "Đội ngũ GoldenCard chụp ảnh tập thể tại văn phòng—kỹ sư, chuyên gia tư vấn và nhân viên hỗ trợ",
+        "factory_tour": "Nhà máy sản xuất thẻ GoldenCard với dây chuyền hiện đại và quy trình kiểm soát chất lượng",
+        "certification_wall": "Tường chứng nhận ISO 9001:2015 và PCI Card Production Security của GoldenCard",
+        "customer_meeting": "Buổi họp giữa đội ngũ GoldenCard và khách hàng doanh nghiệp, thảo luận giải pháp"
+      }
+    },
+    "en": {
+      "hero": {
+        "headline": "About GoldenCard—20+ Years Partnering with Vietnamese Businesses",
+        "subheadline": "We are a trusted partner providing comprehensive solutions for magnetic cards, bank cards, IT, and solar energy to leading corporations, banks, and enterprises.",
+        "trust_bullets": [
+          "20+ years of experience with over 20,000 partners",
+          "200+ trusted customers, 20 billion VND annual revenue",
+          "ISO 9001:2015, PCI Card Production Security certified",
+          "Team of 50+ experienced engineers and experts"
+        ]
+      },
+      "values": {
+        "headline": "Core Values",
+        "key_values": [
+          "Responsibility—Absolute confidentiality of customer information",
+          "Experience—20+ years in information technology solutions",
+          "Meeting all needs—Quick onsite service within 30-60 minutes",
+          "Professional—Enthusiastic, harmonious, and professional team"
+        ]
+      },
+      "image_alts": {
+        "team_photo": "GoldenCard team group photo at office—engineers, consultants, and support staff",
+        "factory_tour": "GoldenCard card production factory with modern assembly line and quality control process",
+        "certification_wall": "Wall displaying GoldenCard's ISO 9001:2015 and PCI Card Production Security certifications",
+        "customer_meeting": "Meeting between GoldenCard team and business client, discussing solutions"
+      }
+    },
+    "zh": {
+      "hero": {
+        "headline": "关于 GoldenCard——与越南企业携手20余年",
+        "subheadline": "我们是值得信赖的合作伙伴，为领先的企业、银行和公司提供磁条卡、银行卡、IT 和太阳能的全面解决方案。",
+        "trust_bullets": [
+          "20余年经验，超过20,000个合作伙伴",
+          "200多个信赖客户，年收入200亿越南盾",
+          "ISO 9001:2015、PCI 卡片生产安全认证",
+          "50多名经验丰富的工程师和专家团队"
+        ]
+      },
+      "values": {
+        "headline": "核心价值观",
+        "key_values": [
+          "责任——客户信息绝对保密",
+          "经验——20余年信息技术解决方案经验",
+          "满足所有需求——30-60分钟内快速上门服务",
+          "专业——热情、和谐、专业的团队"
+        ]
+      },
+      "image_alts": {
+        "team_photo": "GoldenCard 团队在办公室合影——工程师、顾问和支持人员",
+        "factory_tour": "GoldenCard 卡片生产工厂，配备现代化生产线和质量控制流程",
+        "certification_wall": "展示 GoldenCard ISO 9001:2015 和 PCI 卡片生产安全认证的墙",
+        "customer_meeting": "GoldenCard 团队与企业客户会面，讨论解决方案"
+      }
+    }
+  },
+  "global_microcopy": {
+    "vi": {
+      "navigation": {
+        "home": "Trang chủ",
+        "services": "Dịch vụ",
+        "about": "Về chúng tôi",
+        "goldenenergy": "GoldenEnergy",
+        "contact": "Liên hệ",
+        "language_switcher": "Ngôn ngữ"
+      },
+      "common_ctas": {
+        "learn_more": "Tìm hiểu thêm",
+        "get_started": "Bắt đầu ngay",
+        "contact_us": "Liên hệ chúng tôi",
+        "request_quote": "Yêu cầu báo giá",
+        "download": "Tải xuống",
+        "view_details": "Xem chi tiết",
+        "back_to_top": "Về đầu trang"
+      },
+      "accessibility": {
+        "skip_to_content": "Bỏ qua đến nội dung chính",
+        "close": "Đóng",
+        "open_menu": "Mở menu",
+        "close_menu": "Đóng menu",
+        "loading": "Đang tải...",
+        "external_link": "Liên kết ngoài (mở tab mới)"
+      }
+    },
+    "en": {
+      "navigation": {
+        "home": "Home",
+        "services": "Services",
+        "about": "About",
+        "goldenenergy": "GoldenEnergy",
+        "contact": "Contact",
+        "language_switcher": "Language"
+      },
+      "common_ctas": {
+        "learn_more": "Learn More",
+        "get_started": "Get Started",
+        "contact_us": "Contact Us",
+        "request_quote": "Request Quote",
+        "download": "Download",
+        "view_details": "View Details",
+        "back_to_top": "Back to Top"
+      },
+      "accessibility": {
+        "skip_to_content": "Skip to main content",
+        "close": "Close",
+        "open_menu": "Open menu",
+        "close_menu": "Close menu",
+        "loading": "Loading...",
+        "external_link": "External link (opens in new tab)"
+      }
+    },
+    "zh": {
+      "navigation": {
+        "home": "首页",
+        "services": "服务",
+        "about": "关于我们",
+        "goldenenergy": "GoldenEnergy",
+        "contact": "联系我们",
+        "language_switcher": "语言"
+      },
+      "common_ctas": {
+        "learn_more": "了解更多",
+        "get_started": "立即开始",
+        "contact_us": "联系我们",
+        "request_quote": "申请报价",
+        "download": "下载",
+        "view_details": "查看详情",
+        "back_to_top": "回到顶部"
+      },
+      "accessibility": {
+        "skip_to_content": "跳转到主要内容",
+        "close": "关闭",
+        "open_menu": "打开菜单",
+        "close_menu": "关闭菜单",
+        "loading": "加载中...",
+        "external_link": "外部链接（在新标签页中打开）"
+      }
+    }
+  },
+  "recommendations": {
+    "headline_best_practices": [
+      "Keep Vietnamese headlines 8-12 words, English 6-10 words for scannability",
+      "Lead with benefit or outcome, not features",
+      "Use specific numbers when available (15+ years, 30-50% savings)",
+      "Avoid jargon—write for decision-makers, not just technical teams"
+    ],
+    "trust_bullet_guidelines": [
+      "Maximum 5 bullets to avoid cognitive overload",
+      "Lead each bullet with quantifiable proof point or credential",
+      "Focus on outcomes: savings, efficiency, reliability, support",
+      "Use parallel structure within each set for rhythm"
+    ],
+    "cta_selection_tips": [
+      "Primary CTA: Always conversion-focused (consultation, quote, schedule)",
+      "Secondary CTA: Information-gathering (explore, view, learn)",
+      "Use action verbs in imperative mood",
+      "Vietnamese tends slightly longer/politer than English equivalents"
+    ],
+    "image_alt_text_standards": [
+      "Describe what's visually present, not what it symbolizes",
+      "Include relevant brand/location details for context",
+      "Avoid 'image of' or 'picture of'—just describe the content",
+      "Keep under 125 characters when possible; 150 max",
+      "For charts/data viz, describe the data trend or key insight"
+    ]
+  }
+}

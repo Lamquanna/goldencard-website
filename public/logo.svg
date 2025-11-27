@@ -1,0 +1,71 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients for ribbons -->
+    <linearGradient id="teal1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D7A9E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5BA3C5;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="yellow1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDD835;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FDB913;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="orange1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF8C42;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F47B20;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="gray1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5A6770;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#707B85;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="teal2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B8FB5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6BB8D9;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="orange2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9966;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8855;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Ribbon shapes (simplified geometric interpretation) -->
+  <g transform="translate(200, 50)">
+    <!-- Left teal ribbon -->
+    <path d="M50 150 Q80 50, 120 100 L180 180 Q150 200, 110 220 L50 280 Q30 230, 50 150 Z" 
+          fill="url(#teal1)"/>
+    <path d="M50 150 Q65 120, 95 135 L135 185 Q115 205, 85 195 Z" 
+          fill="url(#gray1)" opacity="0.3"/>
+    
+    <!-- Top yellow ribbon -->
+    <path d="M150 30 Q220 20, 280 80 L250 130 Q200 100, 170 120 L140 90 Q145 50, 150 30 Z" 
+          fill="url(#yellow1)"/>
+    <path d="M180 50 Q210 45, 240 75 L220 105 Q200 90, 185 95 Z" 
+          fill="url(#gray1)" opacity="0.3"/>
+    
+    <!-- Top right orange ribbon -->
+    <path d="M280 80 Q350 100, 380 180 L350 220 Q310 190, 280 200 L250 150 Q260 110, 280 80 Z" 
+          fill="url(#orange1)"/>
+    <path d="M300 110 Q330 120, 345 155 L325 180 Q310 165, 300 170 Z" 
+          fill="url(#gray1)" opacity="0.3"/>
+    
+    <!-- Center large teal ribbon -->
+    <path d="M100 200 Q180 180, 250 250 L320 350 Q280 380, 220 370 L150 320 Q90 270, 100 200 Z" 
+          fill="url(#teal2)"/>
+    <path d="M140 230 Q180 220, 220 260 L260 320 Q240 340, 200 330 Z" 
+          fill="url(#gray1)" opacity="0.3"/>
+    
+    <!-- Bottom right orange ribbon -->
+    <path d="M320 280 Q380 310, 420 400 L380 440 Q330 410, 290 420 L260 350 Q280 310, 320 280 Z" 
+          fill="url(#orange2)"/>
+    <path d="M330 310 Q360 330, 380 380 L360 410 Q340 390, 320 395 Z" 
+          fill="url(#gray1)" opacity="0.3"/>
+    
+    <!-- Small light teal accent -->
+    <path d="M250 320 Q280 310, 310 340 L290 370 Q270 360, 260 365 Z" 
+          fill="#6BB8D9" opacity="0.6"/>
+  </g>
+</svg>

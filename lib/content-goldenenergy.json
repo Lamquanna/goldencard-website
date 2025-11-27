@@ -1,0 +1,530 @@
+{
+  "vi": {
+    "hero": {
+      "title": "Năng Lượng Tái Tạo",
+      "subtitle": "Cho Tương Lai Xanh Hơn",
+      "tagline": "GoldenEnergy – Đối tác tin cậy trong hành trình chuyển đổi năng lượng bền vững của bạn",
+      "description": "Chúng tôi thiết kế, lắp đặt và vận hành các hệ thống năng lượng mặt trời, điện gió và giải pháp IoT thông minh cho doanh nghiệp và cộng đồng",
+      "cta_primary": "Khám phá giải pháp",
+      "cta_secondary": "Liên hệ chuyên gia",
+      "stats": {
+        "capacity": "50+ MW",
+        "projects": "500+ Dự án",
+        "clients": "300+ Khách hàng",
+        "uptime": "99.8% Thời gian hoạt động"
+      }
+    },
+    "origin": {
+      "title": "Nguồn Gốc & Hệ Sinh Thái",
+      "subtitle": "Từ Tầm Nhìn Đến Hành Động",
+      "content": "**GoldenEnergy** ra đời từ khát vọng kiến tạo một tương lai năng lượng bền vững cho Việt Nam và khu vực. Chúng tôi là nhánh năng lượng tái tạo thuộc **hệ sinh thái Goldencard** – cái nôi tạo ra thế hệ kế thừa, nơi công nghệ, tài chính và năng lượng hội tụ.\n\nKể từ khi thành lập, GoldenEnergy đã không ngừng đổi mới, từ các dự án solar nhỏ lẻ đến hệ thống quy mô MW, từ giải pháp truyền thống đến tích hợp IoT và AI. Đội ngũ của chúng tôi gồm các kỹ sư năng lượng, chuyên gia tài chính xanh và nhà nghiên cứu, cùng chung tầm nhìn: **Năng lượng sạch không chỉ là xu hướng, mà là trách nhiệm**.",
+      "milestones": [
+        {"year": "2019", "event": "Thành lập GoldenEnergy, triển khai dự án đầu tiên 100kWp"},
+        {"year": "2020", "event": "Mở rộng sang điện gió, đạt 5MW tổng công suất"},
+        {"year": "2021", "event": "Ra mắt IoT Smart Energy Platform, tích hợp AI monitoring"},
+        {"year": "2022", "event": "Đạt 20MW, hợp tác với 100+ doanh nghiệp"},
+        {"year": "2023", "event": "Triển khai R&D Lab, nghiên cứu pin lithium-ion tái chế"},
+        {"year": "2024", "event": "Vượt mốc 50MW, 500+ dự án, mở văn phòng khu vực"},
+        {"year": "2025", "event": "Pilot Wind Hybrid, mục tiêu 100MW vào 2026"}
+      ]
+    },
+    "pillars": {
+      "title": "4 Trụ Cột Giải Pháp",
+      "subtitle": "Công nghệ & Đổi mới",
+      "items": [
+        {
+          "id": "solar",
+          "icon": "🔆",
+          "name": "Solar Energy",
+          "tagline": "Năng lượng mặt trời – Giải pháp phổ biến nhất",
+          "description": "Hệ thống điện mặt trời hòa lưới và độc lập, từ 5kWp đến 5MWp, tối ưu chi phí và hiệu suất cao",
+          "technologies": ["Tấm pin Mono PERC 450-550Wp", "Inverter Hybrid/On-grid", "Monitoring 24/7"],
+          "link": "/vi/solutions/solar"
+        },
+        {
+          "id": "wind",
+          "icon": "💨",
+          "name": "Wind Energy",
+          "tagline": "Điện gió – Nguồn năng lượng vùng ven biển",
+          "description": "Turbine gió quy mô nhỏ và trung bình (10-500kW), phù hợp khu công nghiệp, resort, nông nghiệp",
+          "technologies": ["Turbine trục ngang/dọc", "Hybrid Wind+Solar", "Grid-tie controller"],
+          "link": "/vi/solutions/wind"
+        },
+        {
+          "id": "iot",
+          "icon": "⚡",
+          "name": "IoT Smart Energy",
+          "tagline": "Nền tảng quản lý năng lượng thông minh",
+          "description": "Giám sát, phân tích và tối ưu tiêu thụ năng lượng theo thời gian thực với AI & Machine Learning",
+          "technologies": ["Edge computing", "Predictive maintenance", "Cloud dashboard"],
+          "link": "/vi/solutions/iot"
+        },
+        {
+          "id": "rnd",
+          "icon": "🔬",
+          "name": "R&D Lab",
+          "tagline": "Nghiên cứu & Phát triển – Đang triển khai",
+          "description": "Phòng lab nghiên cứu pin tái chế, vật liệu mới, tối ưu hiệu suất panel, chuẩn bị ra mắt 2026",
+          "technologies": ["Battery recycling", "Perovskite solar", "Energy storage"],
+          "link": "/vi/innovation"
+        }
+      ]
+    },
+    "projects": {
+      "title": "Dự Án Tiêu Biểu",
+      "subtitle": "",
+      "featured": [
+        {
+          "id": "proj-001",
+          "name": "Hương Việt Food",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "453 kWp",
+          "location": "TP. Hồ Chí Minh",
+          "year": "2024",
+          "output": "604 tấm pin 750W",
+          "image": "/Projects/Solar energy/Project 1.jpg",
+          "description": "Hệ thống năng lượng mặt trời với 604 tấm pin công suất 750W, tổng công suất 453kWp"
+        },
+        {
+          "id": "proj-002",
+          "name": "Bến Nghé",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "771 kWp",
+          "location": "Bến Nghé, TP. Hồ Chí Minh",
+          "year": "2024",
+          "output": "1071 tấm pin 720W",
+          "image": "/Projects/Solar energy/Project 2.jpg",
+          "description": "Hệ thống năng lượng mặt trời với 1071 tấm pin công suất 720W, tổng công suất 771kWp"
+        },
+        {
+          "id": "proj-003",
+          "name": "Dự án Solar 3",
+          "category": "Solar + IoT",
+          "status": "Pilot",
+          "capacity": "200 kWp",
+          "location": "TP. Hồ Chí Minh",
+          "year": "2024",
+          "output": "250 MWh/năm",
+          "image": "/Projects/Solar energy/Project 3.jpg",
+          "description": "Tích hợp IoT platform, AI tối ưu tiêu thụ, tiết kiệm 55% chi phí điện"
+        },
+        {
+          "id": "proj-004",
+          "name": "Dự án Solar 4",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "500 kWp",
+          "location": "TP. Hồ Chí Minh",
+          "year": "2024",
+          "output": "650 MWh/năm",
+          "image": "/Projects/Solar energy/Project 4.jpg",
+          "description": "Dự án năng lượng mặt trời quy mô trung bình, hiệu suất cao"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Sẵn Sàng Chuyển Đổi Năng Lượng?",
+      "subtitle": "Tư vấn miễn phí • Khảo sát hiện trường • Báo giá chi tiết",
+      "description": "Đội ngũ chuyên gia của GoldenEnergy luôn sẵn sàng hỗ trợ bạn từ khâu thiết kế đến vận hành, bảo trì dài hạn",
+      "button": "Đặt lịch tư vấn ngay"
+    }
+  },
+  "en": {
+    "hero": {
+      "title": "Renewable Energy",
+      "subtitle": "For A Greener Future",
+      "tagline": "GoldenEnergy – Your trusted partner in sustainable energy transformation",
+      "description": "We design, install and operate solar, wind and smart IoT energy systems for businesses and communities",
+      "cta_primary": "Explore Solutions",
+      "cta_secondary": "Contact Expert",
+      "stats": {
+        "capacity": "50+ MW",
+        "projects": "500+ Projects",
+        "clients": "300+ Clients",
+        "uptime": "99.8% Uptime"
+      }
+    },
+    "origin": {
+      "title": "Origin & Ecosystem",
+      "subtitle": "From Vision To Action",
+      "content": "**GoldenEnergy** was born from the aspiration to build a sustainable energy future for Vietnam and the region. We are the renewable energy branch of the **Goldencard ecosystem** – the cradle of the next generation, where technology, finance and energy converge.\n\nSince our establishment, GoldenEnergy has continuously innovated, from small solar projects to MW-scale systems, from traditional solutions to IoT and AI integration. Our team consists of energy engineers, green finance experts and researchers, sharing the same vision: **Clean energy is not just a trend, but a responsibility**.",
+      "milestones": [
+        {"year": "2019", "event": "Founded GoldenEnergy, deployed first 100kWp project"},
+        {"year": "2020", "event": "Expanded to wind power, reached 5MW total capacity"},
+        {"year": "2021", "event": "Launched IoT Smart Energy Platform with AI monitoring"},
+        {"year": "2022", "event": "Reached 20MW, partnered with 100+ enterprises"},
+        {"year": "2023", "event": "Deployed R&D Lab, researching lithium-ion battery recycling"},
+        {"year": "2024", "event": "Surpassed 50MW, 500+ projects, opened regional offices"},
+        {"year": "2025", "event": "Pilot Wind Hybrid, targeting 100MW by 2026"}
+      ]
+    },
+    "pillars": {
+      "title": "4 Solution Pillars",
+      "subtitle": "Technology & Innovation",
+      "items": [
+        {
+          "id": "solar",
+          "icon": "☀️",
+          "name": "Solar Energy",
+          "tagline": "Solar power – Most popular solution",
+          "description": "Grid-tied and off-grid solar systems from 5kWp to 5MWp, optimized cost and high efficiency",
+          "technologies": ["Mono PERC panels 450-550Wp", "Hybrid/On-grid inverters", "24/7 Monitoring"],
+          "link": "/en/solutions/solar"
+        },
+        {
+          "id": "wind",
+          "icon": "🌬️",
+          "name": "Wind Energy",
+          "tagline": "Wind power – Coastal energy source",
+          "description": "Small and medium wind turbines (10-500kW), suitable for industrial parks, resorts, agriculture",
+          "technologies": ["Horizontal/vertical axis turbines", "Hybrid Wind+Solar", "Grid-tie controller"],
+          "link": "/en/solutions/wind"
+        },
+        {
+          "id": "iot",
+          "icon": "📡",
+          "name": "IoT Smart Energy",
+          "tagline": "Intelligent energy management platform",
+          "description": "Monitor, analyze and optimize energy consumption in real-time with AI & Machine Learning",
+          "technologies": ["Edge computing", "Predictive maintenance", "Cloud dashboard"],
+          "link": "/en/solutions/iot"
+        },
+        {
+          "id": "rnd",
+          "icon": "🔬",
+          "name": "R&D Lab",
+          "tagline": "Research & Development – Coming soon",
+          "description": "Lab researching battery recycling, new materials, panel efficiency optimization, launching 2026",
+          "technologies": ["Battery recycling", "Perovskite solar", "Energy storage"],
+          "link": "/en/innovation"
+        }
+      ]
+    },
+    "projects": {
+      "title": "Featured Projects",
+      "subtitle": "",
+      "featured": [
+        {
+          "id": "proj-001",
+          "name": "Huong Viet Food",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "453 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "604 panels 750W",
+          "image": "/Projects/Solar energy/Project 1.jpg",
+          "description": "Solar energy system with 604 panels of 750W capacity, total capacity 453kWp"
+        },
+        {
+          "id": "proj-002",
+          "name": "Ben Nghe",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "771 kWp",
+          "location": "Ben Nghe, Ho Chi Minh City",
+          "year": "2024",
+          "output": "1071 panels 720W",
+          "image": "/Projects/Solar energy/Project 2.jpg",
+          "description": "Solar energy system with 1071 panels of 720W capacity, total capacity 771kWp"
+        },
+        {
+          "id": "proj-003",
+          "name": "Solar Project 3",
+          "category": "Solar + IoT",
+          "status": "Pilot",
+          "capacity": "200 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "250 MWh/year",
+          "image": "/Projects/Solar energy/Project 3.jpg",
+          "description": "Integrated IoT platform, AI optimizes consumption, saving 55% electricity costs"
+        },
+        {
+          "id": "proj-004",
+          "name": "Solar Project 4",
+          "category": "Solar",
+          "status": "Live",
+          "capacity": "500 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "650 MWh/year",
+          "image": "/Projects/Solar energy/Project 4.jpg",
+          "description": "Medium-scale solar energy project with high efficiency"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready To Transform Energy?",
+      "subtitle": "Free consultation • Site survey • Detailed quotation",
+      "description": "GoldenEnergy's expert team is always ready to support you from design to operation and long-term maintenance",
+      "button": "Schedule consultation now"
+    }
+  },
+  "zh": {
+    "hero": {
+      "title": "可再生能源",
+      "subtitle": "为更绿色的未来",
+      "tagline": "GoldenEnergy – 您在可持续能源转型旅程中的可靠合作伙伴",
+      "description": "我们为企业和社区设计、安装和运营太阳能、风能和智能物联网能源系统",
+      "cta_primary": "探索解决方案",
+      "cta_secondary": "联系专家",
+      "stats": {
+        "capacity": "50+ MW",
+        "projects": "500+ 项目",
+        "clients": "300+ 客户",
+        "uptime": "99.8% 正常运行时间"
+      }
+    },
+    "origin": {
+      "title": "起源与生态系统",
+      "subtitle": "从愿景到行动",
+      "content": "**GoldenEnergy** 诞生于为越南和地区构建可持续能源未来的愿景。我们是 **Goldencard 生态系统**的可再生能源分支 – 下一代的摇篮，技术、金融和能源在此汇聚。\n\n自成立以来，GoldenEnergy 不断创新，从小型太阳能项目到兆瓦级系统，从传统解决方案到物联网和人工智能集成。我们的团队由能源工程师、绿色金融专家和研究人员组成，共同愿景：**清洁能源不仅是趋势，更是责任**。",
+      "milestones": [
+        {"year": "2019", "event": "成立 GoldenEnergy，部署首个 100kWp 项目"},
+        {"year": "2020", "event": "扩展至风电，总容量达到 5MW"},
+        {"year": "2021", "event": "推出物联网智能能源平台，集成人工智能监控"},
+        {"year": "2022", "event": "达到 20MW，与 100+ 企业合作"},
+        {"year": "2023", "event": "部署研发实验室，研究锂离子电池回收"},
+        {"year": "2024", "event": "超过 50MW，500+ 项目，开设区域办事处"},
+        {"year": "2025", "event": "试点风能混合系统，目标 2026 年达到 100MW"}
+      ]
+    },
+    "pillars": {
+      "title": "4 大解决方案支柱",
+      "subtitle": "技术与创新",
+      "items": [
+        {
+          "id": "solar",
+          "icon": "☀️",
+          "name": "太阳能",
+          "tagline": "太阳能 – 最受欢迎的解决方案",
+          "description": "5kWp 至 5MWp 并网和离网太阳能系统，成本优化且高效",
+          "technologies": ["Mono PERC 面板 450-550Wp", "混合/并网逆变器", "24/7 监控"],
+          "link": "/zh/solutions/solar"
+        },
+        {
+          "id": "wind",
+          "icon": "🌬️",
+          "name": "风能",
+          "tagline": "风能 – 沿海能源来源",
+          "description": "小型和中型风力涡轮机 (10-500kW)，适用于工业园区、度假村、农业",
+          "technologies": ["水平/垂直轴涡轮机", "风能+太阳能混合", "并网控制器"],
+          "link": "/zh/solutions/wind"
+        },
+        {
+          "id": "iot",
+          "icon": "📡",
+          "name": "物联网智能能源",
+          "tagline": "智能能源管理平台",
+          "description": "通过人工智能和机器学习实时监控、分析和优化能源消耗",
+          "technologies": ["边缘计算", "预测性维护", "云仪表板"],
+          "link": "/zh/solutions/iot"
+        },
+        {
+          "id": "rnd",
+          "icon": "🔬",
+          "name": "研发实验室",
+          "tagline": "研发 – 即将推出",
+          "description": "研究电池回收、新材料、面板效率优化的实验室，2026 年推出",
+          "technologies": ["电池回收", "钙钛矿太阳能", "储能"],
+          "link": "/zh/innovation"
+        }
+      ]
+    },
+    "projects": {
+      "title": "精选项目",
+      "subtitle": "",
+      "featured": [
+        {
+          "id": "proj-001",
+          "name": "Huong Viet Food",
+          "category": "太阳能",
+          "status": "运行中",
+          "capacity": "453 kWp",
+          "location": "胡志明市",
+          "year": "2024",
+          "output": "604 块 750W 电池板",
+          "image": "/Projects/Solar energy/Project 1.jpg",
+          "description": "太阳能系统包含 604 块 750W 容量的电池板，总容量 453kWp"
+        },
+        {
+          "id": "proj-002",
+          "name": "本润",
+          "category": "太阳能",
+          "status": "运行中",
+          "capacity": "771 kWp",
+          "location": "本润，胡志明市",
+          "year": "2024",
+          "output": "1071 块 720W 电池板",
+          "image": "/Projects/Solar energy/Project 2.jpg",
+          "description": "太阳能系统包含 1071 块 720W 容量的电池板，总容量 771kWp"
+        },
+        {
+          "id": "proj-003",
+          "name": "太阳能项目 3",
+          "category": "太阳能 + 物联网",
+          "status": "试点",
+          "capacity": "200 kWp",
+          "location": "胡志明市",
+          "year": "2024",
+          "output": "250 MWh/年",
+          "image": "/Projects/Solar energy/Project 3.jpg",
+          "description": "集成物联网平台，人工智能优化消耗，节省 55% 电费"
+        },
+        {
+          "id": "proj-004",
+          "name": "太阳能项目 4",
+          "category": "太阳能",
+          "status": "运行中",
+          "capacity": "500 kWp",
+          "location": "胡志明市",
+          "year": "2024",
+          "output": "650 MWh/年",
+          "image": "/Projects/Solar energy/Project 4.jpg",
+          "description": "中型太阳能项目，高效率"
+        }
+      ]
+    },
+    "cta": {
+      "title": "准备好转型能源了吗？",
+      "subtitle": "免费咨询 • 现场勘察 • 详细报价",
+      "description": "GoldenEnergy 的专家团队随时准备为您提供从设计到运营和长期维护的支持",
+      "button": "立即预约咨询"
+    }
+  },
+  "id": {
+    "hero": {
+      "title": "Energi Terbarukan",
+      "subtitle": "Untuk Masa Depan yang Lebih Hijau",
+      "tagline": "GoldenEnergy – Mitra tepercaya dalam perjalanan transformasi energi berkelanjutan Anda",
+      "description": "Kami merancang, memasang, dan mengoperasikan sistem tenaga surya, angin, dan solusi IoT pintar untuk bisnis dan komunitas",
+      "cta_primary": "Jelajahi Solusi",
+      "cta_secondary": "Hubungi Ahli",
+      "stats": {
+        "capacity": "50+ MW",
+        "projects": "500+ Proyek",
+        "clients": "300+ Klien",
+        "uptime": "99.8% Uptime"
+      }
+    },
+    "origin": {
+      "title": "Asal Usul & Ekosistem",
+      "subtitle": "Dari Visi ke Aksi",
+      "content": "**GoldenEnergy** lahir dari aspirasi untuk menciptakan masa depan energi berkelanjutan untuk Vietnam dan kawasan. Kami adalah cabang energi terbarukan dari **ekosistem Goldencard** – tempat lahir generasi penerus, di mana teknologi, keuangan, dan energi bertemu.\n\nSejak didirikan, GoldenEnergy terus berinovasi, dari proyek surya kecil hingga sistem skala MW, dari solusi tradisional hingga integrasi IoT dan AI. Tim kami terdiri dari insinyur energi, pakar keuangan hijau, dan peneliti, dengan visi bersama: **Energi bersih bukan hanya tren, tetapi tanggung jawab**.",
+      "milestones": [
+        {"year": "2019", "event": "Mendirikan GoldenEnergy, menerapkan proyek pertama 100kWp"},
+        {"year": "2020", "event": "Berekspansi ke tenaga angin, mencapai total kapasitas 5MW"},
+        {"year": "2021", "event": "Meluncurkan Platform IoT Smart Energy, mengintegrasikan pemantauan AI"},
+        {"year": "2022", "event": "Mencapai 20MW, bermitra dengan 100+ bisnis"},
+        {"year": "2023", "event": "Menerapkan Lab R&D, meneliti daur ulang baterai lithium-ion"},
+        {"year": "2024", "event": "Melampaui 50MW, 500+ proyek, membuka kantor regional"},
+        {"year": "2025", "event": "Uji coba Wind Hybrid, target 100MW pada 2026"}
+      ]
+    },
+    "pillars": {
+      "title": "4 Pilar Solusi",
+      "subtitle": "Teknologi & Inovasi",
+      "items": [
+        {
+          "id": "solar",
+          "icon": "🔆",
+          "name": "Energi Surya",
+          "tagline": "Energi surya – Solusi paling populer",
+          "description": "Sistem tenaga surya on-grid dan off-grid dari 5kWp hingga 5MWp, biaya optimal dan efisiensi tinggi",
+          "technologies": ["Panel Mono PERC 450-550Wp", "Inverter Hybrid/On-grid", "Pemantauan 24/7"],
+          "link": "/id/solutions/solar"
+        },
+        {
+          "id": "wind",
+          "icon": "💨",
+          "name": "Energi Angin",
+          "tagline": "Tenaga angin – Sumber energi pesisir",
+          "description": "Turbin angin skala kecil dan menengah (10-500kW), cocok untuk zona industri, resort, pertanian",
+          "technologies": ["Turbin sumbu horizontal/vertikal", "Hybrid Wind+Solar", "Kontroler grid-tie"],
+          "link": "/id/solutions/wind"
+        },
+        {
+          "id": "iot",
+          "icon": "⚡",
+          "name": "IoT Smart Energy",
+          "tagline": "Platform manajemen energi pintar",
+          "description": "Pantau, analisis, dan optimalkan konsumsi energi secara real-time dengan AI & Machine Learning",
+          "technologies": ["Edge computing", "Pemeliharaan prediktif", "Cloud dashboard"],
+          "link": "/id/solutions/iot"
+        },
+        {
+          "id": "rnd",
+          "icon": "🧪",
+          "name": "Lab R&D",
+          "tagline": "R&D – Segera hadir",
+          "description": "Laboratorium penelitian daur ulang baterai, material baru, optimasi efisiensi panel, diluncurkan 2026",
+          "technologies": ["Daur ulang baterai", "Solar perovskite", "Penyimpanan energi"],
+          "link": "/id/innovation"
+        }
+      ]
+    },
+    "projects": {
+      "title": "Proyek Unggulan",
+      "subtitle": "",
+      "featured": [
+        {
+          "id": "proj-001",
+          "name": "Huong Viet Food",
+          "category": "Surya",
+          "status": "Beroperasi",
+          "capacity": "453 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "604 panel 750W",
+          "image": "/Projects/Solar energy/Project 1.jpg",
+          "description": "Sistem tenaga surya dengan 604 panel kapasitas 750W, total 453kWp"
+        },
+        {
+          "id": "proj-002",
+          "name": "Ben Nhuan",
+          "category": "Surya",
+          "status": "Beroperasi",
+          "capacity": "771 kWp",
+          "location": "Ben Nhuan, Ho Chi Minh City",
+          "year": "2024",
+          "output": "1071 panel 720W",
+          "image": "/Projects/Solar energy/Project 2.jpg",
+          "description": "Sistem tenaga surya dengan 1071 panel kapasitas 720W, total 771kWp"
+        },
+        {
+          "id": "proj-003",
+          "name": "Proyek Solar 3",
+          "category": "Surya + IoT",
+          "status": "Percontohan",
+          "capacity": "200 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "250 MWh/tahun",
+          "image": "/Projects/Solar energy/Project 3.jpg",
+          "description": "Terintegrasi platform IoT, optimasi konsumsi AI, hemat 55% tagihan listrik"
+        },
+        {
+          "id": "proj-004",
+          "name": "Proyek Solar 4",
+          "category": "Surya",
+          "status": "Beroperasi",
+          "capacity": "500 kWp",
+          "location": "Ho Chi Minh City",
+          "year": "2024",
+          "output": "650 MWh/tahun",
+          "image": "/Projects/Solar energy/Project 4.jpg",
+          "description": "Proyek surya skala menengah dengan efisiensi tinggi"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Siap Transformasi Energi?",
+      "subtitle": "Konsultasi gratis • Survei lokasi • Penawaran detail",
+      "description": "Tim ahli GoldenEnergy selalu siap mendukung Anda dari desain hingga operasi dan pemeliharaan jangka panjang",
+      "button": "Jadwalkan konsultasi sekarang"
+    }
+  }
+}
