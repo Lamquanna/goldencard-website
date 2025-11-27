@@ -1,10 +1,32 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Hero from "@/components/Cinematic/Hero";
 import Section from "@/components/Cinematic/Section";
 import RevealOnScroll from "@/components/Cinematic/RevealOnScroll";
 import { isLocale, type Locale } from "@/lib/i18n";
 import goldenEnergyContent from "@/lib/content-goldenenergy.json";
+
+// Solar project images mapping
+const projectImages = [
+  "/Projects/Solar energy/Project 1.jpg",
+  "/Projects/Solar energy/Project 2.jpg",
+  "/Projects/Solar energy/Project 3.jpg",
+  "/Projects/Solar energy/Project 4.png",
+  "/Projects/Solar energy/Homestay mái pin 1.png",
+  "/Projects/Solar energy/Homestay mái pin 2.png",
+  "/Projects/Solar energy/Homestay mái pin 3.png",
+  "/Projects/Solar energy/Homestay mái pin 4.png",
+  "/Projects/Solar energy/homestay mái pin 5.png",
+  "/Projects/Solar energy/homestay mái pin 6.png",
+  "/Projects/Solar energy/Homestay 7.png",
+  "/Projects/Solar energy/Nhà mái pin 1.png",
+  "/Projects/Solar energy/nhà mái pin 2.png",
+  "/Projects/Solar energy/nhà mái pin 3.png",
+  "/Projects/Solar energy/nhà mái pin 4.png",
+  "/Projects/Solar energy/nhà mái pin 5.png",
+  "/Projects/Solar energy/nhà mái pin 6.png",
+];
 
 interface ProjectsPageProps {
   params: Promise<{ locale: string }>;
@@ -44,12 +66,14 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero with Static Background - Performance Optimized */}
+      {/* Hero with Image Slider */}
       <Hero
         title={projects.title}
         subtitle={projects.subtitle}
         backgroundImage="/Projects/Solar energy/Project 3.jpg"
         useStaticBackground={true}
+        enableSlider={true}
+        sliderInterval={4000}
       />
       
       {/* Stats Bar */}
@@ -114,19 +138,26 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
             {allProjects.map((project: { id: string; name: string; category: string; status: string; capacity: string; location: string; year: string; output: string; description: string }, index: number) => (
               <RevealOnScroll key={project.id} delay={0.1 * index}>
                 <div className="group border border-gray-10 overflow-hidden hover:border-gray-30 transition-all duration-500">
-                  {/* Project Image Placeholder */}
+                  {/* Project Image */}
                   <div className="aspect-video bg-gradient-to-br from-white/10 to-white/5 relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-20">
-                      {project.category === 'Solar' ? '☀️' : 
-                       project.category === 'Wind Energy' ? '🌬️' : 
-                       project.category.includes('Hybrid') ? '⚡' : '📡'}
-                    </div>
+                    <Image
+                      src={projectImages[index % projectImages.length]}
+                      alt={project.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
 
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                      <div className="text-gray-900 text-sm uppercase tracking-wider">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                      <div className="text-white text-sm uppercase tracking-wider font-semibold">
                         {locale === 'vi' ? 'Xem chi tiết' : locale === 'zh' ? '查看详情' : 'View details'}
                       </div>
+                    </div>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#D4AF37] text-white text-xs font-bold uppercase tracking-wider">
+                      {statusLabels[locale][project.status as keyof typeof statusLabels['vi']] || project.status}
                     </div>
                   </div>
 
@@ -193,6 +224,36 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
             </a>
           </div>
         </RevealOnScroll>
+      </Section>
+
+      {/* Project Gallery */}
+      <Section
+        title={locale === 'vi' ? 'Thư viện dự án' : locale === 'zh' ? '项目图库' : 'Project Gallery'}
+        backgroundColor="bg-white"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {projectImages.map((src, index) => (
+              <RevealOnScroll key={src} delay={0.05 * index}>
+                <div className="group relative aspect-square overflow-hidden rounded-lg">
+                  <Image
+                    src={src}
+                    alt={`Solar project ${index + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p className="text-white text-sm font-medium">
+                      {locale === 'vi' ? `Dự án ${index + 1}` : `Project ${index + 1}`}
+                    </p>
+                  </div>
+                </div>
+              </RevealOnScroll>
+            ))}
+          </div>
+        </div>
       </Section>
     </div>
   );

@@ -1,12 +1,27 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import Image from "next/image";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Solar project images for hero slider
+const heroSliderImages = [
+  "/Projects/Solar energy/Project 1.jpg",
+  "/Projects/Solar energy/Project 2.jpg",
+  "/Projects/Solar energy/Project 3.jpg",
+  "/Projects/Solar energy/Project 4.png",
+  "/Projects/Solar energy/Homestay mái pin 1.png",
+  "/Projects/Solar energy/Homestay mái pin 2.png",
+  "/Projects/Solar energy/Homestay mái pin 3.png",
+  "/Projects/Solar energy/Homestay mái pin 4.png",
+  "/Projects/Solar energy/Nhà mái pin 1.png",
+  "/Projects/Solar energy/nhà mái pin 2.png",
+  "/Projects/Solar energy/nhà mái pin 3.png",
+];
 
 interface HeroProps {
   title?: string;
@@ -20,17 +35,19 @@ interface HeroProps {
   hideTitle?: boolean;
   priority?: boolean;
   useStaticBackground?: boolean;
+  enableSlider?: boolean;
+  sliderInterval?: number;
 }
 
 /**
  * Hero Section - Monochrome Cinematic Luxury
- * Performance Optimized - Uses static image by default
+ * Performance Optimized - Uses static image or image slider
  * 
  * Spec:
  * - Font Leyton cho "Golden Energy" (title)
  * - Size: clamp(3rem, 7vw, 6rem), letter-spacing 0.08em
  * - Subtitle/CTA: DM Sans, #CCC
- * - Background: static image or video
+ * - Background: static image, image slider, or video
  */
 export default function Hero({
   title,
@@ -44,6 +61,8 @@ export default function Hero({
   hideTitle = false,
   priority = true,
   useStaticBackground = true,
+  enableSlider = true,
+  sliderInterval = 5000,
 }: HeroProps) {
   const heroRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -51,6 +70,41 @@ export default function Hero({
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const [loadVideo, setLoadVideo] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Auto-advance slider
+  useEffect(() => {
+    if (!enableSlider || !useStaticBackground) return;
+
+    const timer = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroSliderImages.length);
+        setIsTransitioning(false);
+      }, 500);
+    }, sliderInterval);
+
+    return () => clearInterval(timer);
+  }, [enableSlider, useStaticBackground, sliderInterval]);
+
+  // Manual slide navigation
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentSlide(index);
+      setIsTransitioning(false);
+    }, 300);
+  }, [isTransitioning]);
+
+  const nextSlide = useCallback(() => {
+    goToSlide((currentSlide + 1) % heroSliderImages.length);
+  }, [currentSlide, goToSlide]);
+
+  const prevSlide = useCallback(() => {
+    goToSlide((currentSlide - 1 + heroSliderImages.length) % heroSliderImages.length);
+  }, [currentSlide, goToSlide]);
 
   useEffect(() => {
     // Load video only after user interaction or scroll for performance
@@ -81,24 +135,84 @@ export default function Hero({
       ref={heroRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
     >
-      {/* Background - Static Image (Performance Optimized) */}
+      {/* Background - Image Slider or Static Image */}
       {useStaticBackground ? (
         <div className="absolute inset-0 w-full h-full">
-          <Image
-            src={backgroundImage}
-            alt="Hero background"
-            fill
-            priority={priority}
-            quality={85}
-            sizes="100vw"
-            className="object-cover"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAQMDBAMBAAAAAAAAAAAAAQIDBAAFEQYSITEHE0FR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAYEQEAAwEAAAAAAAAAAAAAAAABAAIRIf/aAAwDAQACEQMRAD8AyDx/qC7WnUEWdBmsNKZUpKmnGVFJCgOxnn41r2j/ACI60wHFahuTjT+3f7ELhxAJ4+VIpSsEmC//2Q=="
-          />
+          {/* Image Slider */}
+          {enableSlider ? (
+            <>
+              {heroSliderImages.map((src, index) => (
+                <div
+                  key={src}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                    index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+                >
+                  <Image
+                    src={src}
+                    alt={`Solar project ${index + 1}`}
+                    fill
+                    priority={index === 0}
+                    quality={85}
+                    sizes="100vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+              
+              {/* Slider Navigation Arrows */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all duration-300 backdrop-blur-sm"
+                aria-label="Previous slide"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all duration-300 backdrop-blur-sm"
+                aria-label="Next slide"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Slider Dots Indicator */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                {heroSliderImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                      index === currentSlide 
+                        ? 'bg-[#D4AF37] w-8' 
+                        : 'bg-white/50 hover:bg-white/80'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <Image
+              src={backgroundImage}
+              alt="Hero background"
+              fill
+              priority={priority}
+              quality={85}
+              sizes="100vw"
+              className="object-cover"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAQMDBAMBAAAAAAAAAAAAAQIDBAAFEQYSITEHE0FR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAYEQEAAwEAAAAAAAAAAAAAAAABAAIRIf/aAAwDAQACEQMRAD8AyDx/qC7WnUEWdBmsNKZUpKmnGVFJCgOxnn41r2j/ACI60wHFahuTjT+3f7ELhxAJ4+VIpSsEmC//2Q=="
+            />
+          )}
           {/* Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 z-[11]" />
           {/* Subtle green tint for renewable energy theme */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-green-900/20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-green-900/20 z-[11]" />
         </div>
       ) : (
         /* YouTube Background Video - Lazy Loaded */
