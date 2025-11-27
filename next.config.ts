@@ -221,7 +221,7 @@ const nextConfig: NextConfig = {
         destination: '/erp/:path*',
         permanent: true,
       },
-      // Redirect www to non-www
+      // Redirect www to non-www (only for production)
       {
         source: '/:path*',
         has: [
@@ -233,12 +233,7 @@ const nextConfig: NextConfig = {
         destination: 'https://goldenenergy.vn/:path*',
         permanent: true,
       },
-      // Redirect root to default locale
-      {
-        source: '/',
-        destination: '/vi',
-        permanent: false,
-      },
+      // Note: Root "/" redirect is handled by app/page.tsx
     ];
   },
 };
