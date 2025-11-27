@@ -81,7 +81,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.revenue,
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
-    link: '/crm/analytics'
+    link: '/erp/analytics'
   },
   {
     label: 'Leads mới',
@@ -91,7 +91,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.leads,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    link: '/crm/leads'
+    link: '/erp/leads'
   },
   {
     label: 'Dự án đang chạy',
@@ -101,7 +101,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.projects,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
-    link: '/crm/projects'
+    link: '/erp/projects'
   },
   {
     label: 'Tasks hoàn thành',
@@ -111,7 +111,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.tasks,
     color: 'text-amber-600',
     bgColor: 'bg-amber-50',
-    link: '/crm/tasks'
+    link: '/erp/tasks'
   },
   {
     label: 'Tổng công suất',
@@ -121,7 +121,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.capacity,
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
-    link: '/crm/projects'
+    link: '/erp/projects'
   },
   {
     label: 'Tỷ lệ chuyển đổi',
@@ -131,7 +131,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.conversion,
     color: 'text-cyan-600',
     bgColor: 'bg-cyan-50',
-    link: '/crm/analytics'
+    link: '/erp/analytics'
   },
   {
     label: 'Hàng tồn kho',
@@ -141,7 +141,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.inventory,
     color: 'text-rose-600',
     bgColor: 'bg-rose-50',
-    link: '/crm/inventory'
+    link: '/erp/inventory'
   },
   {
     label: 'Nhân viên',
@@ -151,7 +151,7 @@ const defaultStats: StatCard[] = [
     icon: Icons.users,
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-50',
-    link: '/crm/attendance'
+    link: '/erp/attendance'
   },
 ];
 

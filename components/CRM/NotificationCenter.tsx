@@ -102,7 +102,7 @@ const defaultNotifications: Notification[] = [
     message: 'Công ty ABC Solar đã gửi form liên hệ yêu cầu báo giá hệ thống 100kWp',
     time: new Date(Date.now() - 5 * 60 * 1000),
     read: false,
-    link: '/crm/leads',
+    link: '/erp/leads',
     priority: 'high'
   },
   {
@@ -112,7 +112,7 @@ const defaultNotifications: Notification[] = [
     message: 'Gọi điện khách hàng Solar Farm Bình Dương còn 2 giờ nữa',
     time: new Date(Date.now() - 15 * 60 * 1000),
     read: false,
-    link: '/crm/tasks',
+    link: '/erp/tasks',
     priority: 'urgent'
   },
   {
@@ -122,7 +122,7 @@ const defaultNotifications: Notification[] = [
     message: 'Dự án Solar Farm Bình Thuận - Lắp đặt 50% panels đã hoàn thành',
     time: new Date(Date.now() - 60 * 60 * 1000),
     read: false,
-    link: '/crm/projects',
+    link: '/erp/projects',
     priority: 'medium'
   },
   {
@@ -132,7 +132,7 @@ const defaultNotifications: Notification[] = [
     message: 'Inverter Huawei 100kW còn dưới mức tối thiểu (5 bộ)',
     time: new Date(Date.now() - 2 * 60 * 60 * 1000),
     read: true,
-    link: '/crm/inventory',
+    link: '/erp/inventory',
     priority: 'high'
   },
   {
@@ -142,7 +142,7 @@ const defaultNotifications: Notification[] = [
     message: 'AEON Mall Tân Phú - 2.5MW đã ký hợp đồng thành công!',
     time: new Date(Date.now() - 3 * 60 * 60 * 1000),
     read: true,
-    link: '/crm/leads',
+    link: '/erp/leads',
     priority: 'low'
   },
   {
@@ -152,7 +152,7 @@ const defaultNotifications: Notification[] = [
     message: '12/15 nhân viên đã check-in hôm nay',
     time: new Date(Date.now() - 4 * 60 * 60 * 1000),
     read: true,
-    link: '/crm/attendance',
+    link: '/erp/attendance',
   },
   {
     id: '7',
@@ -366,7 +366,7 @@ export default function NotificationCenter({
               {localNotifications.length > maxDisplay && (
                 <div className="p-3 border-t bg-gray-50 text-center">
                   <Link
-                    href="/crm/notifications"
+                    href="/erp/notifications"
                     onClick={() => setIsOpen(false)}
                     className="text-sm text-[#D4AF37] hover:underline font-medium"
                   >

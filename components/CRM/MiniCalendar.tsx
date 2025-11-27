@@ -213,7 +213,7 @@ export default function MiniCalendar({
           {Icons.calendar}
           Lịch công việc
         </h3>
-        <Link href="/crm/tasks" className="text-sm text-[#D4AF37] hover:underline flex items-center gap-1">
+        <Link href="/erp/tasks" className="text-sm text-[#D4AF37] hover:underline flex items-center gap-1">
           Xem tất cả {Icons.arrowRight}
         </Link>
       </div>

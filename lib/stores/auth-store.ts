@@ -16,6 +16,7 @@ export type CRMModule =
   | 'projects'
   | 'tasks'
   | 'inventory'
+  | 'accounting'
   | 'analytics'
   | 'attendance'
   | 'chat'
@@ -58,6 +59,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModulePermission[]> = {
     { module: 'projects', permissions: ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'export'] },
     { module: 'tasks', permissions: ['view', 'create', 'edit', 'delete', 'assign'] },
     { module: 'inventory', permissions: ['view', 'create', 'edit', 'delete', 'approve', 'export'] },
+    { module: 'accounting', permissions: ['view', 'create', 'edit', 'delete', 'approve', 'export'] },
     { module: 'analytics', permissions: ['view', 'export'] },
     { module: 'attendance', permissions: ['view', 'create', 'edit', 'delete', 'approve', 'export'] },
     { module: 'chat', permissions: ['view', 'create', 'delete'] },
@@ -71,6 +73,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModulePermission[]> = {
     { module: 'projects', permissions: ['view', 'create', 'edit', 'approve', 'assign', 'export'] },
     { module: 'tasks', permissions: ['view', 'create', 'edit', 'assign'] },
     { module: 'inventory', permissions: ['view', 'create', 'edit', 'approve', 'export'] },
+    { module: 'accounting', permissions: ['view', 'create', 'edit', 'approve', 'export'] },
     { module: 'analytics', permissions: ['view', 'export'] },
     { module: 'attendance', permissions: ['view', 'create', 'edit', 'approve', 'export'] },
     { module: 'chat', permissions: ['view', 'create'] },
@@ -84,6 +87,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModulePermission[]> = {
     { module: 'projects', permissions: ['view'] },
     { module: 'tasks', permissions: ['view', 'edit'] },
     { module: 'inventory', permissions: ['view', 'create'] },
+    { module: 'accounting', permissions: [] },
     { module: 'analytics', permissions: [] },
     { module: 'attendance', permissions: ['view', 'create'] },
     { module: 'chat', permissions: ['view', 'create'] },
@@ -97,6 +101,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModulePermission[]> = {
     { module: 'projects', permissions: ['view'] },
     { module: 'tasks', permissions: ['view', 'edit'] },
     { module: 'inventory', permissions: ['view'] },
+    { module: 'accounting', permissions: [] },
     { module: 'analytics', permissions: [] },
     { module: 'attendance', permissions: ['view', 'create'] },
     { module: 'chat', permissions: ['view', 'create'] },
@@ -119,67 +124,73 @@ export const MODULE_INFO: Record<CRMModule, {
   dashboard: { 
     name: 'Dashboard', 
     icon: '📊', 
-    path: '/crm',
+    path: '/erp',
     description: 'Tổng quan CRM'
   },
   leads: { 
     name: 'Leads', 
     icon: '👥', 
-    path: '/crm/leads',
+    path: '/erp/leads',
     description: 'Quản lý khách hàng tiềm năng'
   },
   projects: { 
     name: 'Dự án', 
     icon: '🏗️', 
-    path: '/crm/projects',
+    path: '/erp/projects',
     description: 'Quản lý dự án năng lượng'
   },
   tasks: { 
     name: 'Công việc', 
     icon: '✅', 
-    path: '/crm/tasks',
+    path: '/erp/tasks',
     description: 'Quản lý công việc & nhiệm vụ'
   },
   inventory: { 
     name: 'Kho', 
     icon: '📦', 
-    path: '/crm/inventory',
+    path: '/erp/inventory',
     description: 'Quản lý kho vật tư thiết bị'
+  },
+  accounting: { 
+    name: 'Kế toán', 
+    icon: '🧮', 
+    path: '/erp/accounting',
+    description: 'Quản lý tài chính & kế toán'
   },
   analytics: { 
     name: 'Phân tích', 
     icon: '📈', 
-    path: '/crm/analytics',
+    path: '/erp/analytics',
     description: 'Phân tích & báo cáo'
   },
   attendance: { 
     name: 'Chấm công', 
     icon: '🕐', 
-    path: '/crm/attendance',
+    path: '/erp/attendance',
     description: 'Chấm công & theo dõi giờ làm'
   },
   chat: { 
     name: 'Chat', 
     icon: '💬', 
-    path: '/crm/chat',
+    path: '/erp/chat',
     description: 'Chat nội bộ'
   },
   maps: { 
     name: 'Bản đồ', 
     icon: '🗺️', 
-    path: '/crm/maps',
+    path: '/erp/maps',
     description: 'Bản đồ vị trí'
   },
   users: { 
     name: 'Nhân sự', 
     icon: '👤', 
-    path: '/crm/users',
+    path: '/erp/users',
     description: 'Quản lý người dùng'
   },
   settings: { 
     name: 'Cài đặt', 
     icon: '⚙️', 
-    path: '/crm/settings',
+    path: '/erp/settings',
     description: 'Cấu hình hệ thống'
   },
 };

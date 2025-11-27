@@ -14,10 +14,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   
-  // Tối ưu images
+  // Tối ưu images for goldenenergy.vn
   images: {
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 31536000, // 1 năm
     remotePatterns: [
@@ -39,10 +39,22 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'goldenenergy.vn',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.goldenenergy.vn',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   
-  // Experimental features
+  // Experimental features for optimal performance
   experimental: {
     optimizeCss: true,
     optimizePackageImports: [
@@ -51,8 +63,10 @@ const nextConfig: NextConfig = {
       'lucide-react',
       'react-icons',
       '@radix-ui/react-icons',
+      '@heroicons/react',
       'date-fns',
       'lodash',
+      'mapbox-gl',
     ],
     // Tăng cường lazy loading
     scrollRestoration: true,
@@ -69,6 +83,8 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxAsyncRequests: 30,
+        maxInitialRequests: 25,
         cacheGroups: {
           default: false,
           vendors: false,
@@ -100,6 +116,18 @@ const nextConfig: NextConfig = {
             test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
             priority: 25,
           },
+          // Tách mapbox riêng (nặng)
+          mapbox: {
+            name: 'mapbox',
+            test: /[\\/]node_modules[\\/]mapbox-gl[\\/]/,
+            priority: 25,
+          },
+          // Tách UI components
+          ui: {
+            name: 'ui',
+            test: /[\\/]components[\\/]ui[\\/]/,
+            priority: 15,
+          },
         },
       };
     }
@@ -107,7 +135,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   
-  // Security headers
+// Security headers - Enhanced for goldenenergy.vn
   async headers() {
     return [
       {
@@ -135,13 +163,81 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin'
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
+            value: 'camera=(), microphone=(), geolocation=(self)'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google-analytics.com https://www.googletagmanager.com https://static.cloudflareinsights.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https: http:",
+              "font-src 'self' https://fonts.gstatic.com",
+              "frame-src 'self' https://www.youtube.com https://www.google.com",
+              "connect-src 'self' https://www.google-analytics.com https://api.mapbox.com wss:",
+              "media-src 'self' https://www.youtube.com",
+            ].join('; ')
           }
         ],
+      },
+      // Cache static assets aggressively
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ],
+      },
+      // Cache images
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ],
+      },
+    ];
+  },
+  
+  // Redirect rules for SEO and CRM->ERP migration
+  async redirects() {
+    return [
+      // CRM to ERP redirects
+      {
+        source: '/crm',
+        destination: '/erp',
+        permanent: true,
+      },
+      {
+        source: '/crm/:path*',
+        destination: '/erp/:path*',
+        permanent: true,
+      },
+      // Redirect www to non-www
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.goldenenergy.vn',
+          },
+        ],
+        destination: 'https://goldenenergy.vn/:path*',
+        permanent: true,
+      },
+      // Redirect root to default locale
+      {
+        source: '/',
+        destination: '/vi',
+        permanent: false,
       },
     ];
   },

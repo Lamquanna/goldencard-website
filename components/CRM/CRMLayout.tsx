@@ -39,14 +39,14 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
-    href: '/crm',
+    href: '/erp',
     icon: HomeIcon,
     description: 'Tổng quan CRM',
   },
   {
     id: 'leads',
     name: 'Khách hàng',
-    href: '/crm/leads',
+    href: '/erp/leads',
     icon: UsersIcon,
     description: 'Quản lý leads',
     badge: 'New',
@@ -54,49 +54,49 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'projects',
     name: 'Dự án',
-    href: '/crm/projects',
+    href: '/erp/projects',
     icon: FolderIcon,
     description: 'Quản lý dự án',
   },
   {
     id: 'inventory',
     name: 'Kho hàng',
-    href: '/crm/inventory',
+    href: '/erp/inventory',
     icon: CubeIcon,
     description: 'Quản lý tồn kho',
   },
   {
     id: 'tasks',
     name: 'Công việc',
-    href: '/crm/tasks',
+    href: '/erp/tasks',
     icon: ClipboardDocumentListIcon,
     description: 'Danh sách tasks',
   },
   {
     id: 'attendance',
     name: 'Chấm công',
-    href: '/crm/attendance',
+    href: '/erp/attendance',
     icon: CalendarDaysIcon,
     description: 'Quản lý chấm công',
   },
   {
     id: 'analytics',
     name: 'Báo cáo',
-    href: '/crm/analytics',
+    href: '/erp/analytics',
     icon: ChartBarIcon,
     description: 'Thống kê & phân tích',
   },
   {
     id: 'maps',
     name: 'Bản đồ',
-    href: '/crm/maps',
+    href: '/erp/maps',
     icon: MapIcon,
     description: 'Vị trí kho & dự án',
   },
   {
     id: 'chat',
     name: 'Chat',
-    href: '/crm/chat',
+    href: '/erp/chat',
     icon: ChatBubbleLeftRightIcon,
     description: 'Tin nhắn nội bộ',
     badge: 3,
@@ -104,7 +104,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'users',
     name: 'Người dùng',
-    href: '/crm/users',
+    href: '/erp/users',
     icon: Cog6ToothIcon,
     description: 'Quản lý tài khoản',
   },
@@ -141,12 +141,12 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('crm_auth');
     
     if (!token) {
-      router.push('/crm/login');
+      router.push('/erp/login');
       return;
     }
 
     try {
-      const response = await fetch('/api/crm/auth/verify', {
+      const response = await fetch('/api/erp/auth/verify', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -163,18 +163,18 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       } else {
         localStorage.removeItem('crm_auth');
-        router.push('/crm/login');
+        router.push('/erp/login');
       }
     } catch (error) {
       localStorage.removeItem('crm_auth');
-      router.push('/crm/login');
+      router.push('/erp/login');
     }
   };
 
   const handleLogout = () => {
     logout();
     localStorage.removeItem('crm_auth');
-    router.push('/crm/login');
+    router.push('/erp/login');
   };
 
   // Filter nav items based on permissions
@@ -216,7 +216,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
             <Bars3Icon className="w-6 h-6" />
           </button>
           
-          <Link href="/crm" className="flex items-center gap-2">
+          <Link href="/erp" className="flex items-center gap-2">
             <BoltIcon className="w-8 h-8 text-green-500" />
             <span className="text-xl font-bold">
               <span className="text-amber-500">Golden</span>
@@ -330,7 +330,7 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       {/* Logo Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
-        <Link href="/crm" className="flex items-center gap-3">
+        <Link href="/erp" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
             <BoltIcon className="w-6 h-6 text-white" />
           </div>
@@ -384,7 +384,7 @@ function SidebarContent({
         {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || 
-            (item.href !== '/crm' && pathname.startsWith(item.href));
+            (item.href !== '/erp' && pathname.startsWith(item.href));
           const hasChildren = item.children && item.children.length > 0;
           const isExpanded = expandedItems.includes(item.id);
 
