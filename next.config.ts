@@ -207,10 +207,12 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // Redirect rules for SEO and CRM->ERP migration
+  // Redirect rules - CRM->ERP migration only
+  // NOTE: www→non-www redirect should be configured in Vercel Dashboard → Domains
+  // Do NOT add domain redirects here to avoid conflicts with Vercel's redirect handling
   async redirects() {
     return [
-      // CRM to ERP redirects
+      // CRM to ERP redirects (legacy URL support)
       {
         source: '/crm',
         destination: '/erp',
@@ -221,19 +223,7 @@ const nextConfig: NextConfig = {
         destination: '/erp/:path*',
         permanent: true,
       },
-      // Redirect www to non-www (only for production)
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.goldenenergy.vn',
-          },
-        ],
-        destination: 'https://goldenenergy.vn/:path*',
-        permanent: true,
-      },
-      // Note: Root "/" redirect is handled by app/page.tsx
+      // Root "/" redirect is handled by app/page.tsx → /vi
     ];
   },
 };
