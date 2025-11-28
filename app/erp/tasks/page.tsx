@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle, Search, Plus, MoreHorizontal,
@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
+import { exportToExcel, tasksExportColumns } from '@/lib/excel-export';
 
 // ============================================
 // TYPES
@@ -445,6 +446,27 @@ export default function TasksPage() {
     ));
   };
 
+  // Export to Excel handler
+  const handleExportExcel = useCallback(() => {
+    const exportData = filteredTasks.map(task => ({
+      id: task.id,
+      title: task.title,
+      description: task.description || '',
+      typeLabel: getTypeConfig(task.type).label,
+      statusLabel: getStatusConfig(task.status).label,
+      priorityLabel: getPriorityConfig(task.priority).label,
+      dueDate: task.dueDate,
+      assignedToName: task.assignedTo?.name || '',
+      relatedToName: task.relatedTo?.name || '',
+      tags: task.tags,
+      createdAt: task.createdAt,
+      completedAt: task.completedAt,
+    }));
+    
+    const filename = `tasks_${new Date().toISOString().split('T')[0]}`;
+    exportToExcel(exportData, tasksExportColumns, filename);
+  }, [filteredTasks]);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -468,7 +490,9 @@ export default function TasksPage() {
 
           <div className="flex items-center gap-3">
             {canExport && (
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
+              <button 
+                onClick={handleExportExcel}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
                                border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
                 <Download className="w-4 h-4" />
                 <span>Xuất Excel</span>
@@ -492,9 +516,9 @@ export default function TasksPage() {
             <p className="text-white/60 text-sm">Tổng Tasks</p>
             <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-gray-500/10 border border-gray-500/20">
-            <p className="text-gray-400/80 text-sm">Chờ xử lý</p>
-            <p className="text-2xl font-bold text-gray-400 mt-1">{stats.pending}</p>
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+            <p className="text-amber-400/80 text-sm">Chờ xử lý</p>
+            <p className="text-2xl font-bold text-amber-400 mt-1">{stats.pending}</p>
           </div>
           <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
             <p className="text-blue-400/80 text-sm">Đang thực hiện</p>

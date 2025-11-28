@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Users, Search, Plus, MoreHorizontal, SlidersHorizontal,
@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission, canEditAll as checkCanEditAll } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
+import { exportToExcel, leadsExportColumns } from '@/lib/excel-export';
 
 // ============================================
 // TYPES
@@ -561,6 +562,27 @@ export default function LeadsPage() {
     }));
   }, [filteredLeads]);
 
+  // Export to Excel handler
+  const handleExportExcel = useCallback(() => {
+    const exportData = filteredLeads.map(lead => ({
+      id: lead.id,
+      company: lead.company || lead.name,
+      contact: lead.name,
+      email: lead.email || '',
+      phone: lead.phone || '',
+      sourceLabel: lead.source,
+      statusLabel: getStatusConfig(lead.status).label,
+      value: lead.value ? formatCurrency(lead.value) : '',
+      notes: lead.notes || '',
+      assignedToName: lead.assignedUser?.name || '',
+      createdAt: lead.createdAt,
+      lastActivity: lead.lastActivity,
+    }));
+    
+    const filename = `leads_${new Date().toISOString().split('T')[0]}`;
+    exportToExcel(exportData, leadsExportColumns, filename);
+  }, [filteredLeads]);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -584,7 +606,9 @@ export default function LeadsPage() {
 
           <div className="flex items-center gap-3">
             {canExport && (
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
+              <button 
+                onClick={handleExportExcel}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
                                border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
                 <Download className="w-4 h-4" />
                 <span>Xuất Excel</span>

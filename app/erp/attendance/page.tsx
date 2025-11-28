@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   CalendarDaysIcon,
@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
+import { exportToExcel, attendanceExportColumns } from '@/lib/excel-export';
 
 // Types
 interface AttendanceRecord {
@@ -127,6 +128,12 @@ export default function AttendancePage() {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [todayCheckIn, setTodayCheckIn] = useState<string | null>(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+
+  // Company office location (Golden Energy - Q7, HCMC)
+  const OFFICE_LOCATION = { lat: 10.7350, lng: 106.7150 }; // Q7 coordinates
+  const MAX_DISTANCE_METERS = 200; // 200m radius from office
 
   // Permission checks
   const canViewAllRecords = useMemo(() => checkCanViewAll(userRole, 'attendance'), [userRole]);
@@ -199,21 +206,144 @@ export default function AttendancePage() {
       Math.max(filteredRecords.filter(r => r.work_hours > 0).length, 1),
   }), [filteredRecords]);
 
-  // Handle Check-in/Check-out
-  const handleCheckIn = () => {
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    setIsCheckedIn(true);
-    setTodayCheckIn(timeStr);
-    // In production, this would call an API
-    alert(`✅ Check-in thành công lúc ${timeStr}`);
+  // Export to Excel handler
+  const handleExportExcel = useCallback(() => {
+    const getStatusLabel = (status: string) => {
+      switch (status) {
+        case 'present': return 'Có mặt';
+        case 'absent': return 'Vắng';
+        case 'late': return 'Đi muộn';
+        case 'early_leave': return 'Về sớm';
+        case 'half_day': return 'Nửa ngày';
+        case 'holiday': return 'Nghỉ lễ';
+        default: return status;
+      }
+    };
+
+    const exportData = filteredRecords.map(record => ({
+      id: record.id,
+      employeeName: record.user_name,
+      department: 'Golden Energy', // Mock department
+      date: record.date,
+      checkIn: record.check_in || '',
+      checkOut: record.check_out || '',
+      workHours: record.work_hours,
+      statusLabel: getStatusLabel(record.status),
+      overtime: 0, // Mock OT
+      notes: record.notes || '',
+    }));
+    
+    const filename = `attendance_${new Date().toISOString().split('T')[0]}`;
+    exportToExcel(exportData, attendanceExportColumns, filename);
+  }, [filteredRecords]);
+
+  // Calculate distance between two GPS coordinates (Haversine formula)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
   };
 
-  const handleCheckOut = () => {
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    // In production, this would call an API
-    alert(`✅ Check-out thành công lúc ${timeStr}`);
+  // Get user's current GPS location
+  const getCurrentLocation = (): Promise<{lat: number, lng: number}> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Trình duyệt không hỗ trợ định vị GPS'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              reject(new Error('Bạn cần cấp quyền truy cập vị trí để chấm công'));
+              break;
+            case error.POSITION_UNAVAILABLE:
+              reject(new Error('Không thể xác định vị trí của bạn'));
+              break;
+            case error.TIMEOUT:
+              reject(new Error('Hết thời gian chờ lấy vị trí'));
+              break;
+            default:
+              reject(new Error('Lỗi không xác định khi lấy vị trí'));
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  };
+
+  // Handle Check-in with GPS validation
+  const handleCheckIn = async () => {
+    setGpsLoading(true);
+    try {
+      const location = await getCurrentLocation();
+      setUserLocation(location);
+      
+      const distance = calculateDistance(
+        location.lat, location.lng,
+        OFFICE_LOCATION.lat, OFFICE_LOCATION.lng
+      );
+
+      if (distance > MAX_DISTANCE_METERS) {
+        alert(`❌ Bạn đang ở cách văn phòng ${Math.round(distance)}m.\nVui lòng di chuyển đến gần văn phòng (trong phạm vi ${MAX_DISTANCE_METERS}m) để check-in.`);
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      setIsCheckedIn(true);
+      setTodayCheckIn(timeStr);
+      // In production, this would call an API with location data
+      alert(`✅ Check-in thành công lúc ${timeStr}\n📍 Vị trí: Cách văn phòng ${Math.round(distance)}m`);
+    } catch (error) {
+      alert(`❌ ${error instanceof Error ? error.message : 'Lỗi khi lấy vị trí'}`);
+    } finally {
+      setGpsLoading(false);
+    }
+  };
+
+  // Handle Check-out with GPS validation
+  const handleCheckOut = async () => {
+    setGpsLoading(true);
+    try {
+      const location = await getCurrentLocation();
+      setUserLocation(location);
+      
+      const distance = calculateDistance(
+        location.lat, location.lng,
+        OFFICE_LOCATION.lat, OFFICE_LOCATION.lng
+      );
+
+      if (distance > MAX_DISTANCE_METERS) {
+        alert(`❌ Bạn đang ở cách văn phòng ${Math.round(distance)}m.\nVui lòng di chuyển đến gần văn phòng (trong phạm vi ${MAX_DISTANCE_METERS}m) để check-out.`);
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      // In production, this would call an API with location data
+      alert(`✅ Check-out thành công lúc ${timeStr}\n📍 Vị trí: Cách văn phòng ${Math.round(distance)}m`);
+    } catch (error) {
+      alert(`❌ ${error instanceof Error ? error.message : 'Lỗi khi lấy vị trí'}`);
+    } finally {
+      setGpsLoading(false);
+    }
   };
 
   // Calendar helpers
@@ -264,6 +394,12 @@ export default function AttendancePage() {
                 <span>Bạn chỉ xem được chấm công của mình</span>
               </div>
             )}
+            {userLocation && (
+              <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                <MapPinIcon className="w-3 h-3" />
+                <span>GPS: {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -271,18 +407,28 @@ export default function AttendancePage() {
             {!isCheckedIn ? (
               <button 
                 onClick={handleCheckIn}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={gpsLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <PlayIcon className="w-5 h-5" />
-                Check-in
+                {gpsLoading ? (
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                ) : (
+                  <PlayIcon className="w-5 h-5" />
+                )}
+                {gpsLoading ? 'Đang lấy vị trí...' : 'Check-in'}
               </button>
             ) : (
               <button 
                 onClick={handleCheckOut}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                disabled={gpsLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <StopIcon className="w-5 h-5" />
-                Check-out
+                {gpsLoading ? (
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                ) : (
+                  <StopIcon className="w-5 h-5" />
+                )}
+                {gpsLoading ? 'Đang lấy vị trí...' : 'Check-out'}
               </button>
             )}
 
@@ -307,7 +453,9 @@ export default function AttendancePage() {
             </div>
 
             {canExport && (
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              <button 
+                onClick={handleExportExcel}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                 <DocumentArrowDownIcon className="w-5 h-5" />
                 Xuất báo cáo
               </button>
