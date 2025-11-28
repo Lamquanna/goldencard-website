@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Users, Search, Plus, Filter, SlidersHorizontal, MoreHorizontal,
-  Eye, Edit2, Trash2, Phone, Mail, Building, Calendar, Star,
-  TrendingUp, TrendingDown, Target, Clock, CheckCircle, XCircle,
-  MessageSquare, FileText, MapPin, Globe, ChevronRight, ChevronDown,
-  ArrowUpRight, Activity, Flame, Zap, Award, BarChart3, UserPlus,
-  Download, Upload, RefreshCw, Grid, List, Kanban
+  Users, Search, Plus, MoreHorizontal, SlidersHorizontal,
+  Eye, Edit2, Trash2, Phone, Mail,
+  TrendingUp, Target, Activity, Flame, Zap,
+  Download, LockClosed
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserRole, canViewAll as checkCanViewAll, hasPermission, canEditAll as checkCanEditAll } from '@/lib/permissions';
 
 // ============================================
 // TYPES
@@ -64,15 +63,15 @@ const MOCK_LEADS: Lead[] = [
     priority: 'high',
     score: 85,
     value: 5500000000,
-    assignedTo: 'user-1',
-    assignedUser: { id: 'user-1', name: 'Nguyễn Văn A' },
+    assignedTo: 'admin',
+    assignedUser: { id: 'admin', name: 'Admin User' },
     tags: ['Solar Rooftop', 'Enterprise', 'Urgent'],
     lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000),
     nextFollowUp: new Date(Date.now() + 24 * 60 * 60 * 1000),
     createdAt: new Date('2024-06-01'),
     activities: [
-      { id: 'act-1', type: 'call', title: 'Gọi điện giới thiệu', user: 'Nguyễn Văn A', createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-      { id: 'act-2', type: 'email', title: 'Gửi báo giá sơ bộ', user: 'Nguyễn Văn A', createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      { id: 'act-1', type: 'call', title: 'Gọi điện giới thiệu', user: 'Admin User', createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+      { id: 'act-2', type: 'email', title: 'Gửi báo giá sơ bộ', user: 'Admin User', createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
     ],
   },
   {
@@ -86,14 +85,14 @@ const MOCK_LEADS: Lead[] = [
     priority: 'urgent',
     score: 92,
     value: 12000000000,
-    assignedTo: 'user-2',
-    assignedUser: { id: 'user-2', name: 'Trần Thị B' },
+    assignedTo: 'sale',
+    assignedUser: { id: 'sale', name: 'Nhân viên Sale' },
     tags: ['Solar Farm', 'Industrial', 'Hot Lead'],
     lastActivity: new Date(Date.now() - 30 * 60 * 1000),
     nextFollowUp: new Date(Date.now() + 2 * 60 * 60 * 1000),
     createdAt: new Date('2024-05-15'),
     activities: [
-      { id: 'act-3', type: 'meeting', title: 'Họp trình bày phương án', user: 'Trần Thị B', createdAt: new Date(Date.now() - 30 * 60 * 1000) },
+      { id: 'act-3', type: 'meeting', title: 'Họp trình bày phương án', user: 'Nhân viên Sale', createdAt: new Date(Date.now() - 30 * 60 * 1000) },
     ],
   },
   {
@@ -107,8 +106,8 @@ const MOCK_LEADS: Lead[] = [
     priority: 'medium',
     score: 45,
     value: 250000000,
-    assignedTo: 'user-1',
-    assignedUser: { id: 'user-1', name: 'Nguyễn Văn A' },
+    assignedTo: 'admin',
+    assignedUser: { id: 'admin', name: 'Admin User' },
     tags: ['Residential', 'Home Solar'],
     lastActivity: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date('2024-06-10'),
@@ -140,8 +139,8 @@ const MOCK_LEADS: Lead[] = [
     priority: 'medium',
     score: 100,
     value: 3500000000,
-    assignedTo: 'user-2',
-    assignedUser: { id: 'user-2', name: 'Trần Thị B' },
+    assignedTo: 'sale',
+    assignedUser: { id: 'sale', name: 'Nhân viên Sale' },
     tags: ['Education', 'Government'],
     lastActivity: new Date('2024-06-01'),
     createdAt: new Date('2024-04-01'),
@@ -301,11 +300,13 @@ function LeadCard({ lead, onView }: { lead: Lead; onView: () => void }) {
 // ============================================
 // LEAD ROW (for Table view)
 // ============================================
-function LeadRow({ lead, onView, onEdit, onDelete }: {
+function LeadRow({ lead, onView, onEdit, onDelete, canEdit = true, canDelete = true }: {
   lead: Lead;
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const [showActions, setShowActions] = useState(false);
   const statusConfig = getStatusConfig(lead.status);
@@ -429,22 +430,32 @@ function LeadRow({ lead, onView, onEdit, onDelete }: {
                     <Eye className="w-4 h-4" />
                     <span>Xem chi tiết</span>
                   </button>
-                  <button
-                    onClick={() => { onEdit(); setShowActions(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
-                               hover:bg-white/5 hover:text-white transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    <span>Chỉnh sửa</span>
-                  </button>
-                  <button
-                    onClick={() => { onDelete(); setShowActions(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
-                               hover:bg-red-500/10 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Xóa</span>
-                  </button>
+                  {canEdit && (
+                    <button
+                      onClick={() => { onEdit(); setShowActions(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
+                                 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span>Chỉnh sửa</span>
+                    </button>
+                  )}
+                  {!canEdit && (
+                    <div className="w-full flex items-center gap-3 px-4 py-2.5 text-white/30 cursor-not-allowed">
+                      <LockClosed className="w-4 h-4" />
+                      <span>Không có quyền sửa</span>
+                    </div>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => { onDelete(); setShowActions(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
+                                 hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Xóa</span>
+                    </button>
+                  )}
                 </motion.div>
               </>
             )}
@@ -467,19 +478,54 @@ export default function LeadsPage() {
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
   const [showFilters, setShowFilters] = useState(false);
 
+  // User auth state
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<UserRole>('staff');
+
+  // Permission checks
+  const canViewAll = useMemo(() => checkCanViewAll(userRole, 'leads'), [userRole]);
+  const canEditAllLeads = useMemo(() => checkCanEditAll(userRole, 'leads'), [userRole]);
+  const canCreate = useMemo(() => hasPermission(userRole, 'leads', 'create'), [userRole]);
+  const canDelete = useMemo(() => hasPermission(userRole, 'leads', 'delete'), [userRole]);
+  const canExport = useMemo(() => hasPermission(userRole, 'leads', 'export'), [userRole]);
+
+  useEffect(() => {
+    // Get current user from auth
+    const token = localStorage.getItem('crm_auth');
+    if (token) {
+      try {
+        const decoded = Buffer.from(token, 'base64').toString('utf-8');
+        const parts = decoded.split(':');
+        if (parts.length >= 2) {
+          setCurrentUserId(parts[0]);
+          setUserRole(parts[1] as UserRole);
+        }
+      } catch (e) {
+        console.error('Error decoding token:', e);
+      }
+    }
+  }, []);
+
+  // Filter leads based on permissions
+  const visibleLeads = useMemo(() => {
+    // For leads, most sales can view all leads but only edit assigned ones
+    // This is controlled at the action level
+    return leads;
+  }, [leads]);
+
   // Stats
   const stats = useMemo(() => ({
-    total: leads.length,
-    new: leads.filter(l => l.status === 'new').length,
-    qualified: leads.filter(l => l.status === 'qualified' || l.status === 'proposal').length,
-    won: leads.filter(l => l.status === 'won').length,
-    totalValue: leads.reduce((sum, l) => sum + (l.value || 0), 0),
-    avgScore: Math.round(leads.reduce((sum, l) => sum + l.score, 0) / leads.length),
-  }), [leads]);
+    total: visibleLeads.length,
+    new: visibleLeads.filter(l => l.status === 'new').length,
+    qualified: visibleLeads.filter(l => l.status === 'qualified' || l.status === 'proposal').length,
+    won: visibleLeads.filter(l => l.status === 'won').length,
+    totalValue: visibleLeads.reduce((sum, l) => sum + (l.value || 0), 0),
+    avgScore: Math.round(visibleLeads.reduce((sum, l) => sum + l.score, 0) / Math.max(visibleLeads.length, 1)),
+  }), [visibleLeads]);
 
   // Filtered leads
   const filteredLeads = useMemo(() => {
-    let result = [...leads];
+    let result = [...visibleLeads];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -504,7 +550,13 @@ export default function LeadsPage() {
     }
 
     return result;
-  }, [leads, search, selectedStatus, selectedSource, selectedPriority]);
+  }, [visibleLeads, search, selectedStatus, selectedSource, selectedPriority]);
+
+  // Check if user can edit a specific lead
+  const canEditLead = (lead: Lead) => {
+    if (canEditAllLeads) return true;
+    return lead.assignedTo === currentUserId;
+  };
 
   // Group leads by status for Kanban
   const leadsByStatus = useMemo(() => {
@@ -529,42 +581,32 @@ export default function LeadsPage() {
             <p className="text-white/60 mt-1">
               {stats.total} khách hàng tiềm năng · Tổng giá trị: {formatCurrency(stats.totalValue)}
             </p>
+            {!canEditAllLeads && (
+              <div className="flex items-center gap-1 text-sm text-amber-400 mt-1">
+                <LockClosed className="w-4 h-4" />
+                <span>Bạn chỉ có thể chỉnh sửa leads được phân công cho mình</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'table' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <List className="w-4 h-4" />
+            {canExport && (
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
+                               border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
+                <Download className="w-4 h-4" />
+                <span>Xuất Excel</span>
               </button>
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'kanban' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <Kanban className="w-4 h-4" />
-              </button>
-            </div>
+            )}
 
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
-                             border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
-              <Download className="w-4 h-4" />
-              <span>Xuất Excel</span>
-            </button>
-
-            <Link href="/erp/leads/new"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
-                           bg-gradient-to-r from-blue-500 to-cyan-500
-                           text-white font-medium hover:opacity-90 transition-opacity">
-              <Plus className="w-4 h-4" />
-              <span>Thêm Lead</span>
-            </Link>
+            {canCreate && (
+              <Link href="/erp/leads/new"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
+                             bg-gradient-to-r from-blue-500 to-cyan-500
+                             text-white font-medium hover:opacity-90 transition-opacity">
+                <Plus className="w-4 h-4" />
+                <span>Thêm Lead</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -688,15 +730,32 @@ export default function LeadsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredLeads.map((lead) => (
-                    <LeadRow
-                      key={lead.id}
-                      lead={lead}
-                      onView={() => console.log('View', lead)}
-                      onEdit={() => console.log('Edit', lead)}
-                      onDelete={() => console.log('Delete', lead)}
-                    />
-                  ))}
+                  {filteredLeads.map((lead) => {
+                    const leadEditable = canEditLead(lead);
+                    return (
+                      <LeadRow
+                        key={lead.id}
+                        lead={lead}
+                        onView={() => console.log('View', lead)}
+                        onEdit={() => {
+                          if (leadEditable) {
+                            console.log('Edit', lead);
+                          } else {
+                            alert('Bạn không có quyền chỉnh sửa lead này');
+                          }
+                        }}
+                        onDelete={() => {
+                          if (canDelete) {
+                            console.log('Delete', lead);
+                          } else {
+                            alert('Bạn không có quyền xóa lead');
+                          }
+                        }}
+                        canEdit={leadEditable}
+                        canDelete={canDelete}
+                      />
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
