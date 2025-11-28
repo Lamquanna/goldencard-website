@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Valid roles for the ERP system
+const VALID_ROLES = ['admin', 'manager', 'sale', 'staff', 'hr', 'warehouse', 'engineer'];
+
 // Verify token endpoint
 export async function GET(request: NextRequest) {
   try {
@@ -21,12 +24,22 @@ export async function GET(request: NextRequest) {
           const username = parts[0];
           const role = parts[1];
           
-          if ((username === "admin" || username === "sale") && (role === "admin" || role === "sale")) {
+          // Validate role is one of the valid roles
+          if (username && VALID_ROLES.includes(role)) {
             return NextResponse.json({
               valid: true,
               user: {
+                id: `user-${username}`,
                 username,
                 role,
+                email: `${username}@goldenenergy.vn`,
+                fullName: username === 'admin' ? 'Admin User' : 
+                         username === 'sale' ? 'Nhân viên Sale' :
+                         username === 'manager' ? 'Quản lý' :
+                         username === 'hr' ? 'Nhân sự' :
+                         username === 'warehouse' ? 'Kho' :
+                         username === 'engineer' ? 'Kỹ thuật' :
+                         username,
               },
             });
           }
@@ -37,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Token verification failed" },
       { status: 500 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   CalendarDaysIcon,
@@ -14,7 +15,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DocumentArrowDownIcon,
+  PlayIcon,
+  StopIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
+import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 
 // Types
 interface AttendanceRecord {
@@ -40,13 +45,16 @@ interface AttendanceStats {
 }
 
 // Mock data
-const generateMockAttendance = (): AttendanceRecord[] => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const generateMockAttendance = (_currentUserId?: string): AttendanceRecord[] => {
   const users = [
     { id: 'u1', name: 'Nguyễn Văn A' },
     { id: 'u2', name: 'Trần Thị B' },
     { id: 'u3', name: 'Lê Văn C' },
     { id: 'u4', name: 'Phạm Thị D' },
     { id: 'u5', name: 'Hoàng Văn E' },
+    { id: 'admin', name: 'Admin User' },
+    { id: 'sale', name: 'Nhân viên Sale' },
   ];
 
   const records: AttendanceRecord[] = [];
@@ -106,43 +114,117 @@ const STATUS_CONFIG = {
 };
 
 export default function AttendancePage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const router = useRouter();
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterUser, setFilterUser] = useState<string>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  // User auth state
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<UserRole>('staff');
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [todayCheckIn, setTodayCheckIn] = useState<string | null>(null);
+
+  // Permission checks
+  const canViewAllRecords = useMemo(() => checkCanViewAll(userRole, 'attendance'), [userRole]);
+  const canExport = useMemo(() => hasPermission(userRole, 'attendance', 'export'), [userRole]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const canApprove = useMemo(() => hasPermission(userRole, 'attendance', 'approve'), [userRole]);
+
+  useEffect(() => {
+    // Get current user from auth
+    const token = localStorage.getItem('crm_auth');
+    if (token) {
+      try {
+        const decoded = Buffer.from(token, 'base64').toString('utf-8');
+        const parts = decoded.split(':');
+        if (parts.length >= 2) {
+          setCurrentUserId(parts[0]);
+          setUserRole(parts[1] as UserRole);
+        }
+      } catch (e) {
+        console.error('Error decoding token:', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
-      setRecords(generateMockAttendance());
+      const allRecords = generateMockAttendance(currentUserId);
+      setRecords(allRecords);
       setLoading(false);
+      
+      // Check if user has checked in today
+      const today = new Date().toISOString().split('T')[0];
+      const todayRecord = allRecords.find(r => 
+        r.date === today && r.user_id === currentUserId
+      );
+      if (todayRecord && todayRecord.check_in) {
+        setIsCheckedIn(true);
+        setTodayCheckIn(todayRecord.check_in);
+      }
     }, 500);
-  }, []);
+  }, [currentUserId]);
 
-  // Get unique users
-  const users = Array.from(new Set(records.map(r => r.user_id))).map(uid => {
-    const record = records.find(r => r.user_id === uid);
-    return { id: uid, name: record?.user_name || uid };
-  });
+  // Get unique users (for filter dropdown - only show if canViewAll)
+  const users = useMemo(() => {
+    if (!canViewAllRecords) return [];
+    return Array.from(new Set(records.map(r => r.user_id))).map(uid => {
+      const record = records.find(r => r.user_id === uid);
+      return { id: uid, name: record?.user_name || uid };
+    });
+  }, [records, canViewAllRecords]);
 
-  // Filter records
-  const filteredRecords = records.filter(record => {
-    if (filterStatus !== 'all' && record.status !== filterStatus) return false;
-    if (filterUser !== 'all' && record.user_id !== filterUser) return false;
-    return true;
-  });
+  // Filter records based on permissions
+  const filteredRecords = useMemo(() => {
+    let result = records;
+    
+    // If user cannot view all, filter to only their records
+    if (!canViewAllRecords) {
+      result = result.filter(r => r.user_id === currentUserId);
+    }
+    
+    if (filterStatus !== 'all') {
+      result = result.filter(r => r.status === filterStatus);
+    }
+    if (filterUser !== 'all' && canViewAllRecords) {
+      result = result.filter(r => r.user_id === filterUser);
+    }
+    return result;
+  }, [records, filterStatus, filterUser, canViewAllRecords, currentUserId]);
 
-  // Calculate stats
-  const stats: AttendanceStats = {
-    total_days: new Set(records.map(r => r.date)).size,
-    present: records.filter(r => r.status === 'present').length,
-    absent: records.filter(r => r.status === 'absent').length,
-    late: records.filter(r => r.status === 'late').length,
-    early_leave: records.filter(r => r.status === 'early_leave').length,
-    avg_work_hours: records.filter(r => r.work_hours > 0).reduce((sum, r) => sum + r.work_hours, 0) / 
-      Math.max(records.filter(r => r.work_hours > 0).length, 1),
+  // Calculate stats (based on filtered records)
+  const stats: AttendanceStats = useMemo(() => ({
+    total_days: new Set(filteredRecords.map(r => r.date)).size,
+    present: filteredRecords.filter(r => r.status === 'present').length,
+    absent: filteredRecords.filter(r => r.status === 'absent').length,
+    late: filteredRecords.filter(r => r.status === 'late').length,
+    early_leave: filteredRecords.filter(r => r.status === 'early_leave').length,
+    avg_work_hours: filteredRecords.filter(r => r.work_hours > 0).reduce((sum, r) => sum + r.work_hours, 0) / 
+      Math.max(filteredRecords.filter(r => r.work_hours > 0).length, 1),
+  }), [filteredRecords]);
+
+  // Handle Check-in/Check-out
+  const handleCheckIn = () => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setIsCheckedIn(true);
+    setTodayCheckIn(timeStr);
+    // In production, this would call an API
+    alert(`✅ Check-in thành công lúc ${timeStr}`);
+  };
+
+  const handleCheckOut = () => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    // In production, this would call an API
+    alert(`✅ Check-out thành công lúc ${timeStr}`);
   };
 
   // Calendar helpers
@@ -180,12 +262,41 @@ export default function AttendancePage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <CalendarDaysIcon className="w-8 h-8 text-green-600" />
-              Quản Lý Chấm Công
+              {canViewAllRecords ? 'Quản Lý Chấm Công' : 'Chấm Công Của Tôi'}
             </h1>
-            <p className="text-gray-500 mt-1">Theo dõi thời gian làm việc của nhân viên</p>
+            <p className="text-gray-500 mt-1">
+              {canViewAllRecords 
+                ? 'Theo dõi thời gian làm việc của nhân viên' 
+                : 'Xem lịch sử chấm công của bạn'}
+            </p>
+            {!canViewAllRecords && (
+              <div className="flex items-center gap-1 text-sm text-amber-600 mt-1">
+                <LockClosedIcon className="w-4 h-4" />
+                <span>Bạn chỉ xem được chấm công của mình</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Check-in/Check-out buttons for employees */}
+            {!isCheckedIn ? (
+              <button 
+                onClick={handleCheckIn}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlayIcon className="w-5 h-5" />
+                Check-in
+              </button>
+            ) : (
+              <button 
+                onClick={handleCheckOut}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <StopIcon className="w-5 h-5" />
+                Check-out
+              </button>
+            )}
+
             {/* View Mode Toggle */}
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
@@ -206,10 +317,12 @@ export default function AttendancePage() {
               </button>
             </div>
 
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <DocumentArrowDownIcon className="w-5 h-5" />
-              Xuất báo cáo
-            </button>
+            {canExport && (
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <DocumentArrowDownIcon className="w-5 h-5" />
+                Xuất báo cáo
+              </button>
+            )}
           </div>
         </div>
 
@@ -293,16 +406,19 @@ export default function AttendancePage() {
             ))}
           </select>
 
-          <select
-            value={filterUser}
-            onChange={(e) => setFilterUser(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option value="all">Tất cả nhân viên</option>
-            {users.map(user => (
-              <option key={user.id} value={user.id}>{user.name}</option>
-            ))}
-          </select>
+          {/* Only show user filter if user can view all records */}
+          {canViewAllRecords && users.length > 0 && (
+            <select
+              value={filterUser}
+              onChange={(e) => setFilterUser(e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="all">Tất cả nhân viên</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.name}</option>
+              ))}
+            </select>
+          )}
 
           <button 
             onClick={() => { setFilterStatus('all'); setFilterUser('all'); }}

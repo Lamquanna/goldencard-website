@@ -5,6 +5,11 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  UserRole, 
+  ModuleId, 
+  canAccessModule as checkModuleAccess,
+} from "@/lib/permissions";
 
 // Dynamic import ChatWidget to reduce initial bundle
 const ChatWidget = dynamic(() => import("@/components/CRM/ChatWidget"), {
@@ -97,21 +102,30 @@ const Icons = {
   ),
 };
 
-const navItems = [
-  { name: "Tasks", href: "/erp/tasks", icon: Icons.tasks, badge: null },
-  { name: "Leads", href: "/erp/leads", icon: Icons.leads, badge: null },
-  { name: "Projects", href: "/erp/projects", icon: Icons.projects, badge: null },
-  { name: "Inventory", href: "/erp/inventory", icon: Icons.inventory, badge: null },
-  { name: "Accounting", href: "/erp/accounting", icon: Icons.accounting, badge: null },
-  { name: "Analytics", href: "/erp/analytics", icon: Icons.analytics, badge: null },
-  { name: "Attendance", href: "/erp/attendance", icon: Icons.attendance, badge: null },
-  { name: "Maps", href: "/erp/maps", icon: Icons.maps, badge: null },
-  { name: "Automations", href: "/erp/automations", icon: Icons.automations, badge: null },
+// All navigation items with module IDs for permission filtering
+const allNavItems: { moduleId: ModuleId; name: string; nameVi: string; href: string; icon: React.ReactNode; badge: string | null }[] = [
+  { moduleId: "tasks", name: "Tasks", nameVi: "Công việc", href: "/erp/tasks", icon: Icons.tasks, badge: null },
+  { moduleId: "leads", name: "Leads", nameVi: "Khách hàng", href: "/erp/leads", icon: Icons.leads, badge: null },
+  { moduleId: "projects", name: "Projects", nameVi: "Dự án", href: "/erp/projects", icon: Icons.projects, badge: null },
+  { moduleId: "inventory", name: "Inventory", nameVi: "Kho hàng", href: "/erp/inventory", icon: Icons.inventory, badge: null },
+  { moduleId: "accounting", name: "Accounting", nameVi: "Kế toán", href: "/erp/accounting", icon: Icons.accounting, badge: null },
+  { moduleId: "analytics", name: "Analytics", nameVi: "Báo cáo", href: "/erp/analytics", icon: Icons.analytics, badge: null },
+  { moduleId: "attendance", name: "Attendance", nameVi: "Chấm công", href: "/erp/attendance", icon: Icons.attendance, badge: null },
+  { moduleId: "maps", name: "Maps", nameVi: "Bản đồ", href: "/erp/maps", icon: Icons.maps, badge: null },
+  { moduleId: "automations", name: "Automations", nameVi: "Tự động hóa", href: "/erp/automations", icon: Icons.automations, badge: null },
+  { moduleId: "users", name: "Users", nameVi: "Người dùng", href: "/erp/users", icon: Icons.users, badge: null },
 ];
 
-const adminNavItems = [
-  { name: "Users", href: "/erp/users", icon: Icons.users, badge: null },
-];
+// Role labels for display
+const roleLabels: Record<UserRole, { label: string; color: string }> = {
+  admin: { label: "Quản trị viên", color: "bg-purple-500" },
+  manager: { label: "Quản lý", color: "bg-blue-500" },
+  sale: { label: "Bán hàng", color: "bg-green-500" },
+  staff: { label: "Nhân viên", color: "bg-gray-500" },
+  hr: { label: "Nhân sự", color: "bg-pink-500" },
+  warehouse: { label: "Kho", color: "bg-orange-500" },
+  engineer: { label: "Kỹ thuật", color: "bg-cyan-500" },
+};
 
 export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -127,44 +141,44 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === "/erp/login";
 
   useEffect(() => {
+    const doCheckAuth = async () => {
+      const token = localStorage.getItem("crm_auth");
+
+      if (!token) {
+        router.push("/erp/login");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/erp/auth/verify", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(true);
+          setUserRole(data.user.role);
+          setUsername(data.user.username);
+        } else {
+          localStorage.removeItem("crm_auth");
+          router.push("/erp/login");
+        }
+      } catch {
+        localStorage.removeItem("crm_auth");
+        router.push("/erp/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (!isLoginPage) {
-      checkAuth();
+      doCheckAuth();
     } else {
       setLoading(false);
     }
-  }, [isLoginPage]);
-
-  const checkAuth = async () => {
-    const token = localStorage.getItem("crm_auth");
-
-    if (!token) {
-      router.push("/erp/login");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/erp/auth/verify", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsAuthenticated(true);
-        setUserRole(data.user.role);
-        setUsername(data.user.username);
-      } else {
-        localStorage.removeItem("crm_auth");
-        router.push("/erp/login");
-      }
-    } catch (error) {
-      localStorage.removeItem("crm_auth");
-      router.push("/erp/login");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isLoginPage, router]);
 
   const handleLogout = () => {
     localStorage.removeItem("crm_auth");
@@ -199,6 +213,25 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
     }
     return pathname.startsWith(href);
   };
+
+  // Filter navigation items based on user permissions
+  const getAccessibleNavItems = () => {
+    const role = (userRole as UserRole) || 'staff';
+    return allNavItems.filter((item) => {
+      // Special case: users module only for admin/manager
+      if (item.moduleId === 'users') {
+        return role === 'admin' || role === 'manager';
+      }
+      return checkModuleAccess(role, item.moduleId);
+    });
+  };
+
+  const accessibleNavItems = getAccessibleNavItems();
+  const regularNavItems = accessibleNavItems.filter(item => item.moduleId !== 'users');
+  const adminNavItems = accessibleNavItems.filter(item => item.moduleId === 'users');
+
+  // Get role display info
+  const roleDisplay = roleLabels[(userRole as UserRole) || 'staff'] || roleLabels.staff;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -252,7 +285,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <nav className="p-4 space-y-1">
-                {navItems.map((item) => (
+                {regularNavItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -264,7 +297,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                     }`}
                   >
                     {item.icon}
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-medium">{item.nameVi}</span>
                     {item.badge && (
                       <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                         {item.badge}
@@ -272,9 +305,12 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                     )}
                   </Link>
                 ))}
-                {userRole === "admin" && (
+                {adminNavItems.length > 0 && (
                   <>
                     <div className="border-t border-gray-200 my-4" />
+                    <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                      Quản trị
+                    </div>
                     {adminNavItems.map((item) => (
                       <Link
                         key={item.href}
@@ -287,7 +323,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         {item.icon}
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium">{item.nameVi}</span>
                       </Link>
                     ))}
                   </>
@@ -302,7 +338,11 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">{username}</div>
-                    <div className="text-xs text-gray-500 capitalize">{userRole}</div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full text-white ${roleDisplay.color}`}>
+                        {roleDisplay.label}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -367,7 +407,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+          {regularNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -376,12 +416,12 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                   ? "bg-[#D4AF37]/10 text-[#D4AF37]"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
-              title={sidebarCollapsed ? item.name : undefined}
+              title={sidebarCollapsed ? item.nameVi : undefined}
             >
               {item.icon}
               {!sidebarCollapsed && (
                 <>
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium">{item.nameVi}</span>
                   {item.badge && (
                     <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                       {item.badge}
@@ -398,12 +438,12 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
           ))}
 
           {/* Admin Section */}
-          {userRole === "admin" && (
+          {adminNavItems.length > 0 && (
             <>
               <div className="border-t border-gray-200 my-4" />
               {!sidebarCollapsed && (
                 <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                  Admin
+                  Quản trị
                 </div>
               )}
               {adminNavItems.map((item) => (
@@ -415,10 +455,10 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                       ? "bg-[#D4AF37]/10 text-[#D4AF37]"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
-                  title={sidebarCollapsed ? item.name : undefined}
+                  title={sidebarCollapsed ? item.nameVi : undefined}
                 >
                   {item.icon}
-                  {!sidebarCollapsed && <span className="font-medium">{item.name}</span>}
+                  {!sidebarCollapsed && <span className="font-medium">{item.nameVi}</span>}
                 </Link>
               ))}
             </>
@@ -437,7 +477,9 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{username}</div>
-                  <div className="text-xs text-gray-500 capitalize">{userRole}</div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full text-white ${roleDisplay.color}`}>
+                    {roleDisplay.label}
+                  </span>
                 </div>
               </div>
               <div className="flex gap-2">
