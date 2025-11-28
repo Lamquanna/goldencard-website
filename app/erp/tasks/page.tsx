@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  CheckCircle, Search, Plus, Filter, MoreHorizontal,
-  Eye, Edit2, Trash2, Calendar, Clock, User,
+  CheckCircle, Search, Plus, MoreHorizontal,
+  Edit2, Trash2, Calendar,
   AlertTriangle, CheckSquare, Square, Circle, Timer,
-  ArrowRight, Download, Upload, RefreshCw, Grid, List, Kanban
+  ArrowRight, Download, LockClosed
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 
 // ============================================
 // TYPES
@@ -41,7 +42,7 @@ const MOCK_TASKS: Task[] = [
     status: 'pending',
     priority: 'high',
     dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-    assignedTo: { id: 'user-1', name: 'Nguyễn Văn A' },
+    assignedTo: { id: 'admin', name: 'Admin User' },
     relatedTo: { type: 'lead', id: 'lead-001', name: 'Công ty TNHH ABC Solar' },
     tags: ['Urgent', 'Solar Rooftop'],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -55,7 +56,7 @@ const MOCK_TASKS: Task[] = [
     status: 'in_progress',
     priority: 'urgent',
     dueDate: new Date(Date.now() + 30 * 60 * 1000), // 30 min from now
-    assignedTo: { id: 'user-2', name: 'Trần Thị B' },
+    assignedTo: { id: 'sale', name: 'Nhân viên Sale' },
     relatedTo: { type: 'deal', id: 'deal-001', name: 'Dự án Solar XYZ' },
     tags: ['Hot Lead', 'Industrial'],
     createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
@@ -69,7 +70,7 @@ const MOCK_TASKS: Task[] = [
     status: 'pending',
     priority: 'high',
     dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-    assignedTo: { id: 'user-3', name: 'Phạm Văn C' },
+    assignedTo: { id: 'engineer', name: 'Kỹ thuật viên' },
     relatedTo: { type: 'project', id: 'project-001', name: 'KCN Long Hậu' },
     tags: ['Mega Project', 'Industrial Park'],
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
@@ -83,7 +84,7 @@ const MOCK_TASKS: Task[] = [
     status: 'completed',
     priority: 'medium',
     dueDate: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    assignedTo: { id: 'user-1', name: 'Nguyễn Văn A' },
+    assignedTo: { id: 'admin', name: 'Admin User' },
     relatedTo: { type: 'lead', id: 'lead-002', name: 'Trường ĐH Bách Khoa' },
     tags: ['Education'],
     createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
@@ -97,10 +98,22 @@ const MOCK_TASKS: Task[] = [
     status: 'pending',
     priority: 'low',
     dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-    assignedTo: { id: 'user-2', name: 'Trần Thị B' },
+    assignedTo: { id: 'sale', name: 'Nhân viên Sale' },
     relatedTo: { type: 'project', id: 'project-002', name: 'Nhà máy DEF' },
     tags: ['After Sales'],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'task-006',
+    title: 'Kiểm tra tồn kho thiết bị',
+    description: 'Đối chiếu số liệu tồn kho với hệ thống',
+    type: 'other',
+    status: 'pending',
+    priority: 'medium',
+    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    assignedTo: { id: 'warehouse', name: 'Nhân viên Kho' },
+    tags: ['Inventory'],
+    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
   },
 ];
 
@@ -183,11 +196,13 @@ const getTypeConfig = (type: string) => {
 // ============================================
 // TASK ROW COMPONENT
 // ============================================
-function TaskRow({ task, onToggle, onEdit, onDelete }: {
+function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete = true }: {
   task: Task;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const [showActions, setShowActions] = useState(false);
   const statusConfig = getStatusConfig(task.status);
@@ -204,11 +219,11 @@ function TaskRow({ task, onToggle, onEdit, onDelete }: {
       className="group hover:bg-white/[0.02] transition-colors"
     >
       <td className="px-4 py-4">
-        <button onClick={onToggle} className="p-1">
+        <button onClick={onToggle} className="p-1" disabled={!canEdit}>
           {task.status === 'completed' ? (
             <CheckSquare className="w-5 h-5 text-emerald-400" />
           ) : (
-            <Square className="w-5 h-5 text-white/40 hover:text-white/60 transition-colors" />
+            <Square className={`w-5 h-5 ${canEdit ? 'text-white/40 hover:text-white/60' : 'text-white/20 cursor-not-allowed'} transition-colors`} />
           )}
         </button>
       </td>
@@ -278,46 +293,56 @@ function TaskRow({ task, onToggle, onEdit, onDelete }: {
       </td>
 
       <td className="px-4 py-4">
-        <div className="relative">
-          <button
-            onClick={() => setShowActions(!showActions)}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-          >
-            <MoreHorizontal className="w-4 h-4 text-white/60" />
-          </button>
+        {(canEdit || canDelete) ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowActions(!showActions)}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <MoreHorizontal className="w-4 h-4 text-white/60" />
+            </button>
 
-          <AnimatePresence>
-            {showActions && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className="absolute right-0 top-full mt-1 z-20 w-40 py-1 rounded-xl 
-                             bg-[#1a1a2e] border border-white/10 shadow-2xl"
-                >
-                  <button
-                    onClick={() => { onEdit(); setShowActions(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
-                               hover:bg-white/5 hover:text-white transition-colors"
+            <AnimatePresence>
+              {showActions && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="absolute right-0 top-full mt-1 z-20 w-40 py-1 rounded-xl 
+                               bg-[#1a1a2e] border border-white/10 shadow-2xl"
                   >
-                    <Edit2 className="w-4 h-4" />
-                    <span>Chỉnh sửa</span>
-                  </button>
-                  <button
-                    onClick={() => { onDelete(); setShowActions(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
-                               hover:bg-red-500/10 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Xóa</span>
-                  </button>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
+                    {canEdit && (
+                      <button
+                        onClick={() => { onEdit(); setShowActions(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
+                                   hover:bg-white/5 hover:text-white transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        <span>Chỉnh sửa</span>
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => { onDelete(); setShowActions(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
+                                   hover:bg-red-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Xóa</span>
+                      </button>
+                    )}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="p-2 text-white/20">
+            <LockClosed className="w-4 h-4" />
+          </div>
+        )}
       </td>
     </motion.tr>
   );
@@ -332,20 +357,54 @@ export default function TasksPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
-  // Stats
+  // User auth state
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<UserRole>('staff');
+
+  // Permission checks
+  const canViewAllTasks = useMemo(() => checkCanViewAll(userRole, 'tasks'), [userRole]);
+  const canCreate = useMemo(() => hasPermission(userRole, 'tasks', 'create'), [userRole]);
+  const canEdit = useMemo(() => hasPermission(userRole, 'tasks', 'edit'), [userRole]);
+  const canDelete = useMemo(() => hasPermission(userRole, 'tasks', 'delete'), [userRole]);
+  const canExport = useMemo(() => hasPermission(userRole, 'tasks', 'export'), [userRole]);
+
+  useEffect(() => {
+    // Get current user from auth
+    const token = localStorage.getItem('crm_auth');
+    if (token) {
+      try {
+        const decoded = Buffer.from(token, 'base64').toString('utf-8');
+        const parts = decoded.split(':');
+        if (parts.length >= 2) {
+          setCurrentUserId(parts[0]);
+          setUserRole(parts[1] as UserRole);
+        }
+      } catch (e) {
+        console.error('Error decoding token:', e);
+      }
+    }
+  }, []);
+
+  // Stats (based on visible tasks)
+  const visibleTasks = useMemo(() => {
+    if (canViewAllTasks) return tasks;
+    return tasks.filter(t => t.assignedTo?.id === currentUserId);
+  }, [tasks, canViewAllTasks, currentUserId]);
+
   const stats = useMemo(() => ({
-    total: tasks.length,
-    pending: tasks.filter(t => t.status === 'pending').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    completed: tasks.filter(t => t.status === 'completed').length,
-    overdue: tasks.filter(t => t.dueDate.getTime() < Date.now() && t.status !== 'completed').length,
-  }), [tasks]);
+    total: visibleTasks.length,
+    pending: visibleTasks.filter(t => t.status === 'pending').length,
+    inProgress: visibleTasks.filter(t => t.status === 'in_progress').length,
+    completed: visibleTasks.filter(t => t.status === 'completed').length,
+    overdue: visibleTasks.filter(t => t.dueDate.getTime() < Date.now() && t.status !== 'completed').length,
+  }), [visibleTasks]);
 
   // Filtered tasks
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
+    let result = [...visibleTasks];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -371,10 +430,18 @@ export default function TasksPage() {
     result.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
     return result;
-  }, [tasks, search, selectedStatus, selectedPriority, selectedType]);
+  }, [visibleTasks, search, selectedStatus, selectedPriority, selectedType]);
 
   // Toggle task completion
   const toggleTask = (taskId: string) => {
+    // Check if user can edit this task
+    const task = tasks.find(t => t.id === taskId);
+    const isOwner = task?.assignedTo?.id === currentUserId;
+    if (!canEdit && !isOwner) {
+      alert('Bạn không có quyền cập nhật task này');
+      return;
+    }
+    
     setTasks(tasks.map(t =>
       t.id === taskId
         ? {
@@ -394,46 +461,36 @@ export default function TasksPage() {
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
               <CheckCircle className="w-7 h-7 text-emerald-400" />
-              Quản lý Công việc
+              {canViewAllTasks ? 'Quản lý Công việc' : 'Công việc của tôi'}
             </h1>
             <p className="text-white/60 mt-1">
               {stats.total} công việc · {stats.overdue > 0 && <span className="text-red-400">{stats.overdue} quá hạn</span>}
             </p>
+            {!canViewAllTasks && (
+              <div className="flex items-center gap-1 text-sm text-amber-400 mt-1">
+                <LockClosed className="w-4 h-4" />
+                <span>Bạn chỉ xem được các task được phân công cho mình</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'table' ? 'bg-emerald-500 text-white' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <List className="w-4 h-4" />
+            {canExport && (
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
+                               border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
+                <Download className="w-4 h-4" />
+                <span>Xuất Excel</span>
               </button>
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'kanban' ? 'bg-emerald-500 text-white' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <Kanban className="w-4 h-4" />
+            )}
+
+            {canCreate && (
+              <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
+                              bg-gradient-to-r from-emerald-500 to-cyan-500
+                              text-white font-medium hover:opacity-90 transition-opacity">
+                <Plus className="w-4 h-4" />
+                <span>Tạo Task</span>
               </button>
-            </div>
-
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
-                             border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
-              <Download className="w-4 h-4" />
-              <span>Xuất Excel</span>
-            </button>
-
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
-                            bg-gradient-to-r from-emerald-500 to-cyan-500
-                            text-white font-medium hover:opacity-90 transition-opacity">
-              <Plus className="w-4 h-4" />
-              <span>Tạo Task</span>
-            </button>
+            )}
           </div>
         </div>
 
@@ -541,15 +598,35 @@ export default function TasksPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredTasks.map((task) => (
-                  <TaskRow
-                    key={task.id}
-                    task={task}
-                    onToggle={() => toggleTask(task.id)}
-                    onEdit={() => console.log('Edit', task)}
-                    onDelete={() => console.log('Delete', task)}
-                  />
-                ))}
+                {filteredTasks.map((task) => {
+                  const isOwner = task.assignedTo?.id === currentUserId;
+                  const taskCanEdit = canEdit || isOwner;
+                  const taskCanDelete = canDelete;
+                  
+                  return (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      onToggle={() => toggleTask(task.id)}
+                      onEdit={() => {
+                        if (taskCanEdit) {
+                          console.log('Edit', task);
+                        } else {
+                          alert('Bạn không có quyền chỉnh sửa task này');
+                        }
+                      }}
+                      onDelete={() => {
+                        if (taskCanDelete) {
+                          console.log('Delete', task);
+                        } else {
+                          alert('Bạn không có quyền xóa task');
+                        }
+                      }}
+                      canEdit={taskCanEdit}
+                      canDelete={taskCanDelete}
+                    />
+                  );
+                })}
               </tbody>
             </table>
           </div>
