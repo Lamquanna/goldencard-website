@@ -5,8 +5,8 @@ import Link from 'next/link';
 import {
   Users, Search, Plus, MoreHorizontal, SlidersHorizontal,
   Eye, Edit2, Trash2, Phone, Mail,
-  TrendingUp, Target, Activity, Flame, Zap,
-  Download, LockClosed
+  TrendingUp, TrendingDown, Target, Activity, Flame, Zap,
+  Download, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission, canEditAll as checkCanEditAll } from '@/lib/permissions';
@@ -443,7 +443,7 @@ function LeadRow({ lead, onView, onEdit, onDelete, canEdit = true, canDelete = t
                   )}
                   {!canEdit && (
                     <div className="w-full flex items-center gap-3 px-4 py-2.5 text-white/30 cursor-not-allowed">
-                      <LockClosed className="w-4 h-4" />
+                      <Lock className="w-4 h-4" />
                       <span>Không có quyền sửa</span>
                     </div>
                   )}
@@ -576,7 +576,7 @@ export default function LeadsPage() {
             </p>
             {!canEditAllLeads && (
               <div className="flex items-center gap-1 text-sm text-amber-400 mt-1">
-                <LockClosed className="w-4 h-4" />
+                <Lock className="w-4 h-4" />
                 <span>Bạn chỉ có thể chỉnh sửa leads được phân công cho mình</span>
               </div>
             )}

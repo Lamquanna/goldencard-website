@@ -6,7 +6,7 @@ import {
   CheckCircle, Search, Plus, MoreHorizontal,
   Edit2, Trash2, Calendar, ArrowRight,
   AlertTriangle, CheckSquare, Square, Circle, Timer,
-  Download, LockClosed
+  Download, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
@@ -341,7 +341,7 @@ function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete =
           </div>
         ) : (
           <div className="p-2 text-white/20">
-            <LockClosed className="w-4 h-4" />
+            <Lock className="w-4 h-4" />
           </div>
         )}
       </td>
@@ -460,7 +460,7 @@ export default function TasksPage() {
             </p>
             {!canViewAllTasks && (
               <div className="flex items-center gap-1 text-sm text-amber-400 mt-1">
-                <LockClosed className="w-4 h-4" />
+                <Lock className="w-4 h-4" />
                 <span>Bạn chỉ xem được các task được phân công cho mình</span>
               </div>
             )}
