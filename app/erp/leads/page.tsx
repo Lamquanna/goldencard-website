@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission, canEditAll as checkCanEditAll } from '@/lib/permissions';
+import { getAuthUser } from '@/lib/auth-utils';
 
 // ============================================
 // TYPES
@@ -483,6 +484,7 @@ export default function LeadsPage() {
   const [userRole, setUserRole] = useState<UserRole>('staff');
 
   // Permission checks
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canViewAll = useMemo(() => checkCanViewAll(userRole, 'leads'), [userRole]);
   const canEditAllLeads = useMemo(() => checkCanEditAll(userRole, 'leads'), [userRole]);
   const canCreate = useMemo(() => hasPermission(userRole, 'leads', 'create'), [userRole]);
@@ -490,19 +492,10 @@ export default function LeadsPage() {
   const canExport = useMemo(() => hasPermission(userRole, 'leads', 'export'), [userRole]);
 
   useEffect(() => {
-    // Get current user from auth
-    const token = localStorage.getItem('crm_auth');
-    if (token) {
-      try {
-        const decoded = Buffer.from(token, 'base64').toString('utf-8');
-        const parts = decoded.split(':');
-        if (parts.length >= 2) {
-          setCurrentUserId(parts[0]);
-          setUserRole(parts[1] as UserRole);
-        }
-      } catch (e) {
-        console.error('Error decoding token:', e);
-      }
+    const authUser = getAuthUser();
+    if (authUser) {
+      setCurrentUserId(authUser.id);
+      setUserRole(authUser.role);
     }
   }, []);
 

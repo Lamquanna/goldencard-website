@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   CalendarDaysIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  UserIcon,
   MapPinIcon,
   ArrowPathIcon,
   FunnelIcon,
@@ -18,8 +16,10 @@ import {
   PlayIcon,
   StopIcon,
   LockClosedIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
+import { getAuthUser } from '@/lib/auth-utils';
 
 // Types
 interface AttendanceRecord {
@@ -114,8 +114,6 @@ const STATUS_CONFIG = {
 };
 
 export default function AttendancePage() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const router = useRouter();
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -137,19 +135,10 @@ export default function AttendancePage() {
   const canApprove = useMemo(() => hasPermission(userRole, 'attendance', 'approve'), [userRole]);
 
   useEffect(() => {
-    // Get current user from auth
-    const token = localStorage.getItem('crm_auth');
-    if (token) {
-      try {
-        const decoded = Buffer.from(token, 'base64').toString('utf-8');
-        const parts = decoded.split(':');
-        if (parts.length >= 2) {
-          setCurrentUserId(parts[0]);
-          setUserRole(parts[1] as UserRole);
-        }
-      } catch (e) {
-        console.error('Error decoding token:', e);
-      }
+    const authUser = getAuthUser();
+    if (authUser) {
+      setCurrentUserId(authUser.id);
+      setUserRole(authUser.role);
     }
   }, []);
 

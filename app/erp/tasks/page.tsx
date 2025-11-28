@@ -4,12 +4,13 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle, Search, Plus, MoreHorizontal,
-  Edit2, Trash2, Calendar,
+  Edit2, Trash2, Calendar, ArrowRight,
   AlertTriangle, CheckSquare, Square, Circle, Timer,
-  ArrowRight, Download, LockClosed
+  Download, LockClosed
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
+import { getAuthUser } from '@/lib/auth-utils';
 
 // ============================================
 // TYPES
@@ -372,19 +373,10 @@ export default function TasksPage() {
   const canExport = useMemo(() => hasPermission(userRole, 'tasks', 'export'), [userRole]);
 
   useEffect(() => {
-    // Get current user from auth
-    const token = localStorage.getItem('crm_auth');
-    if (token) {
-      try {
-        const decoded = Buffer.from(token, 'base64').toString('utf-8');
-        const parts = decoded.split(':');
-        if (parts.length >= 2) {
-          setCurrentUserId(parts[0]);
-          setUserRole(parts[1] as UserRole);
-        }
-      } catch (e) {
-        console.error('Error decoding token:', e);
-      }
+    const authUser = getAuthUser();
+    if (authUser) {
+      setCurrentUserId(authUser.id);
+      setUserRole(authUser.role);
     }
   }, []);
 
