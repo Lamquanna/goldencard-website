@@ -129,9 +129,11 @@ export default function EnhancedChatWidget() {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Probability threshold for simulating new messages when chat is closed
+  const NEW_MESSAGE_PROBABILITY = 0.7;
 
   // Calculate total unread messages
   useEffect(() => {
@@ -142,7 +144,7 @@ export default function EnhancedChatWidget() {
   // Simulate new messages
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isOpen && Math.random() > 0.7) {
+      if (!isOpen && Math.random() > NEW_MESSAGE_PROBABILITY) {
         const randomUser = MOCK_ONLINE_USERS[Math.floor(Math.random() * MOCK_ONLINE_USERS.length)];
         const newMsg: ChatMessage = {
           id: Date.now().toString(),
@@ -202,7 +204,7 @@ export default function EnhancedChatWidget() {
     const session: VideoCallSession = {
       id: Date.now().toString(),
       roomId: selectedRoom.id,
-      sessionCode: `CALL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      sessionCode: `CALL-${crypto.randomUUID().substring(0, 9).toUpperCase()}`,
       status: 'waiting',
       participants: [{
         userId: 'current-user',

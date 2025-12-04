@@ -495,4 +495,4 @@ SELECT id, 'offline', NOW()
 FROM users
 ON CONFLICT (user_id) DO NOTHING;
 
-COMMIT;
+-- Note: COMMIT is not needed as PostgreSQL auto-commits DDL statements

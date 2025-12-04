@@ -88,7 +88,9 @@ export default function CompanySettingsPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Save to localStorage for now
+      // Save to localStorage for now (TEMPORARY - should use API in production)
+      // TODO: Security - Replace with secure API endpoint
+      // localStorage is used temporarily for demo purposes only
       localStorage.setItem('company_settings', JSON.stringify(settings));
       
       setSaveSuccess(true);
