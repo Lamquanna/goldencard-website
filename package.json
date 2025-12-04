@@ -14,6 +14,9 @@
     "db:init": "node --experimental-modules scripts/init-db.js",
     "db:migrate": "node scripts/migrate.js",
     "db:migrate:ps1": "powershell -ExecutionPolicy Bypass -File scripts/migrate.ps1",
+    "db:migrate:full": "node scripts/run-migrations.js",
+    "db:seed": "node scripts/seed-database.js",
+    "db:setup": "npm run db:migrate:full && npm run db:seed",
     "generate:avatars": "node scripts/generate-avatars.js"
   },
   "dependencies": {
