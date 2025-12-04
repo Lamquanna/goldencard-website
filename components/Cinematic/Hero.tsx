@@ -199,7 +199,7 @@ export default function Hero({
                       fill
                       priority={prioritize}
                       loading={prioritize ? undefined : "lazy"}
-                      quality={72}
+                      quality={95}
                       sizes="100vw"
                       className="object-cover"
                     />
@@ -246,7 +246,7 @@ export default function Hero({
               fill
               priority={priority}
               loading={priority ? undefined : "lazy"}
-              quality={75}
+              quality={95}
               sizes="100vw"
               className="object-cover"
             />

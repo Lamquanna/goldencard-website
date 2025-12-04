@@ -117,7 +117,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
       
       <main className="relative">
         {/* Hero Section với custom styling cho Contact */}
-        <div className="relative min-h-screen">
+        <div className="relative min-h-[60vh]">
           <Hero
             title=""
             subtitle=""
@@ -126,16 +126,17 @@ export default async function ContactPage({ params }: ContactPageProps) {
             ctaLink=""
             hideTitle={true}
           />
-          {/* Custom Contact Hero Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-            <div className="container mx-auto px-6 md:px-12 lg:px-24 text-center max-w-[1200px]">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-wide">
-                {hero?.headline ?? (locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : "Contact")}
-              </h1>
-              <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto leading-relaxed font-medium">
-                {hero?.subheadline ?? ""}
-              </p>
-            </div>
+        </div>
+
+        {/* Contact Hero Text - Moved below image */}
+        <div className="relative bg-gradient-to-b from-gray-900 to-gray-800 py-16">
+          <div className="container mx-auto px-6 md:px-12 lg:px-24 text-center max-w-[1200px]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-wide">
+              {hero?.headline ?? (locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : "Contact")}
+            </h1>
+            <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto leading-relaxed font-medium">
+              {hero?.subheadline ?? ""}
+            </p>
           </div>
         </div>
 
@@ -253,17 +254,17 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">🏢</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : "Head Office"}
+                        {locale === "vi" ? "Trụ Sở" : locale === "zh" ? "总部" : "Head Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        Nguyễn Hữu Thọ / Đường D1, Ấp 5, Phước Kiển, Nhà Bè, TP. Hồ Chí Minh 70000
+                        A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh
                       </p>
                     </div>
                   </div>
                   <div className="space-y-3 text-gray-900 font-medium">
                     <div className="flex items-center gap-3">
                       <span>📞</span>
-                      <span>03333 142 88</span>
+                      <span>03333 142 88 / 0903 117 277</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span>📧</span>
@@ -287,14 +288,14 @@ export default async function ContactPage({ params }: ContactPageProps) {
                         {locale === "vi" ? "Văn Phòng Đại Diện" : locale === "zh" ? "代表处" : "Representative Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        Nguyễn Hữu Thọ / Đường D1, Ấp 5, Phước Kiển, Nhà Bè, TP. Hồ Chí Minh 70000
+                        625 Trần Xuân Soạn, Phường Tân Hưng, TP. Hồ Chí Minh
                       </p>
                     </div>
                   </div>
                   <div className="space-y-3 text-gray-900 font-medium">
                     <div className="flex items-center gap-3">
                       <span>📞</span>
-                      <span>0903 117 277</span>
+                      <span>03333 142 88 / 0903 117 277</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span>📧</span>
