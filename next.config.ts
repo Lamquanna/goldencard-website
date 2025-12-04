@@ -72,6 +72,9 @@ const nextConfig: NextConfig = {
     scrollRestoration: true,
   },
   
+  // Turbopack config (empty to silence warning)
+  turbopack: {},
+  
   // Production optimizations
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
