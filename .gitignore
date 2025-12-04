@@ -53,3 +53,5 @@ final-copy-edits.json
 
 # deployment scripts
 deploy.ps1
+
+.vercel

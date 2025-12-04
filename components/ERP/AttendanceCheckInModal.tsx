@@ -94,9 +94,9 @@ export default function AttendanceCheckInModal({ isOpen, onClose, onCheckIn, typ
         
         // Find nearest office and check distance
         let minDistance = Infinity;
-        let nearest: OfficeLocation | null = null;
+        let nearest: OfficeLocation | undefined = undefined;
 
-        OFFICE_LOCATIONS.forEach(office => {
+        for (const office of OFFICE_LOCATIONS) {
           const dist = calculateDistance(
             position.coords.latitude,
             position.coords.longitude,
@@ -108,18 +108,19 @@ export default function AttendanceCheckInModal({ isOpen, onClose, onCheckIn, typ
             minDistance = dist;
             nearest = office;
           }
-        });
+        }
 
         setDistance(minDistance);
-        setNearestOffice(nearest);
+        setNearestOffice(nearest ?? null);
         setLoadingLocation(false);
 
         // Check if within acceptable range
-        if (nearest && minDistance <= nearest.radiusMeters) {
+        const allowedRadius = nearest ? nearest.radiusMeters : 300;
+        if (nearest && minDistance <= allowedRadius) {
           setStep('face');
         } else {
           setLocationError(
-            `Bạn đang cách ${nearest?.name} ${Math.round(minDistance)}m. Vui lòng di chuyển đến trong vòng ${nearest?.radiusMeters}m để chấm công.`
+            `Bạn đang cách ${nearest?.name ?? 'văn phòng'} ${Math.round(minDistance)}m. Vui lòng di chuyển đến trong vòng ${allowedRadius}m để chấm công.`
           );
         }
       },
