@@ -11,6 +11,7 @@ import {
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
 import { exportToExcel, tasksExportColumns } from '@/lib/excel-export';
+import TaskCreationModal from '@/components/ERP/TaskCreationModal';
 
 // ============================================
 // TYPES
@@ -349,6 +350,7 @@ export default function TasksPage() {
   const [selectedType, setSelectedType] = useState<string>('all');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+  const [showTaskModal, setShowTaskModal] = useState(false);
 
   // User auth state
   const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -455,6 +457,25 @@ export default function TasksPage() {
     exportToExcel(exportData, tasksExportColumns, filename);
   }, [filteredTasks]);
 
+  // Handle task creation
+  const handleCreateTask = useCallback((taskData: any) => {
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      title: taskData.title,
+      description: taskData.description,
+      type: taskData.type,
+      status: taskData.status,
+      priority: taskData.priority,
+      dueDate: new Date(taskData.dueDate),
+      assignedTo: taskData.assignedTo ? { id: currentUserId, name: 'Current User' } : undefined,
+      relatedTo: taskData.relatedTo,
+      tags: taskData.tags,
+      createdAt: new Date(),
+      reminder: taskData.reminder,
+    };
+    setTasks([newTask, ...tasks]);
+  }, [tasks, currentUserId]);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -488,7 +509,9 @@ export default function TasksPage() {
             )}
 
             {canCreate && (
-              <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
+              <button 
+                onClick={() => setShowTaskModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
                               bg-gradient-to-r from-emerald-500 to-cyan-500
                               text-white font-medium hover:opacity-90 transition-opacity">
                 <Plus className="w-4 h-4" />
@@ -644,6 +667,13 @@ export default function TasksPage() {
           )}
         </div>
       </div>
+
+      {/* Task Creation Modal */}
+      <TaskCreationModal
+        isOpen={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        onSubmit={handleCreateTask}
+      />
     </div>
   );
 }

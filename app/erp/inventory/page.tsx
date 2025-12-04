@@ -17,6 +17,7 @@ import {
   STOCK_OUT_REASONS 
 } from '@/lib/types/inventory';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import * as XLSX from 'xlsx';
 
 // ============================================
 // MOCK DATA
@@ -351,6 +352,86 @@ export default function InventoryPage() {
     return amount.toLocaleString('vi-VN');
   };
 
+  // Handle Excel Export
+  const handleExportExcel = () => {
+    let exportData: any[] = [];
+    let sheetName = '';
+
+    if (activeTab === 'items') {
+      exportData = filteredItems.map(item => ({
+        'Mã hàng': item.item_code,
+        'Tên hàng': item.name,
+        'Loại': ITEM_TYPES[item.type]?.name || item.type,
+        'Kho': item.warehouse_name,
+        'Vị trí': item.location_in_warehouse || '',
+        'Tồn kho': item.current_stock,
+        'Đã đặt': item.reserved_stock,
+        'Còn lại': item.available_stock,
+        'Đơn vị': item.unit,
+        'Đơn giá': item.unit_price || 0,
+        'Giá trị': item.stock_value || 0,
+        'Mức cảnh báo': item.min_stock_alert,
+        'Thương hiệu': item.brand || '',
+        'Model': item.model || '',
+      }));
+      sheetName = 'Danh mục hàng';
+    } else if (activeTab === 'stock_in') {
+      exportData = stockInList.map(si => ({
+        'Mã phiếu': si.transaction_code,
+        'Mã hàng': si.item_code,
+        'Tên hàng': si.item_name,
+        'Kho': si.warehouse_name,
+        'Số lượng': si.quantity,
+        'Đơn vị': si.unit,
+        'Đơn giá': si.unit_price || 0,
+        'Tổng giá trị': si.total_value || 0,
+        'Lý do': STOCK_IN_REASONS[si.reason],
+        'Nhà cung cấp': si.supplier_name || '',
+        'Người nhập': si.created_by_name,
+        'Ngày nhập': new Date(si.created_at).toLocaleDateString('vi-VN'),
+      }));
+      sheetName = 'Phiếu nhập';
+    } else if (activeTab === 'stock_out') {
+      exportData = stockOutList.map(so => ({
+        'Mã phiếu': so.transaction_code,
+        'Mã hàng': so.item_code,
+        'Tên hàng': so.item_name,
+        'Kho': so.warehouse_name,
+        'Số lượng': so.quantity,
+        'Đơn vị': so.unit,
+        'Giá trị': so.total_value || 0,
+        'Lý do': STOCK_OUT_REASONS[so.reason],
+        'Dự án': so.project_name || '',
+        'Người yêu cầu': so.requested_by_name || '',
+        'Trạng thái': so.approval_status,
+        'Ngày xuất': new Date(so.created_at).toLocaleDateString('vi-VN'),
+      }));
+      sheetName = 'Phiếu xuất';
+    } else if (activeTab === 'alerts') {
+      exportData = lowStockItems.map(item => ({
+        'Mã hàng': item.item_code,
+        'Tên hàng': item.name,
+        'Kho': item.warehouse_name,
+        'Tồn kho': item.current_stock,
+        'Mức cảnh báo': item.min_stock_alert,
+        'Chênh lệch': item.current_stock - item.min_stock_alert,
+        'Đơn vị': item.unit,
+      }));
+      sheetName = 'Cảnh báo tồn kho';
+    }
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+    // Generate filename with date
+    const filename = `Kho_${sheetName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    // Export
+    XLSX.writeFile(wb, filename);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -490,7 +571,9 @@ export default function InventoryPage() {
             </select>
 
             {/* Export */}
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <button 
+              onClick={handleExportExcel}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
               <Download size={18} />
               <span>Xuất Excel</span>
             </button>

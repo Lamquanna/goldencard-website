@@ -17,6 +17,12 @@ const ChatWidget = dynamic(() => import("@/components/CRM/ChatWidget"), {
   loading: () => null,
 });
 
+// Dynamic import GlobalChatWidget
+const GlobalChatWidget = dynamic(() => import("@/components/GlobalChatWidget"), {
+  ssr: false,
+  loading: () => null,
+});
+
 // Icons for navigation
 const Icons = {
   dashboard: (
@@ -527,15 +533,8 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* Floating Chat Widget */}
-      <ChatWidget
-        currentUser={{
-          uid: username || "user",
-          email: `${username}@goldenenergy.vn`,
-          displayName: username || "User",
-          role: (userRole as 'admin' | 'manager' | 'sale' | 'staff') || 'staff',
-        }}
-      />
+      {/* Global Chat Widget - Replaces the old one with new enhanced version */}
+      <GlobalChatWidget />
     </div>
   );
 }

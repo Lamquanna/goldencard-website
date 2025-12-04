@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission, canEditAll as checkCanEditAll } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
 import { exportToExcel, leadsExportColumns } from '@/lib/excel-export';
+import LeadCreationModal from '@/components/ERP/LeadCreationModal';
 
 // ============================================
 // TYPES
@@ -472,13 +473,14 @@ function LeadRow({ lead, onView, onEdit, onDelete, canEdit = true, canDelete = t
 // MAIN COMPONENT
 // ============================================
 export default function LeadsPage() {
-  const [leads] = useState<Lead[]>(MOCK_LEADS);
+  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
   const [showFilters, setShowFilters] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
 
   // User auth state
   const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -583,6 +585,27 @@ export default function LeadsPage() {
     exportToExcel(exportData, leadsExportColumns, filename);
   }, [filteredLeads]);
 
+  // Handle lead creation
+  const handleCreateLead = useCallback((leadData: any) => {
+    const newLead: Lead = {
+      id: `lead-${Date.now()}`,
+      name: leadData.name,
+      company: leadData.company,
+      email: leadData.email,
+      phone: leadData.phone,
+      source: leadData.source,
+      status: 'new',
+      priority: leadData.priority,
+      score: 50, // Default score
+      value: leadData.value,
+      tags: leadData.tags,
+      notes: leadData.notes,
+      createdAt: new Date(),
+      activities: [],
+    };
+    setLeads([newLead, ...leads]);
+  }, [leads]);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -616,13 +639,14 @@ export default function LeadsPage() {
             )}
 
             {canCreate && (
-              <Link href="/erp/leads/new"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
+              <button
+                onClick={() => setShowLeadModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
                              bg-gradient-to-r from-blue-500 to-cyan-500
                              text-white font-medium hover:opacity-90 transition-opacity">
                 <Plus className="w-4 h-4" />
                 <span>Thêm Lead</span>
-              </Link>
+              </button>
             )}
           </div>
         </div>
@@ -817,6 +841,13 @@ export default function LeadsPage() {
           </div>
         )}
       </div>
+
+      {/* Lead Creation Modal */}
+      <LeadCreationModal
+        isOpen={showLeadModal}
+        onClose={() => setShowLeadModal(false)}
+        onSubmit={handleCreateLead}
+      />
     </div>
   );
 }
