@@ -256,7 +256,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                         {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : "Head Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        625 Trần Xuân Soạn, Phường Tân Hưng, TP. Hồ Chí Minh
+                        Nguyễn Hữu Thọ / Đường D1, Ấp 5, Phước Kiển, Nhà Bè, TP. Hồ Chí Minh 70000
                       </p>
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                         {locale === "vi" ? "Văn Phòng Đại Diện" : locale === "zh" ? "代表处" : "Representative Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh
+                        Nguyễn Hữu Thọ / Đường D1, Ấp 5, Phước Kiển, Nhà Bè, TP. Hồ Chí Minh 70000
                       </p>
                     </div>
                   </div>

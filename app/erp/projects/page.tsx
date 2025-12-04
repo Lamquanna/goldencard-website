@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { Plus, Search, Filter, LayoutGrid, List, Calendar, ChevronDown, Eye, Edit2, Trash2, Users, MapPin, Clock, DollarSign, AlertTriangle, MoreHorizontal } from 'lucide-react';
 import { 
   Project, 
@@ -184,6 +185,68 @@ const mockProjects: Project[] = [
 ];
 
 // ============================================
+// PLAN LOG TYPES & DEFAULT DATA
+// ============================================
+
+type PlanLogStatus = 'planned' | 'in_progress' | 'completed';
+
+interface PlanLogEntry {
+  id: string;
+  projectId: string;
+  title: string;
+  note?: string;
+  owner: string;
+  plannedDate: string; // YYYY-MM-DD
+  status: PlanLogStatus;
+  progress: number;
+  lastUpdated: string;
+}
+
+type PlanLogInput = Omit<PlanLogEntry, 'id' | 'lastUpdated'>;
+
+const planLogStatusConfig: Record<PlanLogStatus, { label: string; color: string; bg: string }> = {
+  planned: { label: 'Đã lập kế hoạch', color: 'text-gray-700', bg: 'bg-gray-100' },
+  in_progress: { label: 'Đang triển khai', color: 'text-blue-700', bg: 'bg-blue-100' },
+  completed: { label: 'Hoàn tất', color: 'text-green-700', bg: 'bg-green-100' },
+};
+
+const defaultPlanLogs: PlanLogEntry[] = [
+  {
+    id: 'plan-001',
+    projectId: 'proj-001',
+    owner: 'Trần Minh Quân',
+    title: 'Tuần 25 - Hạ tầng',
+    note: 'Hoàn tất san lấp khu B3, chuẩn bị đổ bê tông móng khung.',
+    plannedDate: '2024-06-17',
+    status: 'in_progress',
+    progress: 45,
+    lastUpdated: '2024-06-16T08:00:00Z',
+  },
+  {
+    id: 'plan-002',
+    projectId: 'proj-002',
+    owner: 'Lê Thị Hương',
+    title: 'Triển khai lắp inverter',
+    note: 'Điều phối đội bảo trì trực ca đêm, kiểm tra tồn kho phụ kiện.',
+    plannedDate: '2024-06-20',
+    status: 'planned',
+    progress: 30,
+    lastUpdated: '2024-06-15T04:00:00Z',
+  },
+  {
+    id: 'plan-003',
+    projectId: 'proj-003',
+    owner: 'Phạm Văn Đức',
+    title: 'Hoàn thiện hồ sơ EPC',
+    note: 'Gửi bộ hồ sơ cho ban pháp lý và chuẩn bị buổi review với EVN.',
+    plannedDate: '2024-06-25',
+    status: 'planned',
+    progress: 10,
+    lastUpdated: '2024-06-14T10:30:00Z',
+  },
+];
+
+// ============================================
 // COMPONENT
 // ============================================
 
@@ -213,8 +276,55 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [planLogs, setPlanLogs] = useState<PlanLogEntry[]>([]);
+  const [planLogsLoaded, setPlanLogsLoaded] = useState(false);
   
   const { user, hasPermission } = useAuthStore();
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('erp_plan_logs');
+      if (stored) {
+        const parsed = JSON.parse(stored) as PlanLogEntry[];
+        setPlanLogs(parsed);
+      } else {
+        localStorage.setItem('erp_plan_logs', JSON.stringify(defaultPlanLogs));
+        setPlanLogs(defaultPlanLogs);
+      }
+    } catch (error) {
+      console.error('Failed to load plan logs from storage', error);
+      setPlanLogs(defaultPlanLogs);
+    } finally {
+      setPlanLogsLoaded(true);
+    }
+  }, []);
+
+  const updatePlanLogs = useCallback((updater: PlanLogEntry[] | ((prev: PlanLogEntry[]) => PlanLogEntry[])) => {
+    setPlanLogs((prev) => {
+      const next = typeof updater === 'function' ? (updater as (prev: PlanLogEntry[]) => PlanLogEntry[])(prev) : updater;
+      try {
+        localStorage.setItem('erp_plan_logs', JSON.stringify(next));
+      } catch (error) {
+        console.error('Failed to persist plan logs', error);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleAddPlanLog = useCallback((input: PlanLogInput) => {
+    updatePlanLogs((prev) => {
+      const entry: PlanLogEntry = {
+        id: `plan-${Date.now()}`,
+        lastUpdated: new Date().toISOString(),
+        ...input,
+      };
+      return [entry, ...prev].slice(0, 50);
+    });
+  }, [updatePlanLogs]);
+
+  const handleDeletePlanLog = useCallback((id: string) => {
+    updatePlanLogs((prev) => prev.filter((log) => log.id !== id));
+  }, [updatePlanLogs]);
   
   const canCreate = hasPermission('projects', 'create');
   const canEdit = hasPermission('projects', 'edit');
@@ -431,6 +541,17 @@ export default function ProjectsPage() {
             <div className="text-6xl mb-4">📋</div>
             <h3 className="text-lg font-medium text-gray-900">Không tìm thấy dự án</h3>
             <p className="text-gray-500 mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          </div>
+        )}
+
+        {planLogsLoaded && (
+          <div className="mt-10">
+            <PlanLogPanel
+              projects={projects}
+              logs={planLogs}
+              onAddLog={handleAddPlanLog}
+              onDeleteLog={handleDeletePlanLog}
+            />
           </div>
         )}
       </div>
@@ -656,5 +777,272 @@ function ProjectRow({ project, canEdit, canDelete }: { project: Project; canEdit
         </div>
       </td>
     </tr>
+  );
+}
+
+function PlanLogPanel({
+  projects,
+  logs,
+  onAddLog,
+  onDeleteLog,
+}: {
+  projects: Project[];
+  logs: PlanLogEntry[];
+  onAddLog: (entry: PlanLogInput) => void;
+  onDeleteLog: (id: string) => void;
+}) {
+  const projectOptions = useMemo(
+    () =>
+      projects.map((project) => ({
+        id: project.id,
+        label: `${project.project_code} · ${project.name}`,
+        lead: project.team_lead_name,
+      })),
+    [projects]
+  );
+
+  const projectLookup = useMemo(() => {
+    const map = new Map<string, { name?: string; code?: string }>();
+    projects.forEach((project) => {
+      map.set(project.id, { name: project.name, code: project.project_code });
+    });
+    return map;
+  }, [projects]);
+
+  const [form, setForm] = useState({
+    projectId: projectOptions[0]?.id ?? '',
+    owner: projectOptions[0]?.lead ?? '',
+    title: '',
+    note: '',
+    plannedDate: new Date().toISOString().split('T')[0],
+    status: 'planned' as PlanLogStatus,
+    progress: 0,
+  });
+
+  useEffect(() => {
+    if (!form.projectId && projectOptions.length) {
+      setForm((prev) => ({
+        ...prev,
+        projectId: projectOptions[0].id,
+        owner: projectOptions[0].lead ?? prev.owner,
+      }));
+    }
+  }, [projectOptions, form.projectId]);
+
+  const sortedLogs = useMemo(() => {
+    return [...logs].sort((a, b) => {
+      const latestA = new Date(a.lastUpdated || a.plannedDate).getTime();
+      const latestB = new Date(b.lastUpdated || b.plannedDate).getTime();
+      return latestB - latestA;
+    });
+  }, [logs]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!form.projectId || !form.title.trim()) {
+      return;
+    }
+
+    const selected = projectOptions.find((option) => option.id === form.projectId);
+    const sanitizedProgress = Math.max(0, Math.min(100, Number(form.progress) || 0));
+
+    onAddLog({
+      projectId: form.projectId,
+      owner: form.owner.trim() || selected?.lead || 'PM Office',
+      title: form.title.trim(),
+      note: form.note.trim(),
+      plannedDate: form.plannedDate,
+      status: form.status,
+      progress: sanitizedProgress,
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      title: '',
+      note: '',
+      progress: 0,
+    }));
+  };
+
+  const handleProjectChange = (value: string) => {
+    const selected = projectOptions.find((option) => option.id === value);
+    setForm((prev) => ({
+      ...prev,
+      projectId: value,
+      owner: selected?.lead ?? prev.owner,
+    }));
+  };
+
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('vi-VN');
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-yellow-100 p-6 shadow-sm">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <form onSubmit={handleSubmit} className="w-full lg:w-1/3 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Nhật ký kế hoạch</h3>
+            <p className="text-sm text-gray-500">Ghi lại tiến độ giống Fastcons và lưu ngay trên trình duyệt.</p>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Dự án</label>
+              <select
+                value={form.projectId}
+                onChange={(e) => handleProjectChange(e.target.value)}
+                className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                {projectOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Người phụ trách</label>
+                <input
+                  type="text"
+                  value={form.owner}
+                  onChange={(e) => setForm((prev) => ({ ...prev, owner: e.target.value }))}
+                  className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="Trưởng dự án"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Ngày kế hoạch</label>
+                <input
+                  type="date"
+                  value={form.plannedDate}
+                  onChange={(e) => setForm((prev) => ({ ...prev, plannedDate: e.target.value }))}
+                  className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">Tiêu đề</label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                placeholder="Ví dụ: Tuần 25 - Thi công móng"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">Ghi chú</label>
+              <textarea
+                value={form.note}
+                onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
+                className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                rows={3}
+                placeholder="Liệt kê công việc, vật tư, vấn đề cần theo dõi..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Trạng thái</label>
+                <select
+                  value={form.status}
+                  onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as PlanLogStatus }))}
+                  className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                >
+                  <option value="planned">Đã lập kế hoạch</option>
+                  <option value="in_progress">Đang triển khai</option>
+                  <option value="completed">Hoàn tất</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Tiến độ (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={form.progress}
+                  onChange={(e) => setForm((prev) => ({ ...prev, progress: Number(e.target.value) }))}
+                  className="mt-1 w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 text-white rounded-xl font-medium hover:bg-yellow-600 transition-colors"
+          >
+            <Plus size={18} />
+            Lưu nhật ký
+          </button>
+        </form>
+
+        <div className="flex-1 space-y-4 max-h-[540px] overflow-auto pr-1">
+          {sortedLogs.length === 0 ? (
+            <div className="text-center text-gray-500 py-16 border border-dashed border-gray-200 rounded-2xl">
+              <p className="font-medium">Chưa có nhật ký kế hoạch nào</p>
+              <p className="text-sm mt-1">Bắt đầu ghi nhận để theo dõi thay đổi giống Fastcons.</p>
+            </div>
+          ) : (
+            sortedLogs.map((log) => {
+              const status = planLogStatusConfig[log.status];
+              const projectInfo = projectLookup.get(log.projectId);
+              const projectLabel = projectInfo
+                ? `${projectInfo.code ?? ''} ${projectInfo.name ?? ''}`.trim()
+                : 'Dự án chưa xác định';
+
+              return (
+                <div
+                  key={log.id}
+                  className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 hover:bg-white transition-shadow flex flex-col gap-3 lg:flex-row lg:items-center"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-gray-900">{log.title}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {projectLabel} · {log.owner}
+                    </p>
+                    {log.note && (
+                      <p className="text-sm text-gray-700 mt-2 line-clamp-2">{log.note}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">{formatDate(log.plannedDate)}</p>
+                      <p className="text-sm font-semibold text-gray-900">{log.progress}%</p>
+                      <div className="mt-1 h-2 w-28 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-yellow-500 rounded-full"
+                          style={{ width: `${Math.min(log.progress, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteLog(log.id)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label="Xóa nhật ký"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

@@ -313,7 +313,7 @@ export default async function InnovationPage({ params }: InnovationPageProps) {
         title={content.hero.title}
         subtitle={content.hero.subtitle}
         description={content.hero.description}
-        backgroundImage="/Projects/Solar energy/Project 4.jpg"
+        backgroundImage="/Projects/Solar energy/Project 4.png"
         useStaticBackground={true}
       />
 

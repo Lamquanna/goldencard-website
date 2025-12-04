@@ -370,7 +370,7 @@ export default async function HomePage({ params }: HomePageProps) {
               '/Projects/Solar energy/Project 1.jpg',
               '/Projects/Solar energy/Project 2.jpg',
               '/Projects/Solar energy/Project 3.jpg',
-              '/Projects/Solar energy/Project 4.jpg'
+              '/Projects/Solar energy/Project 4.png'
             ];
             const projectImage = projectImages[index] || projectImages[0];
             
