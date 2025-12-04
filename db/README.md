@@ -4,6 +4,13 @@
 
 Complete PostgreSQL schema for tracking user behavior, analytics, and heatmaps on the Golden Energy website.
 
+As of 2025-12-04 the database layer now ships with **two** logical domains:
+
+1. `001_create_analytics_tables.sql` → Web & product analytics (existing)
+2. `002_create_erp_core.sql` → Full ERP/operations data model (projects, tasks, inventory, accounting, chat, attendance, etc.)
+
+Both migrations can be applied to the same PostgreSQL instance (Supabase, Vercel Postgres, Neon, RDS, …).
+
 ## 🗄️ Database Tables
 
 ### Core Tables
@@ -103,6 +110,97 @@ Expected output:
 - analytics_heatmap_data
 - analytics_user_flows
 - analytics_form_submissions
+
+---
+
+## 🧱 ERP Core Schema (`002_create_erp_core.sql`)
+
+The second migration provisions every table the in-house ERP needs. Major domains:
+
+| Domain | Key Tables |
+|--------|-----------|
+| Org & Access | `erp_departments`, `erp_roles`, `erp_user_profiles` |
+| Projects & Delivery | `erp_projects`, `erp_project_members`, `erp_project_milestones`, `erp_tasks`, `erp_task_comments`, `erp_task_activity` |
+| CRM Overlay | `erp_leads`, `erp_lead_activities` |
+| Inventory & SCM | `erp_warehouses`, `erp_items`, `erp_stock_levels`, `erp_stock_movements`, `erp_inventory_adjustments` |
+| Accounting | `erp_accounts`, `erp_journal_entries`, `erp_journal_lines`, `erp_invoices`, `erp_invoice_line_items`, `erp_payments` |
+| Attendance & Reporting | `erp_attendance_rules`, `erp_attendance_checkins`, `erp_weekly_reports`, `erp_weekly_report_entries` |
+| Collaboration | `erp_chat_rooms`, `erp_chat_room_members`, `erp_chat_messages`, `erp_call_sessions`, `erp_call_participants`, `erp_notifications` |
+| Files & Audit | `erp_files`, `erp_activity_logs` |
+
+### Applying the ERP migration
+
+```bash
+# Analytics + ERP
+node scripts/migrate.js --file db/migrations/001_create_analytics_tables.sql
+node scripts/migrate.js --file db/migrations/002_create_erp_core.sql
+
+# or run via psql
+psql "$POSTGRES_URL" -f db/migrations/001_create_analytics_tables.sql
+psql "$POSTGRES_URL" -f db/migrations/002_create_erp_core.sql
+```
+
+> The Node/Pwsh helpers run every SQL file in `db/migrations` alphabetically. To only apply ERP, run the `psql` command with the exact file path.
+
+### Row-Level Security & roles
+
+- Every ERP table ships with RLS enabled.
+- Default policies allow any authenticated Supabase user to read/write their own data. Fine-grained policies (per department, per project) should be authored in Supabase SQL editor once real roles are known.
+
+### Seed Data
+
+`erp_departments` + `erp_roles` get four sample records so UI dropdowns can render on first boot. They are safe to override.
+
+---
+
+## ⚡ Realtime & Collaboration Setup
+
+The ERP relies on Supabase Realtime (logical replication). Required steps:
+
+1. **Create Supabase project** → copy `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` into `.env.local`.
+2. Run the migrations (analytics + ERP). Supabase automatically enables replication for tables with `REPLICA IDENTITY FULL` (already applied to chat/tasks/attendance/notifications tables).
+3. Install the optional HTTP webhook for push notifications or use Supabase Edge Functions to fan-out notifications.
+
+Example env values:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL="https://xyzcompany.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="public-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="service-role-key" # server-side only!
+```
+
+### Client helpers
+
+Use the provided factories in `lib/supabase/client.ts` and `lib/supabase/server.ts`:
+
+```ts
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
+const { data } = await supabase.from('erp_tasks').select('*');
+```
+
+### Realtime channels (example)
+
+```ts
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
+const channel: RealtimeChannel = supabase.channel('erp-tasks');
+
+channel.on('postgres_changes', {
+  event: '*',
+  schema: 'public',
+  table: 'erp_tasks',
+}, payload => {
+  console.log('Task event', payload.eventType, payload.new);
+});
+
+channel.subscribe();
+```
+
+Subscribe to `erp_chat_messages`, `erp_notifications`, `erp_attendance_checkins`, etc. for live UX (global chat, alerts, attendance approvals, …).
 
 ## 📈 Views & Functions
 
