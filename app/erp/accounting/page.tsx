@@ -10,6 +10,7 @@ import {
   Building, User, FileSpreadsheet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as XLSX from 'xlsx';
 
 // ============================================
 // TYPES
@@ -281,6 +282,67 @@ export default function AccountingPage() {
     return result.sort((a, b) => b.issueDate.getTime() - a.issueDate.getTime());
   }, [invoices, search, selectedStatus]);
 
+  // Handle Excel Export
+  const handleExportReport = () => {
+    let exportData: any[] = [];
+    let sheetName = '';
+
+    if (activeTab === 'transactions') {
+      exportData = filteredTransactions.map(t => ({
+        'Ngày': t.date.toLocaleDateString('vi-VN'),
+        'Loại': t.type === 'income' ? 'Thu' : 'Chi',
+        'Danh mục': t.category,
+        'Mô tả': t.description,
+        'Số tiền': t.amount,
+        'Phương thức': t.paymentMethod,
+        'Trạng thái': t.status === 'completed' ? 'Hoàn thành' : t.status === 'pending' ? 'Chờ xử lý' : 'Đã hủy',
+        'Khách hàng': t.customer?.name || '',
+        'Dự án': t.project?.name || '',
+        'Người tạo': t.createdBy,
+      }));
+      sheetName = 'Giao dịch';
+    } else if (activeTab === 'invoices') {
+      exportData = filteredInvoices.map(inv => ({
+        'Số hóa đơn': inv.invoiceNumber,
+        'Loại': inv.type === 'sales' ? 'Bán hàng' : 'Mua hàng',
+        'Khách hàng': inv.customer.name,
+        'Ngày phát hành': inv.issueDate.toLocaleDateString('vi-VN'),
+        'Ngày đến hạn': inv.dueDate.toLocaleDateString('vi-VN'),
+        'Tổng tiền trước thuế': inv.subtotal,
+        'Thuế': inv.tax,
+        'Tổng tiền': inv.total,
+        'Trạng thái': inv.status === 'paid' ? 'Đã thanh toán' : 
+                     inv.status === 'sent' ? 'Đã gửi' :
+                     inv.status === 'overdue' ? 'Quá hạn' :
+                     inv.status === 'draft' ? 'Nháp' : 'Đã hủy',
+        'Ngày thanh toán': inv.paidDate ? inv.paidDate.toLocaleDateString('vi-VN') : '',
+      }));
+      sheetName = 'Hóa đơn';
+    } else {
+      // Overview - export summary
+      exportData = [
+        { 'Chỉ số': 'Tổng thu nhập', 'Giá trị': stats.totalIncome },
+        { 'Chỉ số': 'Tổng chi phí', 'Giá trị': stats.totalExpense },
+        { 'Chỉ số': 'Lợi nhuận', 'Giá trị': stats.profit },
+        { 'Chỉ số': 'Hóa đơn chờ thanh toán', 'Giá trị': stats.pendingInvoices },
+        { 'Chỉ số': 'Hóa đơn quá hạn', 'Giá trị': stats.overdueInvoices },
+        { 'Chỉ số': 'Đã thu', 'Giá trị': stats.paidInvoices },
+      ];
+      sheetName = 'Tổng quan';
+    }
+
+    // Create workbook
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+    // Generate filename
+    const filename = `KeToan_${sheetName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    // Export
+    XLSX.writeFile(wb, filename);
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -302,7 +364,9 @@ export default function AccountingPage() {
               <Upload className="w-4 h-4" />
               <span>Nhập dữ liệu</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
+            <button 
+              onClick={handleExportReport}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
                              border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
               <Download className="w-4 h-4" />
               <span>Xuất báo cáo</span>
