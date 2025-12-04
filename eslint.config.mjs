@@ -29,6 +29,15 @@ const eslintConfig = [
       "@next/next/no-img-element": "warn",
     },
   },
+  {
+    files: ["scripts/**/*.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

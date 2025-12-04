@@ -1,12 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import Image from "next/image";
-
-gsap.registerPlugin(ScrollTrigger);
 
 // Solar project images for hero slider
 const heroSliderImages = [
@@ -42,12 +38,6 @@ interface HeroProps {
 /**
  * Hero Section - Monochrome Cinematic Luxury
  * Performance Optimized - Uses static image or image slider
- * 
- * Spec:
- * - Font Leyton cho "Golden Energy" (title)
- * - Size: clamp(3rem, 7vw, 6rem), letter-spacing 0.08em
- * - Subtitle/CTA: DM Sans, #CCC
- * - Background: static image, image slider, or video
  */
 export default function Hero({
   title,
@@ -72,97 +62,153 @@ export default function Hero({
   const [loadVideo, setLoadVideo] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Auto-advance slider
-  useEffect(() => {
-    if (!enableSlider || !useStaticBackground) return;
-
-    const timer = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentSlide((prev) => (prev + 1) % heroSliderImages.length);
-        setIsTransitioning(false);
-      }, 500);
-    }, sliderInterval);
-
-    return () => clearInterval(timer);
-  }, [enableSlider, useStaticBackground, sliderInterval]);
-
-  // Manual slide navigation
-  const goToSlide = useCallback((index: number) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentSlide(index);
-      setIsTransitioning(false);
-    }, 300);
-  }, [isTransitioning]);
-
-  const nextSlide = useCallback(() => {
-    goToSlide((currentSlide + 1) % heroSliderImages.length);
-  }, [currentSlide, goToSlide]);
-
-  const prevSlide = useCallback(() => {
-    goToSlide((currentSlide - 1 + heroSliderImages.length) % heroSliderImages.length);
-  }, [currentSlide, goToSlide]);
+  const [prevSlide, setPrevSlide] = useState<number | null>(null);
+  const [allowMotion, setAllowMotion] = useState(true);
+  const currentSlideRef = useRef(0);
+  const totalSlides = heroSliderImages.length;
+  const shouldRenderSlider = useStaticBackground && enableSlider && totalSlides > 1;
 
   useEffect(() => {
-    // Load video only after user interaction or scroll for performance
-    const handleInteraction = () => {
-      setLoadVideo(true);
-      window.removeEventListener('scroll', handleInteraction);
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
+    currentSlideRef.current = currentSlide;
+  }, [currentSlide]);
+
+  // Lắng nghe prefers-reduced-motion để tắt auto-play nếu người dùng hạn chế chuyển động
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const handleChange = (event: MediaQueryList | MediaQueryListEvent) => {
+      setAllowMotion(!event.matches);
     };
 
-    // Only load video if explicitly requested and not using static background
-    if (!useStaticBackground && youtubeId) {
-      const timer = setTimeout(() => setLoadVideo(true), 3000); // Delay video load by 3s
-      window.addEventListener('scroll', handleInteraction, { once: true, passive: true });
-      window.addEventListener('click', handleInteraction, { once: true });
-      window.addEventListener('touchstart', handleInteraction, { once: true, passive: true });
+    handleChange(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+    } else if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === "function") {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else if (typeof mediaQuery.removeListener === "function") {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  const changeSlide = useCallback((targetIndex: number) => {
+    if (isTransitioning || !shouldRenderSlider) return;
+
+    const normalizedIndex = ((targetIndex % totalSlides) + totalSlides) % totalSlides;
+    if (normalizedIndex === currentSlideRef.current) return;
+
+    setPrevSlide(currentSlideRef.current);
+    setCurrentSlide(normalizedIndex);
+    setIsTransitioning(true);
+  }, [isTransitioning, shouldRenderSlider, totalSlides]);
+
+  const goToSlide = useCallback((index: number) => {
+    changeSlide(index);
+  }, [changeSlide]);
+
+  const nextSlide = useCallback(() => {
+    changeSlide(currentSlideRef.current + 1);
+  }, [changeSlide]);
+
+  const prevSlideHandler = useCallback(() => {
+    changeSlide(currentSlideRef.current - 1);
+  }, [changeSlide]);
+
+  useEffect(() => {
+    if (!isTransitioning) return;
+
+    const timer = window.setTimeout(() => {
+      setIsTransitioning(false);
+      setPrevSlide(null);
+    }, 650);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [isTransitioning]);
+
+  // Auto-advance slider chỉ khi không bật reduced motion
+  useEffect(() => {
+    if (!shouldRenderSlider || !allowMotion) return;
+
+    const timer = window.setInterval(() => {
+      changeSlide(currentSlideRef.current + 1);
+    }, sliderInterval);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [allowMotion, changeSlide, shouldRenderSlider, sliderInterval]);
+
+  useEffect(() => {
+    const handleInteraction = () => {
+      setLoadVideo(true);
+      window.removeEventListener("scroll", handleInteraction);
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+    };
+
+    if (!useStaticBackground && (youtubeId || videoSrc)) {
+      const timer = window.setTimeout(() => setLoadVideo(true), 3000);
+      window.addEventListener("scroll", handleInteraction, { once: true, passive: true });
+      window.addEventListener("click", handleInteraction, { once: true });
+      window.addEventListener("touchstart", handleInteraction, { once: true, passive: true });
       return () => {
-        clearTimeout(timer);
-        window.removeEventListener('scroll', handleInteraction);
-        window.removeEventListener('click', handleInteraction);
-        window.removeEventListener('touchstart', handleInteraction);
+        window.clearTimeout(timer);
+        window.removeEventListener("scroll", handleInteraction);
+        window.removeEventListener("click", handleInteraction);
+        window.removeEventListener("touchstart", handleInteraction);
       };
     }
-  }, [useStaticBackground, youtubeId]);
+  }, [useStaticBackground, videoSrc, youtubeId]);
+
+  const visibleSlides = Array.from(
+    new Set([currentSlide, prevSlide].filter((value): value is number => typeof value === "number"))
+  );
 
   return (
     <section
       ref={heroRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
     >
-      {/* Background - Image Slider or Static Image */}
       {useStaticBackground ? (
         <div className="absolute inset-0 w-full h-full">
-          {/* Image Slider */}
-          {enableSlider ? (
+          {shouldRenderSlider ? (
             <>
-              {heroSliderImages.map((src, index) => (
-                <div
-                  key={src}
-                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                    index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                >
-                  <Image
-                    src={src}
-                    alt={`Solar project ${index + 1}`}
-                    fill
-                    priority={index === 0}
-                    quality={85}
-                    sizes="100vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-              
-              {/* Slider Navigation Arrows */}
+              {visibleSlides.map((index) => {
+                const src = heroSliderImages[index];
+                const isActive = index === currentSlide;
+                const prioritize = isActive && priority;
+                return (
+                  <div
+                    key={`${src}-${isActive ? "active" : "inactive"}`}
+                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                      isActive ? "opacity-100 z-20" : "opacity-0 z-10"
+                    }`}
+                  >
+                    <Image
+                      src={src}
+                      alt={`Solar project ${index + 1}`}
+                      fill
+                      priority={prioritize}
+                      loading={prioritize ? undefined : "lazy"}
+                      quality={72}
+                      sizes="100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                );
+              })}
+
               <button
-                onClick={prevSlide}
+                onClick={prevSlideHandler}
                 className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all duration-300 backdrop-blur-sm"
                 aria-label="Previous slide"
               >
@@ -180,16 +226,13 @@ export default function Hero({
                 </svg>
               </button>
 
-              {/* Slider Dots Indicator */}
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
                 {heroSliderImages.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
                     className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                      index === currentSlide 
-                        ? 'bg-[#D4AF37] w-8' 
-                        : 'bg-white/50 hover:bg-white/80'
+                      index === currentSlide ? "bg-[#D4AF37] w-8" : "bg-white/50 hover:bg-white/80"
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -202,41 +245,39 @@ export default function Hero({
               alt="Hero background"
               fill
               priority={priority}
-              quality={85}
+              loading={priority ? undefined : "lazy"}
+              quality={75}
               sizes="100vw"
               className="object-cover"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAQMDBAMBAAAAAAAAAAAAAQIDBAAFEQYSITEHE0FR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAYEQEAAwEAAAAAAAAAAAAAAAABAAIRIf/aAAwDAQACEQMRAD8AyDx/qC7WnUEWdBmsNKZUpKmnGVFJCgOxnn41r2j/ACI60wHFahuTjT+3f7ELhxAJ4+VIpSsEmC//2Q=="
             />
           )}
-          {/* Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 z-[11]" />
-          {/* Subtle green tint for renewable energy theme */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-green-900/20 z-[11]" />
         </div>
       ) : (
-        /* YouTube Background Video - Lazy Loaded */
         <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
           {loadVideo ? (
             <iframe
-              src={`https://www.youtube.com/embed/${youtubeId || 'MbXLt7OwEXI'}?autoplay=1&mute=1&loop=1&playlist=${youtubeId || 'MbXLt7OwEXI'}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&vq=hd1080&start=15`}
+              src={
+                videoSrc ||
+                `https://www.youtube.com/embed/${youtubeId || "MbXLt7OwEXI"}?autoplay=1&mute=1&loop=1&playlist=${
+                  youtubeId || "MbXLt7OwEXI"
+                }&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&vq=hd1080&start=15`
+              }
               className="absolute inset-0 w-full h-full"
               style={{
-                width: '120vw',
-                height: '67.5vw',
-                minHeight: '120vh',
-                minWidth: '213.33vh',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%) scale(1.3)',
+                width: "120vw",
+                height: "67.5vw",
+                minHeight: "120vh",
+                minWidth: "213.33vh",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%) scale(1.3)",
               }}
               allow="autoplay; encrypted-media"
               title="Hero background video"
               loading="lazy"
             />
           ) : (
-            /* Placeholder while video loads */
             <Image
               src={backgroundImage}
               alt="Hero background"
@@ -247,29 +288,26 @@ export default function Hero({
               className="object-cover"
             />
           )}
-          {/* Overlay for better visibility */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/40 to-black/50" />
           <div className="absolute inset-0 bg-gradient-to-br from-green-900/15 via-transparent to-green-900/15" />
         </div>
       )}
 
-      {/* Content */}
+      {/* Subtle green tint for renewable energy theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-green-900/20 z-[11]" />
+
       <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24 text-center max-w-[1200px]">
         <div className="space-y-8">
-          {/* Subtitle */}
           {subtitle && (
             <p
               ref={subtitleRef}
               className="text-xs md:text-sm uppercase tracking-[0.2em] text-white font-bold"
-              style={{ 
-                fontFamily: "var(--font-montserrat), sans-serif"
-              }}
+              style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
             >
               {subtitle}
             </p>
           )}
 
-          {/* Title - Leyton font - White text on video background */}
           {!hideTitle && title && (
             <h1
               ref={titleRef}
@@ -279,17 +317,16 @@ export default function Hero({
                 fontFamily: "Leyton, Playfair Display, serif",
                 fontWeight: 900,
                 color: "#FFFFFF",
-                textShadow: "0 4px 20px rgba(0,0,0,0.5)"
+                textShadow: "0 4px 20px rgba(0,0,0,0.5)",
               }}
               dangerouslySetInnerHTML={{
                 __html: title
                   .replace(/Golden Energy/gi, '<span class="golden-text">Golden</span> <span class="energy-text">Energy</span>')
-                  .replace(/GoldenEnergy/g, '<span class="golden-text">Golden</span><span class="energy-text">Energy</span>')
+                  .replace(/GoldenEnergy/g, '<span class="golden-text">Golden</span><span class="energy-text">Energy</span>'),
               }}
             />
           )}
 
-          {/* Description */}
           {description && (
             <p
               ref={descriptionRef}
@@ -297,14 +334,13 @@ export default function Hero({
               style={{
                 fontFamily: "var(--font-montserrat), sans-serif",
                 fontWeight: 600,
-                letterSpacing: "0.025em"
+                letterSpacing: "0.025em",
               }}
             >
               {description}
             </p>
           )}
 
-          {/* CTA */}
           {ctaLink && (
             <div ref={ctaRef} className="pt-8">
               <Link
@@ -320,11 +356,7 @@ export default function Hero({
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
             </div>
@@ -332,7 +364,6 @@ export default function Hero({
         </div>
       </div>
 
-      {/* Grain texture overlay */}
       <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none">
         <svg className="w-full h-full">
           <filter id="grain-hero">

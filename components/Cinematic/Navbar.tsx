@@ -1,16 +1,12 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import MobileMenu from "@/components/ui/MobileMenu";
 import ScrollProgress from "@/components/ui/ScrollProgress";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface NavItem {
   label: string;
@@ -37,7 +33,6 @@ interface NavbarProps {
 export default function Navbar({ navItems, locale }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const navRef = useRef<HTMLElement>(null);
 
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
@@ -65,32 +60,19 @@ export default function Navbar({ navItems, locale }: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-
-    gsap.to(nav, {
-      padding: isScrolled ? "1rem 0" : "1.5rem 0",
-      backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.98)" : "rgba(255, 255, 255, 0.95)",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  }, [isScrolled]);
-
   return (
     <>
       {/* Scroll Progress Bar */}
       <ScrollProgress color="#D4AF37" height={3} />
 
       <nav
-        ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? "bg-white/95 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "bg-white/90 py-6"
+        }`}
         style={{
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)", // iOS Safari support
           borderBottom: "1px solid rgba(224, 224, 224, 0.5)",
-          position: "sticky",
-          boxShadow: isScrolled ? "0 2px 8px rgba(0,0,0,0.06)" : "none",
         }}
       >
       <div className="container mx-auto px-6 md:px-12 lg:px-24 max-w-[1400px]">

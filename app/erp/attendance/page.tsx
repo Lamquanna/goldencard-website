@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -105,6 +104,7 @@ const generateMockAttendance = (_currentUserId?: string): AttendanceRecord[] => 
   return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+// Static config - moved outside component for performance
 const STATUS_CONFIG = {
   present: { label: 'Có mặt', color: 'bg-green-100 text-green-700', icon: CheckCircleIcon },
   absent: { label: 'Vắng', color: 'bg-red-100 text-red-700', icon: XCircleIcon },
@@ -112,7 +112,62 @@ const STATUS_CONFIG = {
   early_leave: { label: 'Về sớm', color: 'bg-orange-100 text-orange-700', icon: ClockIcon },
   half_day: { label: 'Nửa ngày', color: 'bg-blue-100 text-blue-700', icon: CalendarDaysIcon },
   holiday: { label: 'Nghỉ lễ', color: 'bg-purple-100 text-purple-700', icon: CalendarDaysIcon },
-};
+} as const;
+
+// Memoized stat card component
+const StatCard = memo(({ value, label, colorClass = 'text-gray-900' }: { 
+  value: string | number; 
+  label: string; 
+  colorClass?: string;
+}) => (
+  <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+    <div className={`text-2xl font-bold ${colorClass}`}>{value}</div>
+    <div className="text-sm text-gray-500">{label}</div>
+  </div>
+));
+StatCard.displayName = 'StatCard';
+
+// Memoized table row component  
+const AttendanceRow = memo(({ record, formatDate }: { record: AttendanceRecord; formatDate: (d: string) => string }) => {
+  const statusConfig = STATUS_CONFIG[record.status];
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <tr className="hover:bg-gray-50">
+      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+        {formatDate(record.date)}
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+            <UserIcon className="w-4 h-4 text-gray-500" />
+          </div>
+          <span className="text-sm text-gray-900">{record.user_name}</span>
+        </div>
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-600">{record.check_in || '-'}</td>
+      <td className="px-4 py-3 text-sm text-gray-600">{record.check_out || '-'}</td>
+      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+        {record.work_hours > 0 ? `${record.work_hours}h` : '-'}
+      </td>
+      <td className="px-4 py-3">
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
+          <StatusIcon className="w-3.5 h-3.5" />
+          {statusConfig.label}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-500">
+        {record.location && (
+          <span className="flex items-center gap-1">
+            <MapPinIcon className="w-4 h-4" />
+            {record.location}
+          </span>
+        )}
+      </td>
+    </tr>
+  );
+});
+AttendanceRow.displayName = 'AttendanceRow';
 
 export default function AttendancePage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -150,8 +205,8 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
+    // Faster loading with reduced timeout
+    const timer = setTimeout(() => {
       const allRecords = generateMockAttendance(currentUserId);
       setRecords(allRecords);
       setLoading(false);
@@ -165,7 +220,9 @@ export default function AttendancePage() {
         setIsCheckedIn(true);
         setTodayCheckIn(todayRecord.check_in);
       }
-    }, 500);
+    }, 300);
+    
+    return () => clearTimeout(timer);
   }, [currentUserId]);
 
   // Get unique users (for filter dropdown - only show if canViewAll)
@@ -463,66 +520,14 @@ export default function AttendancePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Optimized without heavy animations */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-gray-900">{stats.total_days}</div>
-            <div className="text-sm text-gray-500">Ngày làm việc</div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-green-600">{stats.present}</div>
-            <div className="text-sm text-gray-500">Có mặt</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-red-600">{stats.absent}</div>
-            <div className="text-sm text-gray-500">Vắng mặt</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-yellow-600">{stats.late}</div>
-            <div className="text-sm text-gray-500">Đi muộn</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-orange-600">{stats.early_leave}</div>
-            <div className="text-sm text-gray-500">Về sớm</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            <div className="text-2xl font-bold text-blue-600">{stats.avg_work_hours.toFixed(1)}h</div>
-            <div className="text-sm text-gray-500">TB giờ làm</div>
-          </motion.div>
+          <StatCard value={stats.total_days} label="Ngày làm việc" />
+          <StatCard value={stats.present} label="Có mặt" colorClass="text-green-600" />
+          <StatCard value={stats.absent} label="Vắng mặt" colorClass="text-red-600" />
+          <StatCard value={stats.late} label="Đi muộn" colorClass="text-yellow-600" />
+          <StatCard value={stats.early_leave} label="Về sớm" colorClass="text-orange-600" />
+          <StatCard value={`${stats.avg_work_hours.toFixed(1)}h`} label="TB giờ làm" colorClass="text-blue-600" />
         </div>
 
         {/* Filters */}

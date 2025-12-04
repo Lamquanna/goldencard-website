@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { gsap } from "gsap";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -21,11 +20,11 @@ interface PageTransitionProps {
 export default function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
   const [displayChildren, setDisplayChildren] = useState(children);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const isTransitioningRef = useRef(false);
+  const [overlayActive, setOverlayActive] = useState(false);
+  const [contentVisible, setContentVisible] = useState(true);
   const previousPathnameRef = useRef(pathname);
+  const contentTimerRef = useRef<number | null>(null);
+  const overlayTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Prevent double-trigger on same path (i18n locale changes)
@@ -39,71 +38,36 @@ export default function PageTransition({ children }: PageTransitionProps) {
       return;
     }
 
-    const overlay = overlayRef.current;
-    const content = contentRef.current;
+    const clearTimers = () => {
+      if (contentTimerRef.current !== null) {
+        window.clearTimeout(contentTimerRef.current);
+        contentTimerRef.current = null;
+      }
+      if (overlayTimerRef.current !== null) {
+        window.clearTimeout(overlayTimerRef.current);
+        overlayTimerRef.current = null;
+      }
+    };
 
-    if (!overlay || !content || isTransitioningRef.current) return;
+    clearTimers();
 
-    isTransitioningRef.current = true;
     previousPathnameRef.current = pathname;
+    setOverlayActive(true);
+    setContentVisible(false);
 
-    // Kill existing timeline
-    if (timelineRef.current) {
-      timelineRef.current.kill();
-    }
+    contentTimerRef.current = window.setTimeout(() => {
+      setDisplayChildren(children);
+      setContentVisible(true);
 
-    // Create new timeline with unified timing (power4.inOut)
-    const tl = gsap.timeline({
-      onComplete: () => {
-        isTransitioningRef.current = false;
-      },
-    });
-
-    timelineRef.current = tl;
-
-    // Fade in curtain (0.7s)
-    tl.to(overlay, {
-      opacity: 1,
-      duration: 0.7,
-      ease: "power4.inOut",
-    })
-      // Hold briefly
-      .to(overlay, {
-        duration: 0.05,
-      })
-      // Update content
-      .call(() => {
-        setDisplayChildren(children);
-      })
-      // Fade out curtain (0.7s)
-      .to(overlay, {
-        opacity: 0,
-        duration: 0.7,
-        ease: "power4.inOut",
-      })
-      // Fade in new content (0.9s, overlapping)
-      .fromTo(
-        content,
-        {
-          opacity: 0,
-          y: 20,
-          filter: "blur(6px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.9,
-          ease: "power4.out",
-        },
-        "-=0.5"
-      );
+      overlayTimerRef.current = window.setTimeout(() => {
+        setOverlayActive(false);
+      }, 180);
+    }, 320);
 
     return () => {
-      if (timelineRef.current) {
-        timelineRef.current.kill();
-      }
-      isTransitioningRef.current = false;
+      clearTimers();
+      setOverlayActive(false);
+      setContentVisible(true);
     };
   }, [pathname, children]);
 
@@ -111,13 +75,21 @@ export default function PageTransition({ children }: PageTransitionProps) {
     <>
       {/* Black curtain overlay */}
       <div
-        ref={overlayRef}
-        className="fixed inset-0 z-[9998] bg-white pointer-events-none opacity-0"
+        className={`fixed inset-0 z-[9998] bg-white transition-opacity duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] ${
+          overlayActive ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         style={{ willChange: "opacity" }}
       />
 
       {/* Content */}
-      <div ref={contentRef} style={{ willChange: "opacity, transform" }}>
+      <div
+        className={`transition-all duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] ${
+          contentVisible
+            ? "opacity-100 translate-y-0 blur-0"
+            : "opacity-0 translate-y-4 blur-sm"
+        }`}
+        style={{ willChange: "opacity, transform" }}
+      >
         {displayChildren}
       </div>
     </>

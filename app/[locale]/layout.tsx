@@ -7,7 +7,6 @@ import LoadingScreen from "@/components/Cinematic/LoadingScreen";
 import { LocaleLangSetter } from "@/components/locale-lang-setter";
 import Navbar from "@/components/Cinematic/Navbar";
 import PageTransition from "@/components/Cinematic/PageTransition";
-import SmoothScrollProvider from "@/components/Cinematic/SmoothScrollProvider";
 import { getSitewide } from "@/lib/content";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n";
 import { getPrimaryNavigation } from "@/lib/navigation";
@@ -40,19 +39,17 @@ export default async function LocaleLayout({
     <>
       <LocaleLangSetter locale={locale} />
       <LoadingScreen />
-      <SmoothScrollProvider>
-        <PageTransition>
-          <div 
-            className={`flex min-h-screen flex-col bg-white text-gray-900 ${montserrat.variable} ${playfairDisplay.variable}`}
-            style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
-          >
-            <Navbar locale={locale} navItems={navItems} />
-            <main className="flex-1">{children}</main>
-            <Footer locale={locale} navItems={navItems} />
-          </div>
-        </PageTransition>
-        <ChatWidget locale={locale} />
-      </SmoothScrollProvider>
+      <PageTransition>
+        <div 
+          className={`flex min-h-screen flex-col bg-white text-gray-900 ${montserrat.variable} ${playfairDisplay.variable}`}
+          style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
+        >
+          <Navbar locale={locale} navItems={navItems} />
+          <main className="flex-1">{children}</main>
+          <Footer locale={locale} navItems={navItems} />
+        </div>
+      </PageTransition>
+      <ChatWidget locale={locale} />
     </>
   );
 }

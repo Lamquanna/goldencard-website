@@ -38,8 +38,6 @@ export default function Section({
                     backgroundColor.includes('gray-100') ||
                     backgroundColor.includes('gray-200');
   
-  // Sky blue with white tint: #7DD3FC (sky-300) - lighter and more readable
-  const titleColor = isLightBg ? 'text-[#0EA5E9]' : 'text-white'; // sky-500 for light bg
   const subtitleColor = isLightBg ? 'text-gray-600' : 'text-white/80';
   
   const content = (

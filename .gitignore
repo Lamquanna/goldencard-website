@@ -26,6 +26,10 @@
 .DS_Store
 *.pem
 
+# audit artifacts
+/lighthouse-*.json
+/tmp/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

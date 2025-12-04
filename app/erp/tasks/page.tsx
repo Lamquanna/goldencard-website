@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle, Search, Plus, MoreHorizontal,
@@ -8,7 +8,6 @@ import {
   AlertTriangle, CheckSquare, Square, Circle, Timer,
   Download, Lock
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, canViewAll as checkCanViewAll, hasPermission } from '@/lib/permissions';
 import { getAuthUser } from '@/lib/auth-utils';
 import { exportToExcel, tasksExportColumns } from '@/lib/excel-export';
@@ -196,9 +195,9 @@ const getTypeConfig = (type: string) => {
 };
 
 // ============================================
-// TASK ROW COMPONENT
+// TASK ROW COMPONENT - Memoized for performance
 // ============================================
-function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete = true }: {
+const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete = true }: {
   task: Task;
   onToggle: () => void;
   onEdit: () => void;
@@ -215,11 +214,7 @@ function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete =
   const isOverdue = task.dueDate.getTime() < Date.now() && task.status !== 'completed';
 
   return (
-    <motion.tr
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group hover:bg-white/[0.02] transition-colors"
-    >
+    <tr className="group hover:bg-white/[0.02] transition-colors">
       <td className="px-4 py-4">
         <button onClick={onToggle} className="p-1" disabled={!canEdit}>
           {task.status === 'completed' ? (
@@ -304,41 +299,34 @@ function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete =
               <MoreHorizontal className="w-4 h-4 text-white/60" />
             </button>
 
-            <AnimatePresence>
-              {showActions && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-full mt-1 z-20 w-40 py-1 rounded-xl 
-                               bg-[#1a1a2e] border border-white/10 shadow-2xl"
-                  >
-                    {canEdit && (
-                      <button
-                        onClick={() => { onEdit(); setShowActions(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
-                                   hover:bg-white/5 hover:text-white transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        <span>Chỉnh sửa</span>
+            {showActions && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20 w-40 py-1 rounded-xl 
+                             bg-[#1a1a2e] border border-white/10 shadow-2xl">
+                  {canEdit && (
+                    <button
+                      onClick={() => { onEdit(); setShowActions(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
+                                 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span>Chỉnh sửa</span>
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => { onDelete(); setShowActions(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
+                                 hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Xóa</span>
                       </button>
                     )}
-                    {canDelete && (
-                      <button
-                        onClick={() => { onDelete(); setShowActions(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
-                                   hover:bg-red-500/10 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Xóa</span>
-                      </button>
-                    )}
-                  </motion.div>
+                  </div>
                 </>
               )}
-            </AnimatePresence>
           </div>
         ) : (
           <div className="p-2 text-white/20">
@@ -346,9 +334,9 @@ function TaskRow({ task, onToggle, onEdit, onDelete, canEdit = true, canDelete =
           </div>
         )}
       </td>
-    </motion.tr>
+    </tr>
   );
-}
+});
 
 // ============================================
 // MAIN COMPONENT

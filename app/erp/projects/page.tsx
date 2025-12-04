@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, LayoutGrid, List, Calendar, ChevronDown, ChevronRight, Eye, Edit2, Trash2, Users, MapPin, Clock, DollarSign, AlertTriangle, MoreHorizontal, PlayCircle, PauseCircle, CheckCircle2 } from 'lucide-react';
+import { useState, useMemo, useCallback, memo } from 'react';
+import { Plus, Search, Filter, LayoutGrid, List, Calendar, ChevronDown, Eye, Edit2, Trash2, Users, MapPin, Clock, DollarSign, AlertTriangle, MoreHorizontal } from 'lucide-react';
 import { 
   Project, 
   ProjectCategory, 
   ProjectStatus, 
   PROJECT_CATEGORIES, 
-  TASK_STATUS_CONFIG 
 } from '@/lib/types/project-management';
-import { useAuthStore, ROLE_PERMISSIONS } from '@/lib/stores/auth-store';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import Link from 'next/link';
 
 // ============================================

@@ -1,10 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 interface RevealOnScrollProps {
   children: ReactNode;
@@ -31,75 +27,59 @@ export default function RevealOnScroll({
   fallback = false,
 }: RevealOnScrollProps) {
   const elementRef = useRef<HTMLDivElement>(null);
-  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const [isVisible, setIsVisible] = useState(fallback);
 
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
 
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    // If fallback mode or reduced motion, skip animation
-    if (fallback || prefersReducedMotion) {
-      gsap.set(element, { opacity: 1, y: 0, filter: "blur(0px)" });
+    if (fallback) {
+      setIsVisible(true);
       return;
     }
 
-    // Set initial state - reduced blur to prevent text clipping
-    gsap.set(element, {
-      opacity: 0,
-      y: 30,
-      filter: "blur(4px)",
-    });
+    if (typeof window === "undefined") return;
 
-    // Create reveal animation
-    const anim = gsap.to(element, {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      duration: 0.9,
-      delay,
-      ease: "power4.out",
-      scrollTrigger: {
-        trigger: element,
-        start: "top 80%",
-        end: "bottom 20%",
-        toggleActions: "play none none reverse",
-        once: false,
-        onEnter: () => {
-          // Ensure content is visible
-          element.style.overflow = "visible";
-        },
-      },
-    });
-
-    // Store ScrollTrigger reference
-    if (anim.scrollTrigger) {
-      scrollTriggerRef.current = anim.scrollTrigger as ScrollTrigger;
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduceMotionQuery.matches) {
+      setIsVisible(true);
+      return;
     }
 
-    // Cleanup function
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        rootMargin: "0px 0px -15% 0px",
+        threshold: 0.25,
+      }
+    );
+
+    observer.observe(element);
+
     return () => {
-      if (scrollTriggerRef.current) {
-        scrollTriggerRef.current.kill();
-        scrollTriggerRef.current = null;
-      }
-      anim.kill();
-      // Reset element to visible state on unmount
-      if (element) {
-        gsap.set(element, { opacity: 1, y: 0, filter: "blur(0px)" });
-      }
+      observer.disconnect();
     };
-  }, [delay, fallback]);
+  }, [fallback]);
+
+  const transitionDelay = `${Math.max(0, delay)}s`;
+  const stateClass = fallback || isVisible
+    ? "opacity-100 translate-y-0 blur-0"
+    : "opacity-0 translate-y-6 blur-sm";
+  const transitionClass = "transition-all duration-[900ms] ease-[cubic-bezier(0.77,0,0.175,1)] will-change-[opacity,transform,filter]";
+  const combinedClass = [transitionClass, stateClass, className].filter(Boolean).join(" ");
 
   return (
     <div 
       ref={elementRef} 
-      className={className}
-      style={{ overflow: "visible" }} // Prevent text clipping
+      className={combinedClass}
+      style={{ overflow: "visible", transitionDelay }}
     >
       {children}
     </div>
