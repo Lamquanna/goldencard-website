@@ -11,14 +11,8 @@ import {
   canAccessModule as checkModuleAccess,
 } from "@/lib/permissions";
 
-// Dynamic import ChatWidget to reduce initial bundle
-const ChatWidget = dynamic(() => import("@/components/CRM/ChatWidget"), {
-  ssr: false,
-  loading: () => null,
-});
-
-// Dynamic import GlobalChatWidget
-const GlobalChatWidget = dynamic(() => import("@/components/GlobalChatWidget"), {
+// Dynamic import EnhancedChatWidget with video call support
+const EnhancedChatWidget = dynamic(() => import("@/components/EnhancedChatWidget"), {
   ssr: false,
   loading: () => null,
 });
@@ -533,8 +527,8 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* Global Chat Widget - Replaces the old one with new enhanced version */}
-      <GlobalChatWidget />
+      {/* Enhanced Chat Widget with Video Call & Group Chat */}
+      <EnhancedChatWidget />
     </div>
   );
 }
