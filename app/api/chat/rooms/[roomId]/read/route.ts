@@ -8,10 +8,10 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { roomId: string } }
+  { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    const roomId = params.roomId;
+    const { roomId } = await params;
     
     if (!roomId) {
       return NextResponse.json(
