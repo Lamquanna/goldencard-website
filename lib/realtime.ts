@@ -615,11 +615,13 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 /**
  * Format time ago string
+ * TODO: Extract to i18n system for multi-language support
  */
 export function formatTimeAgo(date: Date): string {
   const now = new Date();
   const seconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
   
+  // Vietnamese translations (should be moved to i18n)
   if (seconds < 60) return 'Vừa xong';
   if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`;

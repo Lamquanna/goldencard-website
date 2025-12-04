@@ -41,9 +41,25 @@ export function sendToUser(userId: string, event: string, data: any) {
 
 /**
  * Broadcast to all users in a chat room
+ * @param roomId - The room to broadcast to
+ * @param event - Event type
+ * @param data - Event data
+ * 
+ * SECURITY: This should query database for room members before broadcasting
+ * Current implementation is a placeholder - DO NOT use in production without
+ * implementing proper member lookup from chat_room_members table
  */
-export function broadcastToRoom(roomId: string, event: string, data: any) {
-  // In a real implementation, this would look up room members from database
-  // and broadcast to only those users
+export async function broadcastToRoom(roomId: string, event: string, data: any) {
+  // TODO: Implement proper room member lookup
+  // Example implementation:
+  // const members = await db.query(
+  //   'SELECT user_id FROM chat_room_members WHERE room_id = $1',
+  //   [roomId]
+  // );
+  // const userIds = members.rows.map(m => m.user_id);
+  // broadcastEvent(event, data, userIds);
+  
+  // WARNING: Temporary placeholder - broadcasts to all users
+  console.warn('broadcastToRoom: Member filtering not implemented - broadcasting to all users');
   broadcastEvent(event, data);
 }

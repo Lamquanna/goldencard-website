@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
       });
       
       // Store connection for broadcasting
-      const connectionId = `${userId}-${Date.now()}`;
+      // Use crypto.randomUUID() for better uniqueness in high-concurrency scenarios
+      const connectionId = `${userId}-${crypto.randomUUID()}`;
       
       // Heartbeat to keep connection alive
       const heartbeat = setInterval(() => {
