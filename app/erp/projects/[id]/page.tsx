@@ -264,7 +264,12 @@ const mockComments: ProjectComment[] = [
 ];
 
 // Components
-function MilestoneTimeline({ milestones }: { milestones: Milestone[] }) {
+function MilestoneTimeline({ milestones, onToggleComplete }: { 
+  milestones: Milestone[]; 
+  onToggleComplete?: (id: string) => void;
+}) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-500';
@@ -283,76 +288,205 @@ function MilestoneTimeline({ milestones }: { milestones: Milestone[] }) {
     }
   };
 
+  // Check if previous milestone is completed (for step-by-step logic)
+  const canStartMilestone = (index: number) => {
+    if (index === 0) return true;
+    const prevMilestone = milestones[index - 1];
+    return prevMilestone.status === 'completed';
+  };
+
+  // Check if milestone can be marked complete
+  const canCompleteMilestone = (milestone: Milestone, index: number) => {
+    // Must be in_progress or have previous step completed
+    if (milestone.status === 'completed') return false;
+    if (!canStartMilestone(index)) return false;
+    return milestone.status === 'in_progress' || (milestone.status === 'pending' && canStartMilestone(index));
+  };
+
+  // Calculate overall progress
+  const overallProgress = milestones.reduce((sum, m) => {
+    if (m.status === 'completed') return sum + m.weight;
+    if (m.status === 'in_progress') return sum + (m.weight * m.progress / 100);
+    return sum;
+  }, 0);
+
   return (
-    <div className="space-y-4">
-      {milestones.map((milestone, index) => (
-        <div key={milestone.id} className="relative">
-          {index < milestones.length - 1 && (
-            <div className={`absolute left-[11px] top-10 w-0.5 h-full -ml-px ${
-              milestone.status === 'completed' ? 'bg-green-200' : 'bg-gray-200'
-            }`} />
-          )}
-          
-          <div className="flex gap-4">
-            <div className="relative z-10">
-              <div className={`w-6 h-6 rounded-full ${getStatusColor(milestone.status)} flex items-center justify-center`}>
-                {milestone.status === 'completed' ? (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                ) : milestone.status === 'in_progress' ? (
-                  <div className="w-2 h-2 bg-white rounded-full" />
-                ) : null}
-              </div>
-            </div>
+    <div className="space-y-6">
+      {/* Overall Progress Bar */}
+      <div className="bg-white rounded-xl border p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-semibold text-gray-900">Tiến độ tổng thể</h4>
+          <span className="text-2xl font-bold text-blue-600">{overallProgress.toFixed(0)}%</span>
+        </div>
+        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-500"
+            style={{ width: `${overallProgress}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <span>{milestones.filter(m => m.status === 'completed').length}/{milestones.length} bước hoàn thành</span>
+          <span>Còn {milestones.filter(m => m.status === 'pending').length} bước chưa bắt đầu</span>
+        </div>
+      </div>
+
+      {/* Step Progress Indicator */}
+      <div className="bg-white rounded-xl border p-4 overflow-x-auto">
+        <div className="flex items-center justify-between min-w-max gap-2">
+          {milestones.map((milestone, index) => {
+            const isActive = milestone.status === 'in_progress';
+            const isCompleted = milestone.status === 'completed';
+            const isLocked = !canStartMilestone(index) && milestone.status === 'pending';
             
-            <div className="flex-1 pb-8">
-              <div className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-gray-900">{milestone.name}</h4>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        milestone.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        milestone.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                        milestone.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {milestone.weight}% tổng dự án
-                      </span>
-                    </div>
-                    {milestone.description && (
-                      <p className="text-sm text-gray-500 mt-1">{milestone.description}</p>
-                    )}
+            return (
+              <div key={milestone.id} className="flex items-center">
+                <div 
+                  className={`relative flex flex-col items-center cursor-pointer transition-all ${
+                    isLocked ? 'opacity-40' : ''
+                  }`}
+                  onMouseEnter={() => setHoveredId(milestone.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  {/* Step Circle */}
+                  <div className={`
+                    w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all
+                    ${isCompleted ? 'bg-green-500 text-white' : ''}
+                    ${isActive ? 'bg-blue-500 text-white ring-4 ring-blue-100' : ''}
+                    ${!isCompleted && !isActive ? 'bg-gray-200 text-gray-500' : ''}
+                    ${isLocked ? 'bg-gray-100 text-gray-400' : ''}
+                  `}>
+                    {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">
-                      {milestone.completedDate ? (
-                        <span className="text-green-600">Hoàn thành: {milestone.completedDate}</span>
-                      ) : (
-                        <span>Hạn: {milestone.dueDate}</span>
+                  
+                  {/* Step Label */}
+                  <span className={`
+                    mt-2 text-xs font-medium text-center max-w-[80px] line-clamp-2
+                    ${isCompleted ? 'text-green-600' : ''}
+                    ${isActive ? 'text-blue-600' : ''}
+                    ${!isCompleted && !isActive ? 'text-gray-500' : ''}
+                  `}>
+                    {milestone.name}
+                  </span>
+
+                  {/* Hover tooltip */}
+                  {hoveredId === milestone.id && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2 bg-gray-900 text-white text-xs rounded-lg z-10">
+                      <p className="font-medium">{milestone.name}</p>
+                      <p className="text-gray-300 mt-1">{milestone.description}</p>
+                      <p className="text-gray-400 mt-1">Hạn: {milestone.dueDate}</p>
+                      {isLocked && (
+                        <p className="text-amber-400 mt-1">⚠️ Hoàn thành bước trước để mở khóa</p>
                       )}
                     </div>
+                  )}
+                </div>
+                
+                {/* Connector Line */}
+                {index < milestones.length - 1 && (
+                  <div className={`w-8 h-1 mx-1 rounded ${
+                    isCompleted ? 'bg-green-400' : 'bg-gray-200'
+                  }`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Detailed Milestone Cards */}
+      <div className="space-y-4">
+        {milestones.map((milestone, index) => {
+          const isLocked = !canStartMilestone(index) && milestone.status === 'pending';
+          const showCompleteButton = canCompleteMilestone(milestone, index);
+          
+          return (
+            <div key={milestone.id} className="relative">
+              {index < milestones.length - 1 && (
+                <div className={`absolute left-[11px] top-10 w-0.5 h-full -ml-px ${
+                  milestone.status === 'completed' ? 'bg-green-200' : 'bg-gray-200'
+                }`} />
+              )}
+              
+              <div className={`flex gap-4 ${isLocked ? 'opacity-50' : ''}`}>
+                <div className="relative z-10">
+                  <div className={`w-6 h-6 rounded-full ${getStatusColor(milestone.status)} flex items-center justify-center`}>
+                    {milestone.status === 'completed' ? (
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                    ) : milestone.status === 'in_progress' ? (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    ) : isLocked ? (
+                      <span className="text-white text-xs">🔒</span>
+                    ) : null}
                   </div>
                 </div>
                 
-                {milestone.status === 'in_progress' && (
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-500">Tiến độ</span>
-                      <span className="font-medium">{milestone.progress}%</span>
+                <div className="flex-1 pb-8">
+                  <div className={`bg-white rounded-xl border p-4 transition-shadow ${
+                    isLocked ? 'border-dashed' : 'hover:shadow-md'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm text-gray-400 font-medium">Bước {index + 1}</span>
+                          <h4 className="font-semibold text-gray-900">{milestone.name}</h4>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            milestone.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            milestone.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                            milestone.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {milestone.weight}% tổng dự án
+                          </span>
+                          {isLocked && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                              🔒 Chờ bước trước
+                            </span>
+                          )}
+                        </div>
+                        {milestone.description && (
+                          <p className="text-sm text-gray-500 mt-1">{milestone.description}</p>
+                        )}
+                      </div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <div className="text-sm text-gray-500">
+                          {milestone.completedDate ? (
+                            <span className="text-green-600">Hoàn thành: {milestone.completedDate}</span>
+                          ) : (
+                            <span>Hạn: {milestone.dueDate}</span>
+                          )}
+                        </div>
+                        {showCompleteButton && onToggleComplete && (
+                          <button
+                            onClick={() => onToggleComplete(milestone.id)}
+                            className="px-3 py-1 text-xs font-medium bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                          >
+                            ✓ Đánh dấu hoàn thành
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                        style={{ width: `${milestone.progress}%` }}
-                      />
-                    </div>
+                    
+                    {milestone.status === 'in_progress' && (
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-500">Tiến độ</span>
+                          <span className="font-medium">{milestone.progress}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                            style={{ width: `${milestone.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      ))}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -194,20 +194,20 @@ const formatDate = (date: Date) => {
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'pending':
-      return { label: 'Chờ xử lý', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+      return { label: 'Chờ xử lý', color: 'bg-amber-100 text-amber-700 border-amber-200' };
     case 'completed':
     case 'paid':
-      return { label: status === 'paid' ? 'Đã thanh toán' : 'Hoàn thành', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
+      return { label: status === 'paid' ? 'Đã thanh toán' : 'Hoàn thành', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
     case 'draft':
-      return { label: 'Nháp', color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+      return { label: 'Nháp', color: 'bg-gray-100 text-gray-600 border-gray-200' };
     case 'sent':
-      return { label: 'Đã gửi', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' };
+      return { label: 'Đã gửi', color: 'bg-blue-100 text-blue-700 border-blue-200' };
     case 'overdue':
-      return { label: 'Quá hạn', color: 'bg-red-500/10 text-red-400 border-red-500/20' };
+      return { label: 'Quá hạn', color: 'bg-red-100 text-red-700 border-red-200' };
     case 'cancelled':
-      return { label: 'Đã hủy', color: 'bg-red-500/10 text-red-400 border-red-500/20' };
+      return { label: 'Đã hủy', color: 'bg-red-100 text-red-700 border-red-200' };
     default:
-      return { label: status, color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+      return { label: status, color: 'bg-gray-100 text-gray-600 border-gray-200' };
   }
 };
 
@@ -344,30 +344,30 @@ export default function AccountingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Calculator className="w-7 h-7 text-emerald-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <Calculator className="w-7 h-7 text-emerald-500" />
               Kế Toán & Tài Chính
             </h1>
-            <p className="text-white/60 mt-1">
+            <p className="text-gray-600 mt-1">
               Quản lý thu chi, hóa đơn và báo cáo tài chính
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
-                             border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white 
+                             border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
               <Upload className="w-4 h-4" />
               <span>Nhập dữ liệu</span>
             </button>
             <button 
               onClick={handleExportReport}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
-                             border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white 
+                             border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
               <Download className="w-4 h-4" />
               <span>Xuất báo cáo</span>
             </button>
@@ -382,52 +382,52 @@ export default function AccountingPage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-6 gap-4">
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowUpRight className="w-4 h-4 text-emerald-400" />
-              <p className="text-emerald-400/80 text-sm">Thu nhập</p>
+              <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+              <p className="text-emerald-700 text-sm">Thu nhập</p>
             </div>
-            <p className="text-xl font-bold text-emerald-400">{formatCurrency(stats.totalIncome)}</p>
+            <p className="text-xl font-bold text-emerald-600">{formatCurrency(stats.totalIncome)}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
+          <div className="p-4 rounded-2xl bg-red-50 border border-red-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowDownRight className="w-4 h-4 text-red-400" />
-              <p className="text-red-400/80 text-sm">Chi phí</p>
+              <ArrowDownRight className="w-4 h-4 text-red-600" />
+              <p className="text-red-700 text-sm">Chi phí</p>
             </div>
-            <p className="text-xl font-bold text-red-400">{formatCurrency(stats.totalExpense)}</p>
+            <p className="text-xl font-bold text-red-600">{formatCurrency(stats.totalExpense)}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-blue-400" />
-              <p className="text-blue-400/80 text-sm">Lợi nhuận</p>
+              <TrendingUp className="w-4 h-4 text-blue-600" />
+              <p className="text-blue-700 text-sm">Lợi nhuận</p>
             </div>
-            <p className="text-xl font-bold text-blue-400">{formatCurrency(stats.profit)}</p>
+            <p className="text-xl font-bold text-blue-600">{formatCurrency(stats.profit)}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <Receipt className="w-4 h-4 text-amber-400" />
-              <p className="text-amber-400/80 text-sm">Hóa đơn chờ</p>
+              <Receipt className="w-4 h-4 text-amber-600" />
+              <p className="text-amber-700 text-sm">Hóa đơn chờ</p>
             </div>
-            <p className="text-xl font-bold text-amber-400">{stats.pendingInvoices}</p>
+            <p className="text-xl font-bold text-amber-600">{stats.pendingInvoices}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+          <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-4 h-4 text-purple-400" />
-              <p className="text-purple-400/80 text-sm">Đã thu</p>
+              <CheckCircle className="w-4 h-4 text-purple-600" />
+              <p className="text-purple-700 text-sm">Đã thu</p>
             </div>
-            <p className="text-xl font-bold text-purple-400">{formatCurrency(stats.paidInvoices)}</p>
+            <p className="text-xl font-bold text-purple-600">{formatCurrency(stats.paidInvoices)}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
+          <div className="p-4 rounded-2xl bg-red-50 border border-red-200 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-              <p className="text-red-400/80 text-sm">Quá hạn</p>
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+              <p className="text-red-700 text-sm">Quá hạn</p>
             </div>
-            <p className="text-xl font-bold text-red-400">{stats.overdueInvoices}</p>
+            <p className="text-xl font-bold text-red-600">{stats.overdueInvoices}</p>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-white/10 pb-4">
+        <div className="flex gap-2 border-b border-gray-200 pb-4">
           {[
             { id: 'overview', label: 'Tổng quan', icon: PieChart },
             { id: 'transactions', label: 'Giao dịch', icon: CreditCard },
@@ -440,8 +440,8 @@ export default function AccountingPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <TabIcon className="w-4 h-4" />
@@ -454,15 +454,15 @@ export default function AccountingPage() {
         {/* Filters */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10
-                       text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-500/50
-                       transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200
+                       text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-500
+                       transition-colors shadow-sm"
             />
           </div>
 
@@ -470,10 +470,9 @@ export default function AccountingPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-600
-                       text-white focus:outline-none focus:border-emerald-500/50
-                       transition-colors cursor-pointer min-w-[140px]
-                       [&>option]:bg-gray-800 [&>option]:text-white"
+              className="px-4 py-2.5 rounded-xl bg-white border border-gray-200
+                       text-gray-700 focus:outline-none focus:border-emerald-500
+                       transition-colors cursor-pointer min-w-[140px] shadow-sm"
             >
               <option value="all">Tất cả loại</option>
               <option value="income">Thu nhập</option>
@@ -484,10 +483,9 @@ export default function AccountingPage() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-600
-                     text-white focus:outline-none focus:border-emerald-500/50
-                     transition-colors cursor-pointer min-w-[140px]
-                     [&>option]:bg-gray-800 [&>option]:text-white"
+            className="px-4 py-2.5 rounded-xl bg-white border border-gray-200
+                     text-gray-700 focus:outline-none focus:border-emerald-500
+                     transition-colors cursor-pointer min-w-[140px] shadow-sm"
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xử lý</option>
@@ -503,12 +501,12 @@ export default function AccountingPage() {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-2 gap-6">
             {/* Revenue Chart Placeholder */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-400" />
+            <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-500" />
                 Doanh thu theo tháng
               </h3>
-              <div className="h-64 flex items-center justify-center text-white/40">
+              <div className="h-64 flex items-center justify-center text-gray-400">
                 <div className="text-center">
                   <BarChart3 className="w-16 h-16 mx-auto mb-2 opacity-50" />
                   <p>Biểu đồ doanh thu</p>
@@ -517,12 +515,12 @@ export default function AccountingPage() {
             </div>
 
             {/* Expense by Category */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-purple-400" />
+            <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-purple-500" />
                 Chi phí theo danh mục
               </h3>
-              <div className="h-64 flex items-center justify-center text-white/40">
+              <div className="h-64 flex items-center justify-center text-gray-400">
                 <div className="text-center">
                   <PieChart className="w-16 h-16 mx-auto mb-2 opacity-50" />
                   <p>Biểu đồ chi phí</p>
@@ -531,30 +529,30 @@ export default function AccountingPage() {
             </div>
 
             {/* Recent Transactions */}
-            <div className="col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-emerald-400" />
+            <div className="col-span-2 p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-emerald-500" />
                 Giao dịch gần đây
               </h3>
               <div className="space-y-3">
                 {transactions.slice(0, 5).map((t) => (
-                  <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                  <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        t.type === 'income' ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                        t.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'
                       }`}>
                         {t.type === 'income' ? (
-                          <ArrowUpRight className="w-5 h-5 text-emerald-400" />
+                          <ArrowUpRight className="w-5 h-5 text-emerald-600" />
                         ) : (
-                          <ArrowDownRight className="w-5 h-5 text-red-400" />
+                          <ArrowDownRight className="w-5 h-5 text-red-600" />
                         )}
                       </div>
                       <div>
-                        <p className="text-white font-medium">{t.description}</p>
-                        <p className="text-sm text-white/50">{t.category} · {formatDate(t.date)}</p>
+                        <p className="text-gray-900 font-medium">{t.description}</p>
+                        <p className="text-sm text-gray-500">{t.category} · {formatDate(t.date)}</p>
                       </div>
                     </div>
-                    <p className={`font-semibold ${t.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <p className={`font-semibold ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
                       {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
                     </p>
                   </div>
@@ -565,58 +563,58 @@ export default function AccountingPage() {
         )}
 
         {activeTab === 'transactions' && (
-          <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+          <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Mô tả</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Loại</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Danh mục</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Số tiền</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Ngày</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Trạng thái</th>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Mô tả</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Loại</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Danh mục</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Số tiền</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Ngày</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Trạng thái</th>
                     <th className="px-4 py-4 w-12"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-gray-100">
                   {filteredTransactions.map((t) => {
                     const statusConfig = getStatusConfig(t.status);
                     return (
-                      <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
+                      <tr key={t.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-4">
                           <div>
-                            <p className="text-white font-medium">{t.description}</p>
+                            <p className="text-gray-900 font-medium">{t.description}</p>
                             {t.customer && (
-                              <p className="text-sm text-white/50">{t.customer.name}</p>
+                              <p className="text-sm text-gray-500">{t.customer.name}</p>
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-4">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                             t.type === 'income' 
-                              ? 'bg-emerald-500/10 text-emerald-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-red-100 text-red-700'
                           }`}>
                             {t.type === 'income' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {t.type === 'income' ? 'Thu nhập' : 'Chi phí'}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-white/70">{t.category}</td>
+                        <td className="px-4 py-4 text-gray-700">{t.category}</td>
                         <td className="px-4 py-4">
-                          <span className={`font-semibold ${t.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <span className={`font-semibold ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
                             {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-white/60">{formatDate(t.date)}</td>
+                        <td className="px-4 py-4 text-gray-600">{formatDate(t.date)}</td>
                         <td className="px-4 py-4">
                           <span className={`inline-flex px-2.5 py-1 rounded-full text-xs border ${statusConfig.color}`}>
                             {statusConfig.label}
                           </span>
                         </td>
                         <td className="px-4 py-4">
-                          <button className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                            <MoreHorizontal className="w-4 h-4 text-white/60" />
+                          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <MoreHorizontal className="w-4 h-4 text-gray-500" />
                           </button>
                         </td>
                       </tr>
@@ -629,41 +627,41 @@ export default function AccountingPage() {
         )}
 
         {activeTab === 'invoices' && (
-          <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+          <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Số hóa đơn</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Khách hàng</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Tổng tiền</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Ngày phát hành</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Hạn thanh toán</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Trạng thái</th>
-                    <th className="px-4 py-4 text-left text-white/60 font-medium">Thao tác</th>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Số hóa đơn</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Khách hàng</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Tổng tiền</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Ngày phát hành</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Hạn thanh toán</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Trạng thái</th>
+                    <th className="px-4 py-4 text-left text-gray-600 font-medium">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-gray-100">
                   {filteredInvoices.map((inv) => {
                     const statusConfig = getStatusConfig(inv.status);
                     return (
-                      <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors">
+                      <tr key={inv.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-4">
-                          <p className="text-blue-400 font-medium">{inv.invoiceNumber}</p>
+                          <p className="text-blue-600 font-medium">{inv.invoiceNumber}</p>
                         </td>
                         <td className="px-4 py-4">
                           <div>
-                            <p className="text-white font-medium">{inv.customer.name}</p>
+                            <p className="text-gray-900 font-medium">{inv.customer.name}</p>
                             {inv.customer.email && (
-                              <p className="text-sm text-white/50">{inv.customer.email}</p>
+                              <p className="text-sm text-gray-500">{inv.customer.email}</p>
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <span className="text-emerald-400 font-semibold">{formatCurrency(inv.total)}</span>
+                          <span className="text-emerald-600 font-semibold">{formatCurrency(inv.total)}</span>
                         </td>
-                        <td className="px-4 py-4 text-white/60">{formatDate(inv.issueDate)}</td>
-                        <td className="px-4 py-4 text-white/60">{formatDate(inv.dueDate)}</td>
+                        <td className="px-4 py-4 text-gray-600">{formatDate(inv.issueDate)}</td>
+                        <td className="px-4 py-4 text-gray-600">{formatDate(inv.dueDate)}</td>
                         <td className="px-4 py-4">
                           <span className={`inline-flex px-2.5 py-1 rounded-full text-xs border ${statusConfig.color}`}>
                             {statusConfig.label}
@@ -671,14 +669,14 @@ export default function AccountingPage() {
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-1">
-                            <button className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Xem">
-                              <Eye className="w-4 h-4 text-white/60" />
+                            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Xem">
+                              <Eye className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="In">
-                              <Printer className="w-4 h-4 text-white/60" />
+                            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="In">
+                              <Printer className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Tải xuống">
-                              <Download className="w-4 h-4 text-white/60" />
+                            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Tải xuống">
+                              <Download className="w-4 h-4 text-gray-500" />
                             </button>
                           </div>
                         </td>

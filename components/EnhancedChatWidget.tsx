@@ -123,14 +123,20 @@ export default function EnhancedChatWidget() {
   const [showOnlineUsers, setShowOnlineUsers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // File upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Video call states
   const [inVideoCall, setInVideoCall] = useState(false);
   const [videoCallSession, setVideoCallSession] = useState<VideoCallSession | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
   
   // Probability threshold for simulating new messages when chat is closed
   const NEW_MESSAGE_PROBABILITY = 0.7;
@@ -174,19 +180,40 @@ export default function EnhancedChatWidget() {
   }, [messages, currentView, isMinimized]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedRoom) return;
+    if ((!newMessage.trim() && !selectedFile) || !selectedRoom) return;
 
     const msg: ChatMessage = {
       id: Date.now().toString(),
       userId: 'current-user',
       userName: 'Bạn',
-      message: newMessage,
+      message: newMessage || (selectedFile ? `📎 ${selectedFile.name}` : ''),
       timestamp: new Date(),
       isRead: true,
+      type: selectedFile ? 'file' : 'text',
+      attachments: selectedFile ? [{
+        type: selectedFile.type,
+        url: URL.createObjectURL(selectedFile),
+        name: selectedFile.name
+      }] : undefined,
     };
 
     setMessages([...messages, msg]);
     setNewMessage('');
+    setSelectedFile(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Max 10MB
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File quá lớn. Tối đa 10MB.');
+        return;
+      }
+      setSelectedFile(file);
+    }
+    // Reset input để có thể chọn lại file cùng tên
+    e.target.value = '';
   };
 
   const handleSelectRoom = (room: ChatRoom) => {
@@ -198,28 +225,45 @@ export default function EnhancedChatWidget() {
     ));
   };
 
-  const handleStartVideoCall = () => {
+  const handleStartVideoCall = async () => {
     if (!selectedRoom) return;
     
-    const session: VideoCallSession = {
-      id: Date.now().toString(),
-      roomId: selectedRoom.id,
-      sessionCode: `CALL-${crypto.randomUUID().substring(0, 9).toUpperCase()}`,
-      status: 'waiting',
-      participants: [{
-        userId: 'current-user',
-        userName: 'Bạn',
-        cameraEnabled: true,
-        micEnabled: true,
-      }],
-    };
-    
-    setVideoCallSession(session);
-    setInVideoCall(true);
-    setCurrentView('video');
+    try {
+      // Request camera and microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      setLocalStream(stream);
+      
+      const session: VideoCallSession = {
+        id: Date.now().toString(),
+        roomId: selectedRoom.id,
+        sessionCode: `CALL-${crypto.randomUUID().substring(0, 9).toUpperCase()}`,
+        status: 'waiting',
+        participants: [{
+          userId: 'current-user',
+          userName: 'Bạn',
+          cameraEnabled: true,
+          micEnabled: true,
+        }],
+      };
+      
+      setVideoCallSession(session);
+      setInVideoCall(true);
+      setCurrentView('video');
+    } catch (error) {
+      console.error('Error accessing media devices:', error);
+      alert('Không thể truy cập camera hoặc microphone. Vui lòng cho phép quyền truy cập.');
+    }
   };
 
   const handleEndVideoCall = () => {
+    // Stop all tracks
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
     setInVideoCall(false);
     setVideoCallSession(null);
     setCurrentView('chat');
@@ -227,6 +271,31 @@ export default function EnhancedChatWidget() {
     setIsVideoOff(false);
     setIsScreenSharing(false);
   };
+
+  // Effect to attach stream to video element
+  useEffect(() => {
+    if (localVideoRef.current && localStream && !isVideoOff) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream, isVideoOff]);
+
+  // Effect to toggle video track
+  useEffect(() => {
+    if (localStream) {
+      localStream.getVideoTracks().forEach(track => {
+        track.enabled = !isVideoOff;
+      });
+    }
+  }, [isVideoOff, localStream]);
+
+  // Effect to toggle audio track
+  useEffect(() => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = !isMuted;
+      });
+    }
+  }, [isMuted, localStream]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -392,10 +461,38 @@ export default function EnhancedChatWidget() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* File Preview */}
+      {selectedFile && (
+        <div className="px-3 py-2 bg-gray-50 border-t flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-white rounded-lg border">
+            <Paperclip className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-700 truncate">{selectedFile.name}</span>
+            <span className="text-xs text-gray-400">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+          </div>
+          <button
+            onClick={() => setSelectedFile(null)}
+            className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+          >
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-3 bg-white border-t">
         <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Đính kèm tệp"
+          >
             <Paperclip className="w-5 h-5 text-gray-500" />
           </button>
           <input
@@ -404,7 +501,7 @@ export default function EnhancedChatWidget() {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
             placeholder="Nhập tin nhắn... (Enter để gửi)"
-            className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm
+            className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-900
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -412,7 +509,7 @@ export default function EnhancedChatWidget() {
           </button>
           <button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() && !selectedFile}
             className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600
                      text-white hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -441,30 +538,79 @@ export default function EnhancedChatWidget() {
         </button>
       </div>
 
-      {/* Video Grid */}
-      <div className="flex-1 p-4 grid grid-cols-2 gap-4">
-        {videoCallSession?.participants.map((participant, idx) => (
-          <div key={idx} className="relative bg-gray-800 rounded-lg overflow-hidden aspect-video">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 
-                           flex items-center justify-center text-white text-2xl font-bold">
-                {participant.userName.charAt(0)}
+      {/* Local Video Preview (using camera) */}
+      <div className="flex-1 p-4 relative">
+        {/* Main video area */}
+        <div className="relative bg-gray-800 rounded-lg overflow-hidden h-full flex flex-col items-center justify-center">
+          {isVideoOff ? (
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 
+                           flex items-center justify-center text-white text-3xl font-bold mb-4">
+                B
+              </div>
+              <p className="text-white text-lg">Camera đã tắt</p>
+            </div>
+          ) : (
+            <>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-3 left-3 bg-black/50 px-3 py-1 rounded-full text-white text-sm">
+                Bạn
+              </div>
+            </>
+          )}
+          
+          {/* Connecting indicator */}
+          {videoCallSession?.status === 'waiting' && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-3" />
+                <p>Đang chờ người khác tham gia...</p>
+                <p className="text-sm text-gray-400 mt-1">Mã phòng: {videoCallSession.sessionCode}</p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(videoCallSession.sessionCode);
+                    alert('Đã sao chép mã phòng!');
+                  }}
+                  className="mt-3 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-sm transition-colors"
+                >
+                  Sao chép mã phòng
+                </button>
               </div>
             </div>
-            <div className="absolute bottom-3 left-3 bg-black/50 px-3 py-1 rounded-full text-white text-sm">
-              {participant.userName}
-            </div>
-            {!participant.micEnabled && (
-              <div className="absolute top-3 right-3 bg-red-500 p-2 rounded-full">
-                <MicOff className="w-4 h-4 text-white" />
+          )}
+        </div>
+
+        {/* Remote participants (small thumbnails) */}
+        <div className="absolute top-6 right-6 space-y-2">
+          {videoCallSession?.participants.filter(p => p.userId !== 'current-user').map((participant, idx) => (
+            <div key={idx} className="relative w-24 h-18 bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 
+                             flex items-center justify-center text-white text-sm font-bold">
+                  {participant.userName.charAt(0)}
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+              <div className="absolute bottom-1 left-1 bg-black/50 px-1.5 py-0.5 rounded text-white text-xs">
+                {participant.userName}
+              </div>
+              {!participant.micEnabled && (
+                <div className="absolute top-1 right-1 bg-red-500 p-1 rounded-full">
+                  <MicOff className="w-2 h-2 text-white" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Video Controls */}
-      <div className="p-4 flex items-center justify-center gap-4">
+      <div className="p-4 flex items-center justify-center gap-4 bg-gray-800/50">
         <button
           onClick={() => setIsMuted(!isMuted)}
           className={`p-4 rounded-full transition-all ${
@@ -584,7 +730,10 @@ export default function EnhancedChatWidget() {
                   <Minimize2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsMinimized(false); // Reset minimize state when closing
+                  }}
                   className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X className="w-4 h-4" />
@@ -628,7 +777,17 @@ export default function EnhancedChatWidget() {
             </AnimatePresence>
 
             {/* Main Content */}
-            {!isMinimized && (
+            {isMinimized ? (
+              <div className="flex-1 flex items-center justify-center p-4 bg-gray-50">
+                <button 
+                  onClick={() => setIsMinimized(false)}
+                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Nhấn để mở rộng chat</span>
+                </button>
+              </div>
+            ) : (
               <div className="flex-1 overflow-hidden">
                 {currentView === 'rooms' && renderRoomList()}
                 {currentView === 'chat' && renderChatView()}

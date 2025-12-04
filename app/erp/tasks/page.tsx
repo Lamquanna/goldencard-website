@@ -149,30 +149,30 @@ const formatDate = (date: Date) => {
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'pending':
-      return { label: 'Chờ xử lý', color: 'bg-gray-500/10 text-gray-400 border-gray-500/20', icon: Circle };
+      return { label: 'Chờ xử lý', color: 'bg-gray-100 text-gray-600 border-gray-200', icon: Circle };
     case 'in_progress':
-      return { label: 'Đang thực hiện', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: Timer };
+      return { label: 'Đang thực hiện', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: Timer };
     case 'completed':
-      return { label: 'Hoàn thành', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: CheckCircle };
+      return { label: 'Hoàn thành', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: CheckCircle };
     case 'cancelled':
-      return { label: 'Đã hủy', color: 'bg-red-500/10 text-red-400 border-red-500/20', icon: AlertTriangle };
+      return { label: 'Đã hủy', color: 'bg-red-100 text-red-700 border-red-200', icon: AlertTriangle };
     default:
-      return { label: status, color: 'bg-gray-500/10 text-gray-400 border-gray-500/20', icon: Circle };
+      return { label: status, color: 'bg-gray-100 text-gray-600 border-gray-200', icon: Circle };
   }
 };
 
 const getPriorityConfig = (priority: string) => {
   switch (priority) {
     case 'urgent':
-      return { label: 'Khẩn cấp', color: 'text-red-400', bg: 'bg-red-500' };
+      return { label: 'Khẩn cấp', color: 'text-red-600', bg: 'bg-red-500' };
     case 'high':
-      return { label: 'Cao', color: 'text-orange-400', bg: 'bg-orange-500' };
+      return { label: 'Cao', color: 'text-orange-600', bg: 'bg-orange-500' };
     case 'medium':
-      return { label: 'Trung bình', color: 'text-amber-400', bg: 'bg-amber-500' };
+      return { label: 'Trung bình', color: 'text-amber-600', bg: 'bg-amber-500' };
     case 'low':
-      return { label: 'Thấp', color: 'text-gray-400', bg: 'bg-gray-500' };
+      return { label: 'Thấp', color: 'text-gray-600', bg: 'bg-gray-500' };
     default:
-      return { label: priority, color: 'text-gray-400', bg: 'bg-gray-500' };
+      return { label: priority, color: 'text-gray-600', bg: 'bg-gray-500' };
   }
 };
 
@@ -215,13 +215,13 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
   const isOverdue = task.dueDate.getTime() < Date.now() && task.status !== 'completed';
 
   return (
-    <tr className="group hover:bg-white/[0.02] transition-colors">
+    <tr className="group hover:bg-gray-50 transition-colors">
       <td className="px-4 py-4">
         <button onClick={onToggle} className="p-1" disabled={!canEdit}>
           {task.status === 'completed' ? (
-            <CheckSquare className="w-5 h-5 text-emerald-400" />
+            <CheckSquare className="w-5 h-5 text-emerald-500" />
           ) : (
-            <Square className={`w-5 h-5 ${canEdit ? 'text-white/40 hover:text-white/60' : 'text-white/20 cursor-not-allowed'} transition-colors`} />
+            <Square className={`w-5 h-5 ${canEdit ? 'text-gray-400 hover:text-gray-600' : 'text-gray-300 cursor-not-allowed'} transition-colors`} />
           )}
         </button>
       </td>
@@ -232,11 +232,11 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
             {typeConfig.icon} {typeConfig.label}
           </span>
           <div>
-            <p className={`font-medium ${task.status === 'completed' ? 'line-through text-white/40' : 'text-white'}`}>
+            <p className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
               {task.title}
             </p>
             {task.description && (
-              <p className="text-sm text-white/50 mt-0.5 truncate max-w-md">{task.description}</p>
+              <p className="text-sm text-gray-500 mt-0.5 truncate max-w-md">{task.description}</p>
             )}
           </div>
         </div>
@@ -256,12 +256,12 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
       </td>
 
       <td className="px-4 py-4">
-        <div className={`flex items-center gap-2 text-sm ${isOverdue ? 'text-red-400' : 'text-white/60'}`}>
+        <div className={`flex items-center gap-2 text-sm ${isOverdue ? 'text-red-600' : 'text-gray-600'}`}>
           <Calendar className="w-4 h-4" />
           <span>{formatDate(task.dueDate)}</span>
           {isOverdue && <AlertTriangle className="w-4 h-4" />}
         </div>
-        <p className={`text-xs mt-0.5 ${isOverdue ? 'text-red-400 font-bold' : 'text-white/40'}`}>
+        <p className={`text-xs mt-0.5 ${isOverdue ? 'text-red-600 font-bold' : 'text-gray-400'}`}>
           {formatTimeRemaining(task.dueDate)}
         </p>
       </td>
@@ -273,17 +273,17 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
                           flex items-center justify-center text-xs text-white font-medium">
               {task.assignedTo.name.charAt(0)}
             </div>
-            <span className="text-sm text-white/70">{task.assignedTo.name}</span>
+            <span className="text-sm text-gray-700">{task.assignedTo.name}</span>
           </div>
         ) : (
-          <span className="text-white/30 text-sm">Chưa phân công</span>
+          <span className="text-gray-400 text-sm">Chưa phân công</span>
         )}
       </td>
 
       <td className="px-4 py-4">
         {task.relatedTo && (
           <Link href={`/erp/${task.relatedTo.type}s/${task.relatedTo.id}`}
-                className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
             <span>{task.relatedTo.name}</span>
             <ArrowRight className="w-3 h-3" />
           </Link>
@@ -295,21 +295,21 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <MoreHorizontal className="w-4 h-4 text-white/60" />
+              <MoreHorizontal className="w-4 h-4 text-gray-500" />
             </button>
 
             {showActions && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
                 <div className="absolute right-0 top-full mt-1 z-20 w-40 py-1 rounded-xl 
-                             bg-[#1a1a2e] border border-white/10 shadow-2xl">
+                             bg-white border border-gray-200 shadow-lg">
                   {canEdit && (
                     <button
                       onClick={() => { onEdit(); setShowActions(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 
-                                 hover:bg-white/5 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 
+                                 hover:bg-gray-50 transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
                       <span>Chỉnh sửa</span>
@@ -318,8 +318,8 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
                   {canDelete && (
                     <button
                       onClick={() => { onDelete(); setShowActions(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 
-                                 hover:bg-red-500/10 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-600 
+                                 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Xóa</span>
@@ -330,7 +330,7 @@ const TaskRow = memo(function TaskRow({ task, onToggle, onEdit, onDelete, canEdi
               )}
           </div>
         ) : (
-          <div className="p-2 text-white/20">
+          <div className="p-2 text-gray-300">
             <Lock className="w-4 h-4" />
           </div>
         )}
@@ -477,20 +477,20 @@ export default function TasksPage() {
   }, [tasks, currentUserId]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <CheckCircle className="w-7 h-7 text-emerald-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <CheckCircle className="w-7 h-7 text-emerald-500" />
               {canViewAllTasks ? 'Quản lý Công việc' : 'Công việc của tôi'}
             </h1>
-            <p className="text-white/60 mt-1">
-              {stats.total} công việc · {stats.overdue > 0 && <span className="text-red-400">{stats.overdue} quá hạn</span>}
+            <p className="text-gray-600 mt-1">
+              {stats.total} công việc · {stats.overdue > 0 && <span className="text-red-600">{stats.overdue} quá hạn</span>}
             </p>
             {!canViewAllTasks && (
-              <div className="flex items-center gap-1 text-sm text-amber-400 mt-1">
+              <div className="flex items-center gap-1 text-sm text-amber-600 mt-1">
                 <Lock className="w-4 h-4" />
                 <span>Bạn chỉ xem được các task được phân công cho mình</span>
               </div>
@@ -501,8 +501,8 @@ export default function TasksPage() {
             {canExport && (
               <button 
                 onClick={handleExportExcel}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 
-                               border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white 
+                               border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                 <Download className="w-4 h-4" />
                 <span>Xuất Excel</span>
               </button>
@@ -513,7 +513,7 @@ export default function TasksPage() {
                 onClick={() => setShowTaskModal(true)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl 
                               bg-gradient-to-r from-emerald-500 to-cyan-500
-                              text-white font-medium hover:opacity-90 transition-opacity">
+                              text-white font-medium hover:opacity-90 transition-opacity shadow-sm">
                 <Plus className="w-4 h-4" />
                 <span>Tạo Task</span>
               </button>
@@ -523,50 +523,49 @@ export default function TasksPage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-5 gap-4">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <p className="text-white/60 text-sm">Tổng Tasks</p>
-            <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+          <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-sm">
+            <p className="text-gray-600 text-sm">Tổng Tasks</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-            <p className="text-amber-400/80 text-sm">Chờ xử lý</p>
-            <p className="text-2xl font-bold text-amber-400 mt-1">{stats.pending}</p>
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm">
+            <p className="text-amber-700 text-sm">Chờ xử lý</p>
+            <p className="text-2xl font-bold text-amber-600 mt-1">{stats.pending}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-            <p className="text-blue-400/80 text-sm">Đang thực hiện</p>
-            <p className="text-2xl font-bold text-blue-400 mt-1">{stats.inProgress}</p>
+          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm">
+            <p className="text-blue-700 text-sm">Đang thực hiện</p>
+            <p className="text-2xl font-bold text-blue-600 mt-1">{stats.inProgress}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-            <p className="text-emerald-400/80 text-sm">Hoàn thành</p>
-            <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.completed}</p>
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm">
+            <p className="text-emerald-700 text-sm">Hoàn thành</p>
+            <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.completed}</p>
           </div>
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
-            <p className="text-red-400/80 text-sm">Quá hạn</p>
-            <p className="text-2xl font-bold text-red-400 mt-1">{stats.overdue}</p>
+          <div className="p-4 rounded-2xl bg-red-50 border border-red-200 shadow-sm">
+            <p className="text-red-700 text-sm">Quá hạn</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">{stats.overdue}</p>
           </div>
         </div>
 
         {/* Filters */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo tiêu đề, mô tả..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10
-                       text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-500/50
-                       transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200
+                       text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-500
+                       transition-colors shadow-sm"
             />
           </div>
 
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-600
-                     text-white focus:outline-none focus:border-emerald-500/50
-                     transition-colors cursor-pointer min-w-[140px]
-                     [&>option]:bg-gray-800 [&>option]:text-white"
+            className="px-4 py-2.5 rounded-xl bg-white border border-gray-200
+                     text-gray-700 focus:outline-none focus:border-emerald-500
+                     transition-colors cursor-pointer min-w-[140px] shadow-sm"
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xử lý</option>
@@ -578,10 +577,9 @@ export default function TasksPage() {
           <select
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-600
-                     text-white focus:outline-none focus:border-emerald-500/50
-                     transition-colors cursor-pointer min-w-[140px]
-                     [&>option]:bg-gray-800 [&>option]:text-white"
+            className="px-4 py-2.5 rounded-xl bg-white border border-gray-200
+                     text-gray-700 focus:outline-none focus:border-emerald-500
+                     transition-colors cursor-pointer min-w-[140px] shadow-sm"
           >
             <option value="all">Tất cả độ ưu tiên</option>
             <option value="urgent">Khẩn cấp</option>
@@ -593,10 +591,9 @@ export default function TasksPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-600
-                     text-white focus:outline-none focus:border-emerald-500/50
-                     transition-colors cursor-pointer min-w-[140px]
-                     [&>option]:bg-gray-800 [&>option]:text-white"
+            className="px-4 py-2.5 rounded-xl bg-white border border-gray-200
+                     text-gray-700 focus:outline-none focus:border-emerald-500
+                     transition-colors cursor-pointer min-w-[140px] shadow-sm"
           >
             <option value="all">Tất cả loại</option>
             <option value="call">Gọi điện</option>
@@ -609,22 +606,22 @@ export default function TasksPage() {
         </div>
 
         {/* Content */}
-        <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+        <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="px-4 py-4 w-12"></th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Công việc</th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Trạng thái</th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Ưu tiên</th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Hạn chót</th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Phụ trách</th>
-                  <th className="px-4 py-4 text-left text-white/60 font-medium">Liên quan</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Công việc</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Trạng thái</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Ưu tiên</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Hạn chót</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Phụ trách</th>
+                  <th className="px-4 py-4 text-left text-gray-600 font-medium">Liên quan</th>
                   <th className="px-4 py-4 w-12"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-gray-100">
                 {filteredTasks.map((task) => {
                   const isOwner = task.assignedTo?.id === currentUserId;
                   const taskCanEdit = canEdit || isOwner;
@@ -660,9 +657,9 @@ export default function TasksPage() {
 
           {filteredTasks.length === 0 && (
             <div className="py-20 text-center">
-              <CheckCircle className="w-16 h-16 text-white/20 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white/60">Không tìm thấy task</h3>
-              <p className="text-white/40 mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+              <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-600">Không tìm thấy task</h3>
+              <p className="text-gray-400 mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
             </div>
           )}
         </div>
