@@ -1,0 +1,1663 @@
+// =====================================================
+// GOLDEN HOME PLATFORM - PRISMA SCHEMA
+// Enterprise Plugin Architecture
+// Version: 2.0.0
+// =====================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =====================================================
+// CORE PLATFORM - Multi-tenant & Users
+// =====================================================
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logo        String?
+  domain      String?  @unique
+  settings    Json     @default("{}")
+  plan        PlanType @default(FREE)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members         WorkspaceMember[]
+  modules         WorkspaceModule[]
+  invitations     WorkspaceInvitation[]
+  leads           Lead[]
+  contacts        Contact[]
+  deals           Deal[]
+  employees       Employee[]
+  projects        Project[]
+  tasks           Task[]
+  warehouses      Warehouse[]
+  products        Product[]
+  invoices        Invoice[]
+  purchaseOrders  PurchaseOrder[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  chatRooms       ChatRoom[]
+  locations       Location[]
+  automations     Automation[]
+  dashboards      Dashboard[]
+  documents       Document[]
+
+  @@map("workspaces")
+}
+
+enum PlanType {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  avatar        String?
+  phone         String?
+  emailVerified DateTime?
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth relations
+  accounts Account[]
+  sessions Session[]
+
+  // Platform relations
+  memberships      WorkspaceMember[]
+  createdLeads     Lead[]            @relation("CreatedByUser")
+  assignedLeads    Lead[]            @relation("AssignedToUser")
+  contacts         Contact[]
+  deals            Deal[]
+  employeeProfile  Employee?
+  projectsCreated  Project[]         @relation("ProjectCreator")
+  projectsManaged  Project[]         @relation("ProjectManager")
+  tasksCreated     Task[]            @relation("TaskCreator")
+  tasksAssigned    TaskAssignee[]
+  comments         Comment[]
+  activities       Activity[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  sentMessages     ChatMessage[]
+  chatMemberships  ChatMember[]
+  documents        Document[]
+  approvals        Approval[]        @relation("Approver")
+  requestedApprovals Approval[]      @relation("Requester")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model WorkspaceMember {
+  id          String         @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole  @default(MEMBER)
+  permissions Json           @default("[]")
+  joinedAt    DateTime       @default(now())
+  isActive    Boolean        @default(true)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  GUEST
+}
+
+model WorkspaceInvitation {
+  id          String   @id @default(cuid())
+  workspaceId String
+  email       String
+  role        WorkspaceRole @default(MEMBER)
+  token       String   @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_invitations")
+}
+
+model WorkspaceModule {
+  id          String   @id @default(cuid())
+  workspaceId String
+  moduleId    String
+  isEnabled   Boolean  @default(true)
+  settings    Json     @default("{}")
+  installedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, moduleId])
+  @@map("workspace_modules")
+}
+
+// =====================================================
+// CRM MODULE - Sales Pipeline
+// =====================================================
+
+model Lead {
+  id          String     @id @default(cuid())
+  workspaceId String
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  position    String?
+  source      LeadSource @default(OTHER)
+  status      LeadStatus @default(NEW)
+  score       Int        @default(0)
+  rating      LeadRating @default(COLD)
+  budget      Decimal?   @db.Decimal(15, 2)
+  notes       String?    @db.Text
+  tags        String[]
+  customFields Json      @default("{}")
+  
+  // Assignment & Ownership
+  assignedToId String?
+  createdById  String
+  
+  // Timing
+  lastContactAt DateTime?
+  nextFollowUp  DateTime?
+  convertedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedTo  User?      @relation("AssignedToUser", fields: [assignedToId], references: [id])
+  createdBy   User       @relation("CreatedByUser", fields: [createdById], references: [id])
+  contact     Contact?   @relation("LeadToContact")
+  activities  Activity[]
+  comments    Comment[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, assignedToId])
+  @@index([workspaceId, createdAt])
+  @@map("leads")
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  COLD_CALL
+  EXHIBITION
+  ADVERTISEMENT
+  PARTNER
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  NURTURING
+}
+
+enum LeadRating {
+  HOT
+  WARM
+  COLD
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  email       String?
+  phone       String?
+  mobile      String?
+  company     String?
+  position    String?
+  address     String?
+  city        String?
+  country     String?
+  avatar      String?
+  birthday    DateTime?
+  notes       String?  @db.Text
+  tags        String[]
+  customFields Json    @default("{}")
+  isActive    Boolean  @default(true)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Lead conversion
+  leadId      String?  @unique
+  lead        Lead?    @relation("LeadToContact", fields: [leadId], references: [id])
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User       @relation(fields: [createdById], references: [id])
+  deals       Deal[]
+  activities  Activity[]
+  comments    Comment[]
+
+  @@index([workspaceId, email])
+  @@index([workspaceId, company])
+  @@map("contacts")
+}
+
+model Deal {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  value       Decimal   @db.Decimal(15, 2)
+  currency    String    @default("VND")
+  stage       DealStage @default(PROSPECTING)
+  probability Int       @default(0)
+  expectedCloseDate DateTime?
+  actualCloseDate   DateTime?
+  lostReason  String?
+  notes       String?   @db.Text
+  tags        String[]
+  customFields Json     @default("{}")
+  
+  // Relations
+  contactId   String
+  ownerId     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace  Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact    Contact    @relation(fields: [contactId], references: [id])
+  owner      User       @relation(fields: [ownerId], references: [id])
+  activities Activity[]
+  comments   Comment[]
+  quotations Quotation[]
+
+  @@index([workspaceId, stage])
+  @@index([workspaceId, ownerId])
+  @@map("deals")
+}
+
+enum DealStage {
+  PROSPECTING
+  QUALIFICATION
+  NEEDS_ANALYSIS
+  VALUE_PROPOSITION
+  DECISION_MAKERS
+  PERCEPTION_ANALYSIS
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+model Quotation {
+  id          String          @id @default(cuid())
+  dealId      String
+  number      String
+  validUntil  DateTime
+  status      QuotationStatus @default(DRAFT)
+  subtotal    Decimal         @db.Decimal(15, 2)
+  discount    Decimal         @default(0) @db.Decimal(15, 2)
+  tax         Decimal         @default(0) @db.Decimal(15, 2)
+  total       Decimal         @db.Decimal(15, 2)
+  notes       String?         @db.Text
+  terms       String?         @db.Text
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  deal  Deal            @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  items QuotationItem[]
+
+  @@map("quotations")
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model QuotationItem {
+  id          String  @id @default(cuid())
+  quotationId String
+  productId   String?
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(15, 2)
+  discount    Decimal @default(0) @db.Decimal(5, 2)
+  total       Decimal @db.Decimal(15, 2)
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product   Product?  @relation(fields: [productId], references: [id])
+
+  @@map("quotation_items")
+}
+
+// =====================================================
+// HRM MODULE - Human Resources
+// =====================================================
+
+model Employee {
+  id            String         @id @default(cuid())
+  workspaceId   String
+  userId        String?        @unique
+  employeeCode  String
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  avatar        String?
+  gender        Gender?
+  birthDate     DateTime?
+  nationalId    String?
+  address       String?
+  city          String?
+  country       String?
+  
+  // Employment
+  departmentId  String?
+  positionId    String?
+  managerId     String?
+  employmentType EmploymentType @default(FULL_TIME)
+  startDate     DateTime
+  endDate       DateTime?
+  status        EmployeeStatus @default(ACTIVE)
+  
+  // Compensation
+  salary        Decimal?       @db.Decimal(15, 2)
+  currency      String         @default("VND")
+  bankAccount   String?
+  bankName      String?
+  
+  // Emergency Contact
+  emergencyName  String?
+  emergencyPhone String?
+  emergencyRelation String?
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id])
+  department    Department?    @relation(fields: [departmentId], references: [id])
+  position      Position?      @relation(fields: [positionId], references: [id])
+  manager       Employee?      @relation("EmployeeManager", fields: [managerId], references: [id])
+  subordinates  Employee[]     @relation("EmployeeManager")
+  attendances   Attendance[]
+  leaveRequests LeaveRequest[]
+  payslips      Payslip[]
+
+  @@unique([workspaceId, employeeCode])
+  @@index([workspaceId, departmentId])
+  @@index([workspaceId, status])
+  @@map("employees")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  FREELANCE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  PROBATION
+  TERMINATED
+  RESIGNED
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  code        String
+  description String?
+  parentId    String?
+  managerId   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DepartmentHierarchy")
+  employees   Employee[]
+  positions   Position[]
+
+  @@map("departments")
+}
+
+model Position {
+  id           String   @id @default(cuid())
+  name         String
+  code         String
+  departmentId String?
+  level        Int      @default(1)
+  description  String?
+  minSalary    Decimal? @db.Decimal(15, 2)
+  maxSalary    Decimal? @db.Decimal(15, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department  Department? @relation(fields: [departmentId], references: [id])
+  employees   Employee[]
+
+  @@map("positions")
+}
+
+model Attendance {
+  id          String         @id @default(cuid())
+  employeeId  String
+  date        DateTime       @db.Date
+  checkIn     DateTime?
+  checkOut    DateTime?
+  status      AttendanceStatus @default(PRESENT)
+  workHours   Decimal?       @db.Decimal(4, 2)
+  overtime    Decimal?       @db.Decimal(4, 2)
+  
+  // Geolocation
+  checkInLat  Float?
+  checkInLng  Float?
+  checkInMethod CheckInMethod?
+  checkOutLat Float?
+  checkOutLng Float?
+  checkOutMethod CheckInMethod?
+  
+  // Site/Location
+  locationId  String?
+  
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  employee    Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  location    Location?      @relation(fields: [locationId], references: [id])
+
+  @@unique([employeeId, date])
+  @@index([employeeId, date])
+  @@map("attendances")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EARLY_LEAVE
+  HALF_DAY
+  ON_LEAVE
+  HOLIDAY
+  WORK_FROM_HOME
+}
+
+enum CheckInMethod {
+  GPS
+  WIFI
+  FACE_ID
+  QR_CODE
+  MANUAL
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  employeeId  String
+  type        LeaveType
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  days        Decimal     @db.Decimal(4, 1)
+  reason      String?     @db.Text
+  status      ApprovalStatus @default(PENDING)
+  approvedById String?
+  approvedAt  DateTime?
+  rejectedReason String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, startDate])
+  @@index([status])
+  @@map("leave_requests")
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  MATERNITY
+  PATERNITY
+  BEREAVEMENT
+  MARRIAGE
+  OTHER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Payslip {
+  id           String   @id @default(cuid())
+  employeeId   String
+  period       String   // YYYY-MM format
+  basicSalary  Decimal  @db.Decimal(15, 2)
+  allowances   Json     @default("[]")
+  deductions   Json     @default("[]")
+  overtime     Decimal  @default(0) @db.Decimal(15, 2)
+  bonus        Decimal  @default(0) @db.Decimal(15, 2)
+  tax          Decimal  @default(0) @db.Decimal(15, 2)
+  insurance    Decimal  @default(0) @db.Decimal(15, 2)
+  netSalary    Decimal  @db.Decimal(15, 2)
+  currency     String   @default("VND")
+  status       PayslipStatus @default(DRAFT)
+  paidAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, period])
+  @@map("payslips")
+}
+
+enum PayslipStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+// =====================================================
+// PROJECT MODULE - Project Management
+// =====================================================
+
+model Project {
+  id          String        @id @default(cuid())
+  workspaceId String
+  name        String
+  code        String?
+  description String?       @db.Text
+  status      ProjectStatus @default(PLANNING)
+  priority    Priority      @default(MEDIUM)
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Decimal?      @db.Decimal(15, 2)
+  currency    String        @default("VND")
+  progress    Int           @default(0)
+  color       String?
+  icon        String?
+  
+  // Team
+  createdById String
+  managerId   String?
+  
+  settings    Json          @default("{}")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User          @relation("ProjectCreator", fields: [createdById], references: [id])
+  manager     User?         @relation("ProjectManager", fields: [managerId], references: [id])
+  
+  stages      ProjectStage[]
+  tasks       Task[]
+  milestones  Milestone[]
+  sprints     Sprint[]
+  comments    Comment[]
+  activities  Activity[]
+  documents   Document[]
+
+  @@unique([workspaceId, code])
+  @@index([workspaceId, status])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum Priority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model ProjectStage {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  order     Int      @default(0)
+  color     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@map("project_stages")
+}
+
+model Sprint {
+  id          String       @id @default(cuid())
+  projectId   String
+  name        String
+  goal        String?      @db.Text
+  startDate   DateTime
+  endDate     DateTime
+  status      SprintStatus @default(PLANNING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@map("sprints")
+}
+
+enum SprintStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  description String?
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@map("milestones")
+}
+
+model Task {
+  id           String     @id @default(cuid())
+  workspaceId  String
+  projectId    String?
+  stageId      String?
+  sprintId     String?
+  milestoneId  String?
+  parentId     String?
+  
+  title        String
+  description  String?    @db.Text
+  status       TaskStatus @default(TODO)
+  priority     Priority   @default(MEDIUM)
+  type         TaskType   @default(TASK)
+  
+  startDate    DateTime?
+  dueDate      DateTime?
+  completedAt  DateTime?
+  
+  estimatedHours Decimal? @db.Decimal(6, 2)
+  actualHours    Decimal? @db.Decimal(6, 2)
+  progress       Int      @default(0)
+  
+  order        Int        @default(0)
+  tags         String[]
+  customFields Json       @default("{}")
+  
+  createdById  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage       ProjectStage?  @relation(fields: [stageId], references: [id])
+  sprint      Sprint?        @relation(fields: [sprintId], references: [id])
+  milestone   Milestone?     @relation(fields: [milestoneId], references: [id])
+  parent      Task?          @relation("TaskHierarchy", fields: [parentId], references: [id])
+  subtasks    Task[]         @relation("TaskHierarchy")
+  createdBy   User           @relation("TaskCreator", fields: [createdById], references: [id])
+  
+  assignees   TaskAssignee[]
+  dependencies TaskDependency[] @relation("DependentTask")
+  dependents   TaskDependency[] @relation("RequiredTask")
+  comments    Comment[]
+  activities  Activity[]
+  timeEntries TimeEntry[]
+  attachments Attachment[]
+  checklists  Checklist[]
+
+  @@index([workspaceId, status])
+  @@index([projectId, stageId])
+  @@index([createdById])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum TaskType {
+  TASK
+  BUG
+  FEATURE
+  STORY
+  EPIC
+  SUBTASK
+}
+
+model TaskAssignee {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  assignedAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@map("task_assignees")
+}
+
+model TaskDependency {
+  id            String         @id @default(cuid())
+  taskId        String
+  dependsOnId   String
+  type          DependencyType @default(FINISH_TO_START)
+  createdAt     DateTime       @default(now())
+
+  task          Task @relation("DependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn     Task @relation("RequiredTask", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnId])
+  @@map("task_dependencies")
+}
+
+enum DependencyType {
+  FINISH_TO_START
+  START_TO_START
+  FINISH_TO_FINISH
+  START_TO_FINISH
+}
+
+model TimeEntry {
+  id          String   @id @default(cuid())
+  taskId      String
+  userId      String
+  description String?
+  hours       Decimal  @db.Decimal(6, 2)
+  date        DateTime @db.Date
+  billable    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("time_entries")
+}
+
+model Checklist {
+  id      String          @id @default(cuid())
+  taskId  String
+  title   String
+  items   ChecklistItem[]
+  order   Int             @default(0)
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id          String   @id @default(cuid())
+  checklistId String
+  content     String
+  isCompleted Boolean  @default(false)
+  order       Int      @default(0)
+  dueDate     DateTime?
+  assigneeId  String?
+
+  checklist Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@map("checklist_items")
+}
+
+// =====================================================
+// INVENTORY MODULE - Warehouse & Stock
+// =====================================================
+
+model Warehouse {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  code        String
+  address     String?
+  city        String?
+  country     String?
+  managerId   String?
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stockLevels StockLevel[]
+  stockMovements StockMovement[]
+
+  @@unique([workspaceId, code])
+  @@map("warehouses")
+}
+
+model ProductCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  parentId    String?
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent    ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  ProductCategory[] @relation("CategoryHierarchy")
+  products  Product[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  categoryId   String?
+  name         String
+  sku          String
+  barcode      String?
+  description  String?  @db.Text
+  type         ProductType @default(GOODS)
+  unit         String   @default("pcs")
+  costPrice    Decimal? @db.Decimal(15, 2)
+  salePrice    Decimal? @db.Decimal(15, 2)
+  minStock     Int      @default(0)
+  maxStock     Int?
+  weight       Decimal? @db.Decimal(10, 2)
+  dimensions   Json?    // { length, width, height }
+  images       String[]
+  tags         String[]
+  attributes   Json     @default("{}")
+  isActive     Boolean  @default(true)
+  trackLots    Boolean  @default(false)
+  trackSerial  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category      ProductCategory? @relation(fields: [categoryId], references: [id])
+  stockLevels   StockLevel[]
+  stockMovements StockMovement[]
+  quotationItems QuotationItem[]
+  invoiceItems   InvoiceItem[]
+  poItems        PurchaseOrderItem[]
+
+  @@unique([workspaceId, sku])
+  @@index([workspaceId, categoryId])
+  @@map("products")
+}
+
+enum ProductType {
+  GOODS
+  SERVICE
+  CONSUMABLE
+  DIGITAL
+}
+
+model StockLevel {
+  id          String   @id @default(cuid())
+  productId   String
+  warehouseId String
+  quantity    Decimal  @default(0) @db.Decimal(15, 3)
+  reserved    Decimal  @default(0) @db.Decimal(15, 3)
+  available   Decimal  @default(0) @db.Decimal(15, 3)
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+  @@map("stock_levels")
+}
+
+model StockMovement {
+  id            String        @id @default(cuid())
+  type          MovementType
+  productId     String
+  warehouseId   String
+  quantity      Decimal       @db.Decimal(15, 3)
+  lotNumber     String?
+  serialNumber  String?
+  referenceType String?       // PO, SO, Transfer, Adjustment
+  referenceId   String?
+  notes         String?
+  createdById   String
+  createdAt     DateTime      @default(now())
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([productId, warehouseId])
+  @@index([referenceType, referenceId])
+  @@map("stock_movements")
+}
+
+enum MovementType {
+  STOCK_IN
+  STOCK_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT
+  RETURN
+  SCRAP
+}
+
+// =====================================================
+// FINANCE MODULE - Invoices & Payments
+// =====================================================
+
+model Invoice {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  number       String
+  type         InvoiceType   @default(SALE)
+  status       InvoiceStatus @default(DRAFT)
+  customerId   String?
+  supplierId   String?
+  
+  issueDate    DateTime      @db.Date
+  dueDate      DateTime      @db.Date
+  paidDate     DateTime?
+  
+  subtotal     Decimal       @db.Decimal(15, 2)
+  discount     Decimal       @default(0) @db.Decimal(15, 2)
+  tax          Decimal       @default(0) @db.Decimal(15, 2)
+  total        Decimal       @db.Decimal(15, 2)
+  amountPaid   Decimal       @default(0) @db.Decimal(15, 2)
+  currency     String        @default("VND")
+  exchangeRate Decimal       @default(1) @db.Decimal(10, 4)
+  
+  notes        String?       @db.Text
+  terms        String?       @db.Text
+  
+  createdById  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items        InvoiceItem[]
+  payments     Payment[]
+
+  @@unique([workspaceId, number])
+  @@index([workspaceId, status])
+  @@index([workspaceId, dueDate])
+  @@map("invoices")
+}
+
+enum InvoiceType {
+  SALE
+  PURCHASE
+  CREDIT_NOTE
+  DEBIT_NOTE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  productId   String?
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(15, 2)
+  discount    Decimal @default(0) @db.Decimal(5, 2)
+  tax         Decimal @default(0) @db.Decimal(5, 2)
+  total       Decimal @db.Decimal(15, 2)
+
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  amount      Decimal       @db.Decimal(15, 2)
+  method      PaymentMethod
+  reference   String?
+  notes       String?
+  paidAt      DateTime      @default(now())
+  createdById String
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  CHECK
+  ONLINE
+  OTHER
+}
+
+model PurchaseOrder {
+  id          String         @id @default(cuid())
+  workspaceId String
+  number      String
+  supplierId  String?
+  status      POStatus       @default(DRAFT)
+  
+  orderDate   DateTime       @db.Date
+  expectedDate DateTime?     @db.Date
+  receivedDate DateTime?
+  
+  subtotal    Decimal        @db.Decimal(15, 2)
+  discount    Decimal        @default(0) @db.Decimal(15, 2)
+  tax         Decimal        @default(0) @db.Decimal(15, 2)
+  shipping    Decimal        @default(0) @db.Decimal(15, 2)
+  total       Decimal        @db.Decimal(15, 2)
+  currency    String         @default("VND")
+  
+  notes       String?        @db.Text
+  
+  createdById String
+  approvedById String?
+  approvedAt  DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  workspace   Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items       PurchaseOrderItem[]
+
+  @@unique([workspaceId, number])
+  @@index([workspaceId, status])
+  @@map("purchase_orders")
+}
+
+enum POStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+model PurchaseOrderItem {
+  id            String  @id @default(cuid())
+  purchaseOrderId String
+  productId     String?
+  description   String
+  quantity      Decimal @db.Decimal(10, 2)
+  receivedQty   Decimal @default(0) @db.Decimal(10, 2)
+  unitPrice     Decimal @db.Decimal(15, 2)
+  total         Decimal @db.Decimal(15, 2)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product?      @relation(fields: [productId], references: [id])
+
+  @@map("purchase_order_items")
+}
+
+// =====================================================
+// CHAT MODULE - Internal Communication
+// =====================================================
+
+model ChatRoom {
+  id          String       @id @default(cuid())
+  workspaceId String
+  name        String?
+  type        ChatRoomType @default(DIRECT)
+  avatar      String?
+  description String?
+  isArchived  Boolean      @default(false)
+  lastMessageAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members     ChatMember[]
+  messages    ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+enum ChatRoomType {
+  DIRECT
+  GROUP
+  CHANNEL
+  THREAD
+}
+
+model ChatMember {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  role      ChatRole @default(MEMBER)
+  isMuted   Boolean  @default(false)
+  lastRead  DateTime?
+  joinedAt  DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("chat_members")
+}
+
+enum ChatRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  roomId    String
+  senderId  String
+  parentId  String?
+  content   String      @db.Text
+  type      MessageType @default(TEXT)
+  metadata  Json?
+  isEdited  Boolean     @default(false)
+  isDeleted Boolean     @default(false)
+  deletedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  room    ChatRoom       @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender  User           @relation(fields: [senderId], references: [id])
+  parent  ChatMessage?   @relation("MessageThread", fields: [parentId], references: [id])
+  replies ChatMessage[]  @relation("MessageThread")
+  attachments Attachment[]
+  reactions   ChatReaction[]
+
+  @@index([roomId, createdAt])
+  @@map("chat_messages")
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  IMAGE
+  VIDEO
+  AUDIO
+  SYSTEM
+  LINK
+}
+
+model ChatReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("chat_reactions")
+}
+
+// =====================================================
+// MAPS & LOCATIONS MODULE
+// =====================================================
+
+model Location {
+  id          String       @id @default(cuid())
+  workspaceId String
+  name        String
+  code        String?
+  type        LocationType @default(OFFICE)
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
+  radius      Int?         // Geofence radius in meters
+  timezone    String?
+  isActive    Boolean      @default(true)
+  metadata    Json         @default("{}")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@index([workspaceId])
+  @@map("locations")
+}
+
+enum LocationType {
+  OFFICE
+  WAREHOUSE
+  STORE
+  SITE
+  BRANCH
+  CUSTOMER
+  SUPPLIER
+  OTHER
+}
+
+// =====================================================
+// AUTOMATION MODULE - Workflows
+// =====================================================
+
+model Automation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  trigger     AutomationTrigger
+  conditions  Json             @default("[]")
+  actions     Json             @default("[]")
+  isActive    Boolean          @default(true)
+  lastRunAt   DateTime?
+  runCount    Int              @default(0)
+  createdById String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs        AutomationLog[]
+
+  @@index([workspaceId, isActive])
+  @@map("automations")
+}
+
+enum AutomationTrigger {
+  ON_CREATE
+  ON_UPDATE
+  ON_DELETE
+  ON_SCHEDULE
+  ON_WEBHOOK
+  ON_FIELD_CHANGE
+  ON_STATUS_CHANGE
+}
+
+model AutomationLog {
+  id           String   @id @default(cuid())
+  automationId String
+  status       String
+  input        Json?
+  output       Json?
+  error        String?
+  executedAt   DateTime @default(now())
+  duration     Int?     // milliseconds
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId, executedAt])
+  @@map("automation_logs")
+}
+
+// =====================================================
+// DOCUMENTS MODULE
+// =====================================================
+
+model Document {
+  id          String       @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  name        String
+  type        DocumentType @default(FILE)
+  mimeType    String?
+  size        Int?
+  url         String?
+  content     String?      @db.Text
+  parentId    String?
+  path        String?      // Full path for folder structure
+  tags        String[]
+  isPublic    Boolean      @default(false)
+  isArchived  Boolean      @default(false)
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project    Project?    @relation(fields: [projectId], references: [id])
+  createdBy  User        @relation(fields: [createdById], references: [id])
+  parent     Document?   @relation("DocumentHierarchy", fields: [parentId], references: [id])
+  children   Document[]  @relation("DocumentHierarchy")
+  versions   DocumentVersion[]
+
+  @@index([workspaceId, parentId])
+  @@index([workspaceId, projectId])
+  @@map("documents")
+}
+
+enum DocumentType {
+  FILE
+  FOLDER
+  LINK
+  NOTE
+}
+
+model DocumentVersion {
+  id          String   @id @default(cuid())
+  documentId  String
+  version     Int
+  url         String?
+  size        Int?
+  content     String?  @db.Text
+  changes     String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@map("document_versions")
+}
+
+// =====================================================
+// ANALYTICS MODULE - Dashboards
+// =====================================================
+
+model Dashboard {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  layout      Json     @default("[]")
+  isDefault   Boolean  @default(false)
+  isPublic    Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  widgets   DashboardWidget[]
+
+  @@index([workspaceId])
+  @@map("dashboards")
+}
+
+model DashboardWidget {
+  id          String   @id @default(cuid())
+  dashboardId String
+  type        String   // chart, kpi, table, list, etc.
+  title       String
+  config      Json     @default("{}")
+  position    Json     @default("{}") // { x, y, w, h }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  @@map("dashboard_widgets")
+}
+
+// =====================================================
+// SHARED - Activities, Comments, Notifications
+// =====================================================
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  type        ActivityType
+  entityType  String   // Lead, Contact, Deal, Task, Project, etc.
+  entityId    String
+  title       String
+  description String?  @db.Text
+  metadata    Json?
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id])
+  lead    Lead?    @relation(fields: [entityId], references: [id], map: "activity_lead_fk")
+  contact Contact? @relation(fields: [entityId], references: [id], map: "activity_contact_fk")
+  deal    Deal?    @relation(fields: [entityId], references: [id], map: "activity_deal_fk")
+  task    Task?    @relation(fields: [entityId], references: [id], map: "activity_task_fk")
+  project Project? @relation(fields: [entityId], references: [id], map: "activity_project_fk")
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+  @@map("activities")
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  NOTE
+  SYSTEM
+  STATUS_CHANGE
+  ASSIGNMENT
+  FILE_UPLOAD
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  userId      String
+  entityType  String
+  entityId    String
+  parentId    String?
+  content     String   @db.Text
+  mentions    String[] // User IDs mentioned
+  isEdited    Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id])
+  parent  Comment?  @relation("CommentThread", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentThread")
+  lead    Lead?     @relation(fields: [entityId], references: [id], map: "comment_lead_fk")
+  contact Contact?  @relation(fields: [entityId], references: [id], map: "comment_contact_fk")
+  deal    Deal?     @relation(fields: [entityId], references: [id], map: "comment_deal_fk")
+  task    Task?     @relation(fields: [entityId], references: [id], map: "comment_task_fk")
+  project Project?  @relation(fields: [entityId], references: [id], map: "comment_project_fk")
+
+  @@index([entityType, entityId])
+  @@map("comments")
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  mimeType    String?
+  size        Int?
+  entityType  String?
+  entityId    String?
+  taskId      String?
+  messageId   String?
+  uploadedById String
+  createdAt   DateTime @default(now())
+
+  task    Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  message ChatMessage? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        NotificationType
+  title       String
+  message     String?
+  entityType  String?
+  entityId    String?
+  link        String?
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([workspaceId, createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  TASK_DUE
+  MENTION
+  COMMENT
+  LEAD_ASSIGNED
+  DEAL_WON
+  DEAL_LOST
+  APPROVAL_REQUEST
+  APPROVAL_RESPONSE
+  SYSTEM
+  REMINDER
+}
+
+model Approval {
+  id          String         @id @default(cuid())
+  type        String         // LeaveRequest, PurchaseOrder, etc.
+  entityId    String
+  requesterId String
+  approverId  String
+  status      ApprovalStatus @default(PENDING)
+  notes       String?
+  respondedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  requester User @relation("Requester", fields: [requesterId], references: [id])
+  approver  User @relation("Approver", fields: [approverId], references: [id])
+
+  @@index([approverId, status])
+  @@map("approvals")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  oldValues   Json?
+  newValues   Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+
+  @@index([workspaceId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
