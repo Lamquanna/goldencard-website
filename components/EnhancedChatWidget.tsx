@@ -4,9 +4,18 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   MessageCircle, X, Send, Minimize2, Users, Circle, 
   Video, Phone, MoreVertical, Paperclip, Smile, Search,
-  PhoneOff, Mic, MicOff, VideoOff, Monitor, Settings
+  PhoneOff, Mic, MicOff, VideoOff, Monitor, Settings,
+  Download, FileText, Image as ImageIcon, File, Play, Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface FileAttachment {
+  type: string;
+  url: string;
+  name: string;
+  size?: number;
+  thumbnail?: string;
+}
 
 interface ChatMessage {
   id: string;
@@ -16,9 +25,10 @@ interface ChatMessage {
   timestamp: Date;
   isRead: boolean;
   type?: 'text' | 'image' | 'file' | 'system';
-  attachments?: { type: string; url: string; name: string }[];
+  attachments?: FileAttachment[];
   replyTo?: string;
   reactions?: Record<string, string[]>;
+  mentions?: string[]; // Added for @mention support
 }
 
 interface OnlineUser {
@@ -123,8 +133,15 @@ export default function EnhancedChatWidget() {
   const [showOnlineUsers, setShowOnlineUsers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Mention autocomplete states
+  const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+  
   // File upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState<string | null>(null);
+  const [viewingFile, setViewingFile] = useState<FileAttachment | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Video call states
@@ -182,24 +199,66 @@ export default function EnhancedChatWidget() {
   const handleSendMessage = () => {
     if ((!newMessage.trim() && !selectedFile) || !selectedRoom) return;
 
+    let attachments: FileAttachment[] | undefined;
+    let msgType: 'text' | 'image' | 'file' = 'text';
+
+    if (selectedFile) {
+      const isImage = selectedFile.type.startsWith('image/');
+      msgType = isImage ? 'image' : 'file';
+      attachments = [{
+        type: selectedFile.type,
+        url: URL.createObjectURL(selectedFile),
+        name: selectedFile.name,
+        size: selectedFile.size,
+        thumbnail: isImage ? selectedFilePreview || undefined : undefined,
+      }];
+    }
+
+    // Parse @mentions
+    const mentionRegex = /@(\w+)/g;
+    const mentions: string[] = [];
+    let match;
+    while ((match = mentionRegex.exec(newMessage)) !== null) {
+      mentions.push(match[1]);
+    }
+
+    // Send notifications to mentioned users
+    if (mentions.length > 0) {
+      mentions.forEach(mentionedName => {
+        const mentionedUser = onlineUsers.find(u => 
+          u.name.toLowerCase().includes(mentionedName.toLowerCase())
+        );
+        if (mentionedUser) {
+          // Trigger notification (in real app, this would call an API)
+          console.log(`Sending notification to ${mentionedUser.name} for mention`);
+          // Show browser notification if permitted
+          if (Notification.permission === 'granted') {
+            new Notification(`${selectedRoom?.name || 'Chat'}`, {
+              body: `Bạn được nhắc đến: "${newMessage.substring(0, 50)}..."`,
+              icon: '/images/logo.png',
+              tag: `mention-${Date.now()}`,
+            });
+          }
+        }
+      });
+    }
+
     const msg: ChatMessage = {
       id: Date.now().toString(),
       userId: 'current-user',
       userName: 'Bạn',
-      message: newMessage || (selectedFile ? `📎 ${selectedFile.name}` : ''),
+      message: newMessage,
       timestamp: new Date(),
       isRead: true,
-      type: selectedFile ? 'file' : 'text',
-      attachments: selectedFile ? [{
-        type: selectedFile.type,
-        url: URL.createObjectURL(selectedFile),
-        name: selectedFile.name
-      }] : undefined,
+      type: msgType,
+      attachments,
+      mentions, // Add mentions to message
     };
 
     setMessages([...messages, msg]);
     setNewMessage('');
     setSelectedFile(null);
+    setSelectedFilePreview(null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,9 +270,106 @@ export default function EnhancedChatWidget() {
         return;
       }
       setSelectedFile(file);
+      
+      // Tạo preview cho hình ảnh
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setSelectedFilePreview(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setSelectedFilePreview(null);
+      }
     }
     // Reset input để có thể chọn lại file cùng tên
     e.target.value = '';
+  };
+
+  // Handle message input change with @mention detection
+  const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+    
+    // Check for @mention
+    const cursorPos = e.target.selectionStart || 0;
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+    
+    if (mentionMatch) {
+      setShowMentionSuggestions(true);
+      setMentionQuery(mentionMatch[1]);
+      setMentionStartIndex(textBeforeCursor.lastIndexOf('@'));
+    } else {
+      setShowMentionSuggestions(false);
+      setMentionQuery('');
+      setMentionStartIndex(-1);
+    }
+  };
+
+  // Handle mention selection
+  const handleSelectMention = (user: OnlineUser) => {
+    if (mentionStartIndex >= 0) {
+      const beforeMention = newMessage.substring(0, mentionStartIndex);
+      const afterMention = newMessage.substring(mentionStartIndex + mentionQuery.length + 1);
+      setNewMessage(`${beforeMention}@${user.name.replace(/\s/g, '_')} ${afterMention}`);
+    }
+    setShowMentionSuggestions(false);
+    setMentionQuery('');
+    setMentionStartIndex(-1);
+  };
+
+  // Filter users for mention suggestions
+  const mentionSuggestions = onlineUsers.filter(user =>
+    user.name.toLowerCase().includes(mentionQuery.toLowerCase())
+  );
+
+  // Highlight @mentions in message text
+  const renderMessageWithMentions = (text: string) => {
+    const parts = text.split(/(@\w+)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={index} className="bg-blue-200/50 text-blue-700 px-1 rounded font-medium">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Download file
+  const handleDownloadFile = (attachment: FileAttachment) => {
+    const link = document.createElement('a');
+    link.href = attachment.url;
+    link.download = attachment.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Format file size
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  // Get file icon based on type
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.startsWith('image/')) return ImageIcon;
+    if (mimeType.includes('pdf')) return FileText;
+    if (mimeType.includes('video')) return Play;
+    return File;
   };
 
   const handleSelectRoom = (room: ChatRoom) => {
@@ -434,52 +590,192 @@ export default function EnhancedChatWidget() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-        {messages.map(msg => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.userId === 'current-user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className={`max-w-[75%] ${msg.userId === 'current-user' ? 'order-2' : 'order-1'}`}>
-              {msg.userId !== 'current-user' && (
-                <p className="text-xs text-gray-500 mb-1 ml-1">{msg.userName}</p>
-              )}
-              <div
-                className={`px-4 py-2 rounded-2xl ${
-                  msg.userId === 'current-user'
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                    : 'bg-white text-gray-800 border border-gray-200'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+        {messages.map(msg => {
+          const isOwn = msg.userId === 'current-user';
+          const hasAttachments = msg.attachments && msg.attachments.length > 0;
+          
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`max-w-[75%] ${isOwn ? 'order-2' : 'order-1'}`}>
+                {!isOwn && (
+                  <p className="text-xs text-gray-500 mb-1 ml-1">{msg.userName}</p>
+                )}
+                
+                <div
+                  className={`rounded-2xl overflow-hidden ${
+                    isOwn
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                      : 'bg-white text-gray-800 border border-gray-200'
+                  }`}
+                >
+                  {/* Attachments - WhatsApp style */}
+                  {hasAttachments && msg.attachments?.map((attachment, idx) => {
+                    const isImage = attachment.type.startsWith('image/');
+                    const FileIcon = getFileIcon(attachment.type);
+                    
+                    return (
+                      <div key={idx} className="relative group">
+                        {isImage ? (
+                          // Image attachment - WhatsApp style
+                          <div className="relative">
+                            <img 
+                              src={attachment.url} 
+                              alt={attachment.name}
+                              className="max-w-full max-h-64 object-cover cursor-pointer hover:opacity-95"
+                              onClick={() => setViewingFile(attachment)}
+                            />
+                            {/* Overlay controls */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 
+                                          transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                              <button
+                                onClick={() => setViewingFile(attachment)}
+                                className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+                                title="Xem"
+                              >
+                                <Eye className="w-5 h-5 text-gray-700" />
+                              </button>
+                              <button
+                                onClick={() => handleDownloadFile(attachment)}
+                                className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+                                title="Tải về"
+                              >
+                                <Download className="w-5 h-5 text-gray-700" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          // File attachment - WhatsApp style
+                          <div className={`p-3 flex items-center gap-3 ${
+                            isOwn ? 'bg-white/10' : 'bg-gray-50'
+                          }`}>
+                            <div className={`p-2 rounded-lg ${
+                              isOwn ? 'bg-white/20' : 'bg-blue-100'
+                            }`}>
+                              <FileIcon className={`w-6 h-6 ${isOwn ? 'text-white' : 'text-blue-600'}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium truncate ${isOwn ? 'text-white' : 'text-gray-900'}`}>
+                                {attachment.name}
+                              </p>
+                              <p className={`text-xs ${isOwn ? 'text-white/70' : 'text-gray-500'}`}>
+                                {formatFileSize(attachment.size)}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDownloadFile(attachment)}
+                              className={`p-2 rounded-full hover:bg-white/20 transition-colors ${
+                                isOwn ? 'text-white' : 'text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title="Tải về"
+                            >
+                              <Download className="w-5 h-5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Text message */}
+                  {msg.message && (
+                    <div className="px-4 py-2">
+                      <p className="text-sm whitespace-pre-wrap">{renderMessageWithMentions(msg.message)}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-[10px] text-gray-400 mt-1 ml-1">
+                  {formatTime(msg.timestamp)}
+                </p>
               </div>
-              <p className="text-[10px] text-gray-400 mt-1 ml-1">
-                {formatTime(msg.timestamp)}
-              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* File Preview */}
+      {/* File Preview - Before sending */}
       {selectedFile && (
-        <div className="px-3 py-2 bg-gray-50 border-t flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-white rounded-lg border">
-            <Paperclip className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-700 truncate">{selectedFile.name}</span>
-            <span className="text-xs text-gray-400">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+        <div className="px-3 py-2 bg-gray-100 border-t">
+          <div className="flex items-center gap-3 p-2 bg-white rounded-lg border shadow-sm">
+            {selectedFilePreview ? (
+              // Image preview
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <img 
+                  src={selectedFilePreview} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              // File icon
+              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                {(() => {
+                  const FileIcon = getFileIcon(selectedFile.type);
+                  return <FileIcon className="w-6 h-6 text-blue-600" />;
+                })()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate">{selectedFile.name}</p>
+              <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+            </div>
+            <button
+              onClick={() => {
+                setSelectedFile(null);
+                setSelectedFilePreview(null);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            onClick={() => setSelectedFile(null)}
-            className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
-          >
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
         </div>
       )}
 
       {/* Input */}
-      <div className="p-3 bg-white border-t">
+      <div className="p-3 bg-white border-t relative">
+        {/* Mention Suggestions Popup */}
+        <AnimatePresence>
+          {showMentionSuggestions && mentionSuggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute bottom-full left-0 right-0 mb-1 mx-3 bg-white rounded-lg shadow-lg border max-h-48 overflow-y-auto"
+            >
+              <div className="p-2">
+                <p className="text-xs text-gray-400 px-2 mb-1">Nhắc đến (@)</p>
+                {mentionSuggestions.map(user => (
+                  <button
+                    key={user.id}
+                    onClick={() => handleSelectMention(user)}
+                    className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                  >
+                    <div className="relative">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 
+                                   flex items-center justify-center text-white text-sm font-medium">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white
+                                    ${user.status === 'online' ? 'bg-green-500' : 
+                                      user.status === 'away' ? 'bg-yellow-500' : 
+                                      user.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.role}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex items-center gap-2">
           <input
             type="file"
@@ -498,9 +794,9 @@ export default function EnhancedChatWidget() {
           <input
             type="text"
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-            placeholder="Nhập tin nhắn... (Enter để gửi)"
+            onChange={handleMessageInputChange}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !showMentionSuggestions && handleSendMessage()}
+            placeholder="Nhập tin nhắn... Gõ @ để nhắc ai đó"
             className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-900
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -794,6 +1090,57 @@ export default function EnhancedChatWidget() {
                 {currentView === 'video' && renderVideoCall()}
               </div>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* File Viewer Modal - WhatsApp style */}
+      <AnimatePresence>
+        {viewingFile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setViewingFile(null)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setViewingFile(null)}
+              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            
+            {/* Download button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownloadFile(viewingFile);
+              }}
+              className="absolute top-4 left-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg 
+                       transition-colors flex items-center gap-2 text-white"
+            >
+              <Download className="w-5 h-5" />
+              <span className="text-sm">Tải về</span>
+            </button>
+            
+            {/* File info */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-white">
+              <p className="text-sm font-medium">{viewingFile.name}</p>
+              <p className="text-xs text-white/70">{formatFileSize(viewingFile.size)}</p>
+            </div>
+            
+            {/* Image */}
+            <motion.img
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              src={viewingFile.url}
+              alt={viewingFile.name}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
           </motion.div>
         )}
       </AnimatePresence>

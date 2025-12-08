@@ -105,7 +105,8 @@ const Icons = {
 // All navigation items with module IDs for permission filtering
 const allNavItems: { moduleId: ModuleId; name: string; nameVi: string; href: string; icon: React.ReactNode; badge: string | null }[] = [
   { moduleId: "tasks", name: "Tasks", nameVi: "Công việc", href: "/erp/tasks", icon: Icons.tasks, badge: null },
-  { moduleId: "leads", name: "Leads", nameVi: "Khách hàng", href: "/erp/leads", icon: Icons.leads, badge: null },
+  { moduleId: "leads", name: "Leads", nameVi: "Leads", href: "/erp/leads", icon: Icons.leads, badge: null },
+  { moduleId: "leads", name: "Customers", nameVi: "Khách hàng", href: "/erp/customers", icon: Icons.users, badge: "VIP" },
   { moduleId: "projects", name: "Projects", nameVi: "Dự án", href: "/erp/projects", icon: Icons.projects, badge: null },
   { moduleId: "inventory", name: "Inventory", nameVi: "Kho hàng", href: "/erp/inventory", icon: Icons.inventory, badge: null },
   { moduleId: "accounting", name: "Accounting", nameVi: "Kế toán", href: "/erp/accounting", icon: Icons.accounting, badge: null },

@@ -34,6 +34,14 @@ interface PhotoUpdate {
   location?: string;
 }
 
+interface PlanTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  completedAt?: Date;
+  completedBy?: string;
+}
+
 interface WeeklyReport {
   id: string;
   weekNumber: number;
@@ -48,6 +56,12 @@ interface WeeklyReport {
   createdBy: string;
   createdAt: Date;
   attachments?: string[];
+  // New fields for check/lock logic
+  planTasks: PlanTask[]; // Tasks from the plan
+  isLocked: boolean; // Lock report after approval
+  lockedAt?: Date;
+  lockedBy?: string;
+  status: 'draft' | 'submitted' | 'approved' | 'locked';
 }
 
 interface ProjectComment {
@@ -216,9 +230,17 @@ const mockReports: WeeklyReport[] = [
       'Bắt đầu đổ bê tông móng khung giá đỡ',
       'Thuê thêm máy xúc từ nhà thầu khác',
     ],
+    planTasks: [
+      { id: 'pt1', title: 'San lấp khu vực B2', completed: true, completedAt: new Date('2024-06-14'), completedBy: 'Nguyễn Văn B' },
+      { id: 'pt2', title: 'Đổ bê tông móng tường rào phía Nam', completed: true, completedAt: new Date('2024-06-15'), completedBy: 'Lê Văn C' },
+      { id: 'pt3', title: 'Nhận vật tư đợt 2', completed: true, completedAt: new Date('2024-06-13'), completedBy: 'Trần Minh Quân' },
+      { id: 'pt4', title: 'Hoàn thành san lấp khu vực B3', completed: false },
+    ],
     progressPercent: 38,
     createdBy: 'Trần Minh Quân',
     createdAt: new Date('2024-06-16'),
+    status: 'submitted',
+    isLocked: false,
   },
   {
     id: 'r2',
@@ -239,9 +261,18 @@ const mockReports: WeeklyReport[] = [
       'Tiếp tục san lấp khu B2, B3',
       'Chuẩn bị vật tư đổ bê tông',
     ],
+    planTasks: [
+      { id: 'pt5', title: 'San lấp khu vực A', completed: true, completedAt: new Date('2024-06-05'), completedBy: 'Nguyễn Văn B' },
+      { id: 'pt6', title: 'San lấp khu vực B1', completed: true, completedAt: new Date('2024-06-08'), completedBy: 'Nguyễn Văn B' },
+      { id: 'pt7', title: 'Nghiệm thu phần san lấp khu A', completed: true, completedAt: new Date('2024-06-09'), completedBy: 'Trần Minh Quân' },
+    ],
     progressPercent: 35,
     createdBy: 'Trần Minh Quân',
     createdAt: new Date('2024-06-09'),
+    status: 'locked',
+    isLocked: true,
+    lockedAt: new Date('2024-06-10'),
+    lockedBy: 'Admin User',
   },
 ];
 
@@ -630,118 +661,297 @@ function PhotoGallery({ photos }: { photos: PhotoUpdate[] }) {
 
 function WeeklyReportList({ reports }: { reports: WeeklyReport[] }) {
   const [expandedId, setExpandedId] = useState<string | null>(reports[0]?.id);
+  const [localReports, setLocalReports] = useState(reports);
+
+  // Handle task check/uncheck
+  const handleTaskToggle = (reportId: string, taskId: string) => {
+    setLocalReports(prev => prev.map(report => {
+      if (report.id === reportId && !report.isLocked) {
+        return {
+          ...report,
+          planTasks: report.planTasks.map(task => {
+            if (task.id === taskId) {
+              return {
+                ...task,
+                completed: !task.completed,
+                completedAt: !task.completed ? new Date() : undefined,
+                completedBy: !task.completed ? 'Bạn' : undefined,
+              };
+            }
+            return task;
+          }),
+        };
+      }
+      return report;
+    }));
+  };
+
+  // Handle lock report
+  const handleLockReport = (reportId: string) => {
+    const report = localReports.find(r => r.id === reportId);
+    if (!report) return;
+    
+    const allTasksCompleted = report.planTasks.every(t => t.completed);
+    if (!allTasksCompleted) {
+      alert('Vui lòng hoàn thành tất cả các task trước khi khóa báo cáo!');
+      return;
+    }
+
+    if (confirm('Sau khi khóa báo cáo sẽ không thể chỉnh sửa. Bạn có chắc chắn?')) {
+      setLocalReports(prev => prev.map(report => {
+        if (report.id === reportId) {
+          return {
+            ...report,
+            isLocked: true,
+            lockedAt: new Date(),
+            lockedBy: 'Bạn',
+            status: 'locked',
+          };
+        }
+        return report;
+      }));
+    }
+  };
+
+  const getStatusBadge = (status: WeeklyReport['status']) => {
+    switch (status) {
+      case 'draft':
+        return <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Nháp</span>;
+      case 'submitted':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">Đã gửi</span>;
+      case 'approved':
+        return <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full">Đã duyệt</span>;
+      case 'locked':
+        return <span className="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded-full flex items-center gap-1">
+          <Lock className="w-3 h-3" /> Đã khóa
+        </span>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-4">
-      {reports.map((report) => (
-        <div key={report.id} className="bg-white rounded-xl border overflow-hidden">
-          <button
-            onClick={() => setExpandedId(expandedId === report.id ? null : report.id)}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-700 font-bold text-lg">W{report.weekNumber}</span>
-              </div>
-              <div className="text-left">
-                <h4 className="font-semibold text-gray-900">Tuần {report.weekNumber}/{report.year}</h4>
-                <p className="text-sm text-gray-500">{report.startDate} - {report.endDate}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <span className="text-sm text-gray-500">Tiến độ</span>
-                <p className="font-bold text-yellow-600">{report.progressPercent}%</p>
-              </div>
-              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${
-                expandedId === report.id ? 'rotate-180' : ''
-              }`} />
-            </div>
-          </button>
-
-          <AnimatePresence>
-            {expandedId === report.id && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="border-t"
-              >
-                <div className="p-4 space-y-4">
-                  <div>
-                    <h5 className="font-medium text-gray-900 mb-2">Tóm tắt</h5>
-                    <p className="text-gray-600">{report.summary}</p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-green-50 rounded-xl p-4">
-                      <h5 className="font-medium text-green-700 flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Hoàn thành
-                      </h5>
-                      <ul className="space-y-1">
-                        {report.achievements.map((item, i) => (
-                          <li key={i} className="text-sm text-green-600 flex items-start gap-2">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="bg-red-50 rounded-xl p-4">
-                      <h5 className="font-medium text-red-700 flex items-center gap-2 mb-2">
-                        <AlertTriangle className="w-4 h-4" />
-                        Vấn đề
-                      </h5>
-                      <ul className="space-y-1">
-                        {report.issues.map((item, i) => (
-                          <li key={i} className="text-sm text-red-600 flex items-start gap-2">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <h5 className="font-medium text-blue-700 flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-4 h-4" />
-                      Kế hoạch tuần tới
-                    </h5>
-                    <ul className="space-y-1">
-                      {report.nextWeekPlan.map((item, i) => (
-                        <li key={i} className="text-sm text-blue-600 flex items-start gap-2">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <p className="text-sm text-gray-500">
-                      Tạo bởi {report.createdBy} · {report.createdAt.toLocaleDateString('vi-VN')}
-                    </p>
-                    <button className="flex items-center gap-2 text-sm text-yellow-600 hover:text-yellow-700">
-                      <Download className="w-4 h-4" />
-                      Tải báo cáo
-                    </button>
-                  </div>
+      {localReports.map((report) => {
+        const completedTasks = report.planTasks.filter(t => t.completed).length;
+        const totalTasks = report.planTasks.length;
+        const taskProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+        
+        return (
+          <div key={report.id} className={`bg-white rounded-xl border overflow-hidden ${
+            report.isLocked ? 'border-purple-200' : ''
+          }`}>
+            <button
+              onClick={() => setExpandedId(expandedId === report.id ? null : report.id)}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  report.isLocked ? 'bg-purple-100' : 'bg-yellow-100'
+                }`}>
+                  {report.isLocked ? (
+                    <Lock className="w-5 h-5 text-purple-600" />
+                  ) : (
+                    <span className="text-yellow-700 font-bold text-lg">W{report.weekNumber}</span>
+                  )}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ))}
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Tuần {report.weekNumber}/{report.year}</h4>
+                    {getStatusBadge(report.status)}
+                  </div>
+                  <p className="text-sm text-gray-500">{report.startDate} - {report.endDate}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <span className="text-sm text-gray-500">Tiến độ</span>
+                  <p className="font-bold text-yellow-600">{report.progressPercent}%</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm text-gray-500">Tasks</span>
+                  <p className="font-bold text-blue-600">{completedTasks}/{totalTasks}</p>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${
+                  expandedId === report.id ? 'rotate-180' : ''
+                }`} />
+              </div>
+            </button>
+
+            <AnimatePresence>
+              {expandedId === report.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="border-t"
+                >
+                  <div className="p-4 space-y-4">
+                    {/* Plan Tasks Checklist */}
+                    <div className={`rounded-xl p-4 ${report.isLocked ? 'bg-purple-50' : 'bg-amber-50'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h5 className={`font-medium flex items-center gap-2 ${
+                          report.isLocked ? 'text-purple-700' : 'text-amber-700'
+                        }`}>
+                          <FileText className="w-4 h-4" />
+                          Checklist kế hoạch tuần
+                        </h5>
+                        <span className={`text-sm font-medium ${
+                          taskProgress === 100 ? 'text-green-600' : 'text-amber-600'
+                        }`}>
+                          {taskProgress.toFixed(0)}% hoàn thành
+                        </span>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="h-2 bg-white rounded-full overflow-hidden mb-3">
+                        <div 
+                          className={`h-full rounded-full transition-all ${
+                            taskProgress === 100 ? 'bg-green-500' : 'bg-amber-500'
+                          }`}
+                          style={{ width: `${taskProgress}%` }}
+                        />
+                      </div>
+
+                      {/* Task list */}
+                      <div className="space-y-2">
+                        {report.planTasks.map((task, idx) => (
+                          <div 
+                            key={task.id}
+                            className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                              task.completed ? 'bg-green-100/50' : 'bg-white'
+                            }`}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTaskToggle(report.id, task.id);
+                              }}
+                              disabled={report.isLocked}
+                              className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                task.completed 
+                                  ? 'bg-green-500 border-green-500 text-white' 
+                                  : report.isLocked 
+                                    ? 'border-gray-300 bg-gray-100 cursor-not-allowed'
+                                    : 'border-gray-300 hover:border-green-500'
+                              }`}
+                            >
+                              {task.completed && <CheckCircle2 className="w-4 h-4" />}
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm ${
+                                task.completed ? 'text-gray-500 line-through' : 'text-gray-800'
+                              }`}>
+                                <span className="font-medium text-gray-400 mr-2">{idx + 1}.</span>
+                                {task.title}
+                              </p>
+                              {task.completed && task.completedBy && (
+                                <p className="text-xs text-gray-400">
+                                  ✓ {task.completedBy} · {task.completedAt?.toLocaleDateString('vi-VN')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">Tóm tắt</h5>
+                      <p className="text-gray-600">{report.summary}</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-green-50 rounded-xl p-4">
+                        <h5 className="font-medium text-green-700 flex items-center gap-2 mb-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Hoàn thành
+                        </h5>
+                        <ul className="space-y-1">
+                          {report.achievements.map((item, i) => (
+                            <li key={i} className="text-sm text-green-600 flex items-start gap-2">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-red-50 rounded-xl p-4">
+                        <h5 className="font-medium text-red-700 flex items-center gap-2 mb-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          Vấn đề
+                        </h5>
+                        <ul className="space-y-1">
+                          {report.issues.map((item, i) => (
+                            <li key={i} className="text-sm text-red-600 flex items-start gap-2">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 rounded-xl p-4">
+                      <h5 className="font-medium text-blue-700 flex items-center gap-2 mb-2">
+                        <TrendingUp className="w-4 h-4" />
+                        Kế hoạch tuần tới
+                      </h5>
+                      <ul className="space-y-1">
+                        {report.nextWeekPlan.map((item, i) => (
+                          <li key={i} className="text-sm text-blue-600 flex items-start gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          Tạo bởi {report.createdBy} · {report.createdAt.toLocaleDateString('vi-VN')}
+                        </p>
+                        {report.isLocked && report.lockedAt && (
+                          <p className="text-xs text-purple-500">
+                            🔒 Khóa bởi {report.lockedBy} · {report.lockedAt.toLocaleDateString('vi-VN')}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button className="flex items-center gap-2 text-sm text-yellow-600 hover:text-yellow-700 px-3 py-1.5 hover:bg-yellow-50 rounded-lg transition-colors">
+                          <Download className="w-4 h-4" />
+                          Tải báo cáo
+                        </button>
+                        {!report.isLocked && taskProgress === 100 && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLockReport(report.id);
+                            }}
+                            className="flex items-center gap-2 text-sm text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg transition-colors"
+                          >
+                            <Lock className="w-4 h-4" />
+                            Khóa báo cáo
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-// Import ChevronDown for reports
-import { ChevronDown } from 'lucide-react';
+// Import ChevronDown, Lock for reports
+import { ChevronDown, Lock } from 'lucide-react';
 
 // Main Page
 export default function ProjectDetailPage() {
