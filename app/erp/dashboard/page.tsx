@@ -1,7 +1,7 @@
 'use client';
 
-// CRM Dashboard with KPI Metrics
-// Comprehensive business analytics for CRM
+// Home Dashboard with KPI Metrics
+// Comprehensive business analytics for Home
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -146,7 +146,7 @@ const generateMockData = (): {
   return { kpi, revenueData, leadSources, teamMembers, recentActivities };
 };
 
-export default function CRMDashboardPage() {
+export default function HomeDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<ReturnType<typeof generateMockData> | null>(null);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'year'>('30d');

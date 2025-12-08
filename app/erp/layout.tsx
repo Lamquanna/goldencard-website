@@ -128,7 +128,7 @@ const roleLabels: Record<UserRole, { label: string; color: string }> = {
   engineer: { label: "Kỹ thuật", color: "bg-cyan-500" },
 };
 
-export default function ERPLayout({ children }: { children: React.ReactNode }) {
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -247,7 +247,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
         <Link href="/erp/tasks" className="flex items-center gap-2">
           <span className="text-xl font-bold">
             <span className="text-[#D4AF37]">Golden</span>
-            <span className="text-gray-900">ERP</span>
+            <span className="text-gray-900">Home</span>
           </span>
         </Link>
         <div className="w-10" /> {/* Spacer */}
@@ -275,7 +275,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/erp/tasks" className="flex items-center gap-2">
                   <span className="text-xl font-bold">
                     <span className="text-[#D4AF37]">Golden</span>
-                    <span className="text-gray-900">ERP</span>
+                    <span className="text-gray-900">Home</span>
                   </span>
                 </Link>
                 <button
@@ -380,7 +380,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
             <Link href="/erp/tasks" className="flex items-center gap-2">
               <span className="text-xl font-bold">
                 <span className="text-[#D4AF37]">Golden</span>
-                <span className="text-gray-900">ERP</span>
+                <span className="text-gray-900">Home</span>
               </span>
             </Link>
           )}

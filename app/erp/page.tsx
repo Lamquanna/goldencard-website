@@ -343,8 +343,8 @@ const getActivityColor = (type: string) => {
   }
 };
 
-// CRM Home Page - Main Dashboard
-export default function CRMHomePage() {
+// Home Page - Main Dashboard
+export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState('');
@@ -415,7 +415,7 @@ export default function CRMHomePage() {
                 {greeting}, {username || 'Người dùng'}! 👋
               </h1>
               <p className="mt-1 text-yellow-100/90">
-                Đây là tổng quan hoạt động CRM của GoldenEnergy hôm nay
+                Đây là tổng quan hoạt động của GoldenHome hôm nay
               </p>
             </div>
             <div className="mt-4 md:mt-0 flex items-center gap-3">

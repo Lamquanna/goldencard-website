@@ -50,9 +50,9 @@ export default function CRMLogin() {
           {/* Logo/Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
-              Golden Energy CRM
+              Golden Home
             </h1>
-            <p className="text-gray-300">Đăng nhập để quản lý khách hàng</p>
+            <p className="text-gray-300">Đăng nhập hệ thống quản lý tổng hợp</p>
           </div>
 
           {/* Login Form */}
