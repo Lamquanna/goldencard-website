@@ -188,11 +188,8 @@ function TeamCard({ member, index, locale, onClick }: {
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
           {name}
         </h3>
-        <p className="text-sm text-[#D4AF37] font-medium mb-2">
+        <p className="text-sm text-[#D4AF37] font-medium mb-3">
           {role}
-        </p>
-        <p className="text-xs text-gray-500 mb-3">
-          {member.employeeCode}
         </p>
         <p className="text-sm text-gray-600 line-clamp-2 mb-3">
           {description}

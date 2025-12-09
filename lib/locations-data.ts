@@ -83,10 +83,10 @@ export const locations: Location[] = [
     id: 'hq-hcm',
     type: 'headquarters',
     name: 'Golden Energy - Trụ Sở Chính',
-    address: 'A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh',
+    address: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP. Hồ Chí Minh',
     coordinates: {
-      lat: 10.7186,
-      lng: 106.7246,
+      lat: 10.7198,
+      lng: 106.7220,
     },
     phone: '+84 333 142 888',
     email: 'sales@goldenenergy.vn',
@@ -154,14 +154,14 @@ export const locationsData: BusinessLocation[] = [
     name: 'Golden Energy - Trụ Sở Chính',
     address: {
       street: 'A2206-A2207 Tháp A, Sunrise Riverside',
-      district: 'Xã Nhà Bè',
+      district: 'Phước Kiến, Nhà Bè',
       city: 'TP. Hồ Chí Minh',
       country: 'Vietnam',
       postalCode: '700000',
     },
     coordinates: {
-      lat: 10.7186,
-      lng: 106.7246,
+      lat: 10.7198,
+      lng: 106.7220,
     },
     contact: {
       phone: '+84 333 142 888',

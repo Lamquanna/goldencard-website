@@ -21,7 +21,7 @@ export const teamData: TeamMember[] = [
   // Leadership Team
   {
     id: 'emp-001',
-    employeeCode: 'GE-CEO-001',
+    employeeCode: 'GES001',
     nameEn: 'Jimmy Ha',
     nameVi: 'Hà Hoàng Hà',
     roleEn: 'Founder & CEO',
@@ -38,7 +38,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-002',
-    employeeCode: 'GE-CFO-001',
+    employeeCode: 'GES002',
     nameEn: 'Rita Kim Anh',
     nameVi: 'Trương Kim Anh',
     roleEn: 'CFO & Vice-CEO',
@@ -57,7 +57,7 @@ export const teamData: TeamMember[] = [
   // Management Team
   {
     id: 'emp-003',
-    employeeCode: 'GE-PM-001',
+    employeeCode: 'GES003',
     nameEn: 'Tuan Ha',
     nameVi: 'Hà Huy Tuấn',
     roleEn: 'Project Supervision Manager',
@@ -74,7 +74,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-004',
-    employeeCode: 'GE-TECH-001',
+    employeeCode: 'GES004',
     nameEn: 'Tan Ho',
     nameVi: 'Hồ Minh Tân',
     roleEn: 'Chief Technical Officer',
@@ -91,15 +91,15 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-005',
-    employeeCode: 'GE-BD-001',
+    employeeCode: 'GES005',
     nameEn: 'Anh Le',
     nameVi: 'Lê Quang Anh',
-    roleEn: 'Business Development Manager',
-    roleVi: 'Trưởng phòng Phát triển Dự án',
-    titleEn: 'Head of Project Development',
-    titleVi: 'Trưởng phòng Phát triển Dự án',
-    descriptionEn: 'Driving business growth through strategic project development and partnership building in renewable energy sector.',
-    descriptionVi: 'Thúc đẩy tăng trưởng kinh doanh thông qua phát triển dự án chiến lược và xây dựng quan hệ đối tác trong lĩnh vực năng lượng tái tạo.',
+    roleEn: 'CTO & Head of Project Development',
+    roleVi: 'CTO & Trưởng phòng Phát triển Dự án',
+    titleEn: 'Chief Technology Officer & Head of Project Development',
+    titleVi: 'Giám đốc Công nghệ & Trưởng phòng Phát triển Dự án',
+    descriptionEn: 'Leading technology strategy and driving business growth through strategic project development and partnership building in renewable energy sector.',
+    descriptionVi: 'Dẫn dắt chiến lược công nghệ và thúc đẩy tăng trưởng kinh doanh thông qua phát triển dự án chiến lược và xây dựng quan hệ đối tác trong lĩnh vực năng lượng tái tạo.',
     avatar: '/Team/anh-le.jpg',
     email: 'anh.le@goldenenergy.vn',
     category: 'management',
@@ -108,7 +108,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-006',
-    employeeCode: 'GE-ACC-001',
+    employeeCode: 'GES006',
     nameEn: 'Thu Nguyen',
     nameVi: 'Nguyễn Thị Thu',
     roleEn: 'Chief Accountant',
@@ -125,7 +125,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-007',
-    employeeCode: 'GE-LOG-001',
+    employeeCode: 'GES007',
     nameEn: 'Le Pham',
     nameVi: 'Phạm Tấn Lễ',
     roleEn: 'Transportation Manager',
@@ -142,7 +142,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-008',
-    employeeCode: 'GE-SALES-001',
+    employeeCode: 'GES008',
     nameEn: 'Nguyet Nguyen',
     nameVi: 'Nguyễn Minh Nguyệt',
     roleEn: 'Sales Manager',
@@ -159,7 +159,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-009',
-    employeeCode: 'GE-MKT-001',
+    employeeCode: 'GES009',
     nameEn: 'Cristina Lu',
     nameVi: 'Lưu Thị Duyên',
     roleEn: 'Marketing Manager',
@@ -178,7 +178,7 @@ export const teamData: TeamMember[] = [
   // Engineering Team
   {
     id: 'emp-010',
-    employeeCode: 'GE-ENG-001',
+    employeeCode: 'GES010',
     nameEn: 'Giau Dao',
     nameVi: 'Đào Hữu Giàu',
     roleEn: 'Solar Engineer',
@@ -195,9 +195,9 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-011',
-    employeeCode: 'GE-ENG-002',
+    employeeCode: 'GES011',
     nameEn: 'Son Tran',
-    nameVi: 'Trần Văn Sơn',
+    nameVi: 'Trần Văn Son',
     roleEn: 'Solar Engineer',
     roleVi: 'Kỹ sư',
     titleEn: 'Solar Systems Engineer',
@@ -212,7 +212,7 @@ export const teamData: TeamMember[] = [
   },
   {
     id: 'emp-012',
-    employeeCode: 'GE-ENG-003',
+    employeeCode: 'GES012',
     nameEn: 'Duy Nguyen',
     nameVi: 'Nguyễn Minh Duy',
     roleEn: 'Solar Engineer',

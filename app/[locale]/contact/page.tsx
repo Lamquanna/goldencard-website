@@ -257,7 +257,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                         {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : "Headquarters"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh
+                        A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP. Hồ Chí Minh
                       </p>
                     </div>
                   </div>

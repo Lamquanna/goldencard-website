@@ -268,7 +268,7 @@ export default async function HomePage({ params }: HomePageProps) {
             description: 'Công ty lắp đặt hệ thống điện mặt trời hàng đầu Việt Nam',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè',
+              streetAddress: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè',
               addressLocality: 'TP. Hồ Chí Minh',
               addressCountry: 'VN',
             },

@@ -148,7 +148,7 @@ Notes:
 ## 📋 Thông Tin Liên Hệ
 
 **Golden Energy Vietnam**
-- **Trụ sở chính**: A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP.HCM
+- **Trụ sở chính**: A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP.HCM
 - **VP Đại diện**: 625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM
 - **Kho**: 354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, TP.HCM
 - **Hotline**: 03333 142 88 / 0903 117 277

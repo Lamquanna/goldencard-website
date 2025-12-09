@@ -549,9 +549,9 @@ export const DEFAULT_GEOFENCE_SITES: GeofenceSite[] = [
   {
     id: 'site-1',
     name: 'Trụ sở chính - Sunrise Riverside',
-    address: 'A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP.HCM',
-    latitude: 10.7186,
-    longitude: 106.7246,
+    address: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP.HCM',
+    latitude: 10.7198,
+    longitude: 106.7220,
     radius: 100,
     wifiSSIDs: ['GoldenEnergy-5G', 'GoldenEnergy-2.4G'],
     isActive: true,
