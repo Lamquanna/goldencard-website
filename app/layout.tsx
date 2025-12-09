@@ -2,7 +2,7 @@
 import { bodyFont, headingFont } from "./fonts";
 import "./globals.css";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
-import DevTools from "@/components/DevTools";
+// import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
 const criticalStyles = `
@@ -234,7 +234,8 @@ export default function RootLayout({
         <AnalyticsProvider>
           {children}
         </AnalyticsProvider>
-        <DevTools />
+        {/* DevTools disabled - causing infinite loop */}
+        {/* <DevTools /> */}
       </body>
     </html>
   );
