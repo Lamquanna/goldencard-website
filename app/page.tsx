@@ -1,7 +1,7 @@
-﻿import { redirect } from "next/navigation";
+﻿// ============================================================================
+// ROOT PAGE - RE-EXPORT HOME
+// GoldenEnergy HOME Platform - Main Entry at /
+// ============================================================================
 
-import { defaultLocale } from "@/lib/i18n";
+export { default } from './(home)/page';
 
-export default function IndexRedirect() {
-  redirect(`/${defaultLocale}`);
-}
