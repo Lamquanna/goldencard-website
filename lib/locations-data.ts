@@ -83,16 +83,16 @@ export const locations: Location[] = [
     id: 'hq-hcm',
     type: 'headquarters',
     name: 'Golden Energy - Trụ Sở Chính',
-    address: 'Hẻm 625 Trần Xuân Soạn, Tân Hưng, Quận 7, TP. Hồ Chí Minh',
+    address: 'A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh',
     coordinates: {
-      lat: 10.7367,
-      lng: 106.7258,
+      lat: 10.7186,
+      lng: 106.7246,
     },
     phone: '+84 333 142 888',
     email: 'sales@goldenenergy.vn',
     operatingHours: {
-      weekday: '08:00 - 18:00',
-      saturday: '08:00 - 12:00',
+      weekday: '08:00 - 17:30',
+      saturday: '08:00 - 17:30',
       sunday: 'Nghỉ',
     },
     services: [
@@ -101,25 +101,67 @@ export const locations: Location[] = [
       'Bảo trì & sửa chữa',
     ],
   },
+  {
+    id: 'branch-txs',
+    type: 'branch',
+    name: 'Golden Energy - Văn Phòng Đại Diện',
+    address: '625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP. Hồ Chí Minh',
+    coordinates: {
+      lat: 10.7367,
+      lng: 106.7258,
+    },
+    phone: '+84 333 142 888',
+    email: 'sales@goldenenergy.vn',
+    operatingHours: {
+      weekday: '08:00 - 17:30',
+      saturday: '08:00 - 17:30',
+      sunday: 'Nghỉ',
+    },
+    services: [
+      'Tư vấn khách hàng',
+      'Hỗ trợ kỹ thuật',
+    ],
+  },
+  {
+    id: 'warehouse-nvl',
+    type: 'warehouse',
+    name: 'Golden Energy - Kho Hàng',
+    address: '354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, Quận 7, TP. Hồ Chí Minh',
+    coordinates: {
+      lat: 10.7298,
+      lng: 106.7165,
+    },
+    phone: '+84 333 142 888',
+    email: 'warehouse@goldenenergy.vn',
+    operatingHours: {
+      weekday: '08:00 - 17:30',
+      saturday: '08:00 - 17:30',
+      sunday: 'Nghỉ',
+    },
+    services: [
+      'Kho vật tư năng lượng',
+      'Trung tâm phân phối',
+    ],
+  },
 ];
 
 // Chỉ giữ lại thông tin thật của GoldenEnergy
 export const locationsData: BusinessLocation[] = [
-  // Trụ sở chính - TP.HCM
+  // Trụ sở chính - Sunrise Riverside
   {
     id: 'hq-hcm',
     type: 'headquarters',
     name: 'Golden Energy - Trụ Sở Chính',
     address: {
-      street: 'Hẻm 625 Trần Xuân Soạn',
-      district: 'Quận 7',
+      street: 'A2206-A2207 Tháp A, Sunrise Riverside',
+      district: 'Xã Nhà Bè',
       city: 'TP. Hồ Chí Minh',
       country: 'Vietnam',
       postalCode: '700000',
     },
     coordinates: {
-      lat: 10.7367,
-      lng: 106.7258,
+      lat: 10.7186,
+      lng: 106.7246,
     },
     contact: {
       phone: '+84 333 142 888',
@@ -127,12 +169,12 @@ export const locationsData: BusinessLocation[] = [
       website: 'https://www.goldenenergy.vn',
     },
     hours: {
-      monday: { open: '08:00', close: '18:00' },
-      tuesday: { open: '08:00', close: '18:00' },
-      wednesday: { open: '08:00', close: '18:00' },
-      thursday: { open: '08:00', close: '18:00' },
-      friday: { open: '08:00', close: '18:00' },
-      saturday: { open: '08:00', close: '12:00' },
+      monday: { open: '08:00', close: '17:30' },
+      tuesday: { open: '08:00', close: '17:30' },
+      wednesday: { open: '08:00', close: '17:30' },
+      thursday: { open: '08:00', close: '17:30' },
+      friday: { open: '08:00', close: '17:30' },
+      saturday: { open: '08:00', close: '17:30' },
       sunday: { closed: true },
     },
     services: [

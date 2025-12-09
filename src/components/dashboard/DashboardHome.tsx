@@ -178,7 +178,7 @@ function PersonalWorkspaceSection() {
       icon: <Plus className="w-5 h-5" />,
       description: 'Tạo công việc mới',
       shortcut: 'Ctrl+T',
-      onClick: () => console.log('New task'),
+      onClick: () => alert('Mở form tạo công việc mới'),
     },
     {
       id: 'new-lead',
@@ -186,7 +186,7 @@ function PersonalWorkspaceSection() {
       icon: <UserPlus className="w-5 h-5" />,
       description: 'Thêm khách hàng tiềm năng',
       permission: 'crm:create',
-      onClick: () => console.log('New lead'),
+      onClick: () => alert('Mở form thêm khách hàng tiềm năng'),
     },
     {
       id: 'new-project',
@@ -194,7 +194,7 @@ function PersonalWorkspaceSection() {
       icon: <FolderPlus className="w-5 h-5" />,
       description: 'Tạo dự án mới',
       permission: 'projects:create',
-      onClick: () => console.log('New project'),
+      onClick: () => alert('Mở form tạo dự án mới'),
     },
     {
       id: 'new-invoice',
@@ -202,21 +202,21 @@ function PersonalWorkspaceSection() {
       icon: <FileSpreadsheet className="w-5 h-5" />,
       description: 'Lập hóa đơn mới',
       permission: 'finance:create',
-      onClick: () => console.log('New invoice'),
+      onClick: () => alert('Mở form tạo hóa đơn mới'),
     },
     {
       id: 'view-reports',
       label: 'Báo cáo',
       icon: <BarChart3 className="w-5 h-5" />,
       description: 'Xem báo cáo tổng hợp',
-      onClick: () => console.log('View reports'),
+      onClick: () => alert('Mở trang báo cáo tổng hợp'),
     },
     {
       id: 'settings',
       label: 'Cài đặt',
       icon: <Settings className="w-5 h-5" />,
       description: 'Cài đặt tài khoản',
-      onClick: () => console.log('Settings'),
+      onClick: () => alert('Mở cài đặt tài khoản'),
     },
   ], []);
   
@@ -235,8 +235,8 @@ function PersonalWorkspaceSection() {
             showPriority
             showProject
             loading={loading}
-            onTaskClick={(task) => console.log('Task clicked:', task)}
-            onViewAll={() => console.log('View all tasks')}
+            onTaskClick={(task) => alert(`Mở chi tiết công việc: ${task.title}`)}
+            onViewAll={() => alert('Chuyển đến danh sách tất cả công việc')}
           />
         </div>
         
@@ -411,7 +411,7 @@ function ActivityFeedSection() {
   const { activities, loading, refetch } = useRecentActivities({ limit: 15 });
   
   const handleFilterChange = useCallback((modules: ActivityModule[]) => {
-    console.log('Filter changed:', modules);
+    // Filter activities by selected modules
   }, []);
   
   return (
@@ -425,8 +425,8 @@ function ActivityFeedSection() {
         groupByTime
         loading={loading}
         onFilterChange={handleFilterChange}
-        onActivityClick={(activity) => console.log('Activity clicked:', activity)}
-        onViewAll={() => console.log('View all activities')}
+        onActivityClick={(activity) => alert(`Xem chi tiết hoạt động: ${activity.action}`)}
+        onViewAll={() => alert('Chuyển đến danh sách tất cả hoạt động')}
       />
     </DashboardSection>
   );

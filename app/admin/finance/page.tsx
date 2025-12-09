@@ -3,7 +3,48 @@
 // GoldenEnergy HOME Platform
 // ============================================================================
 
+'use client';
+
+import { useState } from 'react';
+
+// Mock data
+const INITIAL_TRANSACTIONS = [
+  { id: 1, date: '20/01/2024', desc: 'Thanh toán dự án Solar ABC', type: 'Thu', amount: '1,500,000,000' },
+  { id: 2, date: '19/01/2024', desc: 'Mua tấm pin JA Solar', type: 'Chi', amount: '-850,000,000' },
+  { id: 3, date: '18/01/2024', desc: 'Lương nhân viên tháng 1', type: 'Chi', amount: '-450,000,000' },
+  { id: 4, date: '17/01/2024', desc: 'Tạm ứng dự án XYZ', type: 'Thu', amount: '2,000,000,000' },
+  { id: 5, date: '16/01/2024', desc: 'Mua inverter Huawei', type: 'Chi', amount: '-320,000,000' },
+];
+
 export default function FinancePage() {
+  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTransaction, setNewTransaction] = useState({ desc: '', type: 'Thu', amount: '' });
+
+  const handleAddTransaction = () => {
+    if (!newTransaction.desc || !newTransaction.amount) {
+      alert('Vui lòng nhập mô tả và số tiền');
+      return;
+    }
+    const today = new Date();
+    const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+    const transaction = {
+      id: Date.now(),
+      date: dateStr,
+      desc: newTransaction.desc,
+      type: newTransaction.type,
+      amount: newTransaction.type === 'Chi' ? `-${newTransaction.amount}` : newTransaction.amount,
+    };
+    setTransactions([transaction, ...transactions]);
+    setNewTransaction({ desc: '', type: 'Thu', amount: '' });
+    setShowAddForm(false);
+  };
+
+  const handleDeleteTransaction = (id: number) => {
+    if (confirm('Bạn có chắc muốn xóa giao dịch này?')) {
+      setTransactions(transactions.filter(t => t.id !== id));
+    }
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -92,10 +133,49 @@ export default function FinancePage() {
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">Giao dịch gần đây</h3>
-          <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600">
+          <button 
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600"
+          >
             + Tạo giao dịch
           </button>
         </div>
+
+        {/* Add Transaction Form */}
+        {showAddForm && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 className="font-medium text-gray-900 mb-3">Tạo giao dịch mới</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                type="text"
+                placeholder="Mô tả giao dịch"
+                value={newTransaction.desc}
+                onChange={(e) => setNewTransaction({...newTransaction, desc: e.target.value})}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              />
+              <select
+                value={newTransaction.type}
+                onChange={(e) => setNewTransaction({...newTransaction, type: e.target.value})}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              >
+                <option value="Thu">Thu</option>
+                <option value="Chi">Chi</option>
+              </select>
+              <input
+                type="text"
+                placeholder="Số tiền (VNĐ)"
+                value={newTransaction.amount}
+                onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              />
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button onClick={handleAddTransaction} className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600">Lưu</button>
+              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Hủy</button>
+            </div>
+          </div>
+        )}
+
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -104,17 +184,12 @@ export default function FinancePage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Số tiền</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {[
-                { date: '20/01/2024', desc: 'Thanh toán dự án Solar ABC', type: 'Thu', amount: '1,500,000,000' },
-                { date: '19/01/2024', desc: 'Mua tấm pin JA Solar', type: 'Chi', amount: '-850,000,000' },
-                { date: '18/01/2024', desc: 'Lương nhân viên tháng 1', type: 'Chi', amount: '-450,000,000' },
-                { date: '17/01/2024', desc: 'Tạm ứng dự án XYZ', type: 'Thu', amount: '2,000,000,000' },
-                { date: '16/01/2024', desc: 'Mua inverter Huawei', type: 'Chi', amount: '-320,000,000' },
-              ].map((trans, i) => (
-                <tr key={i} className="hover:bg-gray-50">
+              {transactions.map((trans) => (
+                <tr key={trans.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-500">{trans.date}</td>
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{trans.desc}</td>
                   <td className="px-4 py-3">
@@ -128,6 +203,14 @@ export default function FinancePage() {
                     trans.type === 'Thu' ? 'text-green-600' : 'text-red-600'
                   }`}>
                     {trans.type === 'Thu' ? '+' : ''}{trans.amount} đ
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => handleDeleteTransaction(trans.id)}
+                      className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-800"
+                    >
+                      Xóa
+                    </button>
                   </td>
                 </tr>
               ))}

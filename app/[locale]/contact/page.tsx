@@ -141,30 +141,30 @@ export default async function ContactPage({ params }: ContactPageProps) {
         </div>
 
         {/* Free Consultation Banner */}
-        <section className="py-20 bg-gradient-to-br from-white/10 to-white/5 border-y border-gray-20">
+        <section className="py-20 bg-white">
           <div className="max-w-6xl mx-auto px-6">
             <RevealOnScroll>
               <div className="text-center mb-12">
-                <h2 className="text-4xl md:text-5xl font-light text-white mb-3 tracking-wider">
+                <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-3 tracking-wider">
                   {consultContent.title}
                 </h2>
-                <p className="text-xl text-gray-400 font-light">{consultContent.subtitle}</p>
+                <p className="text-xl text-gray-600 font-light">{consultContent.subtitle}</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 {consultContent.benefits.map((benefit: { icon: string; text: string }, idx: number) => (
-                  <div key={idx} className="flex items-start gap-4 p-6 bg-white/5 border border-gray-200 hover:bg-white/10 hover:border-gray-300 transition-all duration-500">
+                  <div key={idx} className="flex items-start gap-4 p-6 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all duration-500">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center">
                       <span className="text-white text-xl font-bold">{benefit.icon}</span>
                     </div>
-                    <p className="text-gray-900 leading-relaxed flex-1 font-medium">
+                    <p className="text-gray-700 leading-relaxed flex-1 font-medium">
                       {benefit.text}
                     </p>
                   </div>
                 ))}
               </div>
 
-              <div className="text-center p-8 bg-white/5 border border-gray-200">
+              <div className="text-center p-8 bg-gradient-to-br from-[#D4AF37]/10 to-[#D4AF37]/5 border-2 border-[#D4AF37]/30 rounded-2xl">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <span className="text-3xl">📞</span>
                   <p className="text-2xl md:text-3xl text-gray-900 font-semibold">{consultContent.hotline}</p>
@@ -254,7 +254,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">🏢</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Trụ Sở" : locale === "zh" ? "总部" : "Head Office"}
+                        {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : "Headquarters"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
                         A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè, TP. Hồ Chí Minh
@@ -282,13 +282,13 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <RevealOnScroll  delay={0.1}>
                 <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500">
                   <div className="flex items-start gap-4 mb-6">
-                    <div className="text-4xl">🏢</div>
+                    <div className="text-4xl">🏬</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
                         {locale === "vi" ? "Văn Phòng Đại Diện" : locale === "zh" ? "代表处" : "Representative Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
-                        625 Trần Xuân Soạn, Phường Tân Hưng, TP. Hồ Chí Minh
+                        625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP. Hồ Chí Minh
                       </p>
                     </div>
                   </div>

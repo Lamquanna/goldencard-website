@@ -457,29 +457,29 @@ export default async function HomePage({ params }: HomePageProps) {
               {locale === 'vi' ? 'Vị trí' : locale === 'zh' ? '位置' : 'Location'}
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-wide mb-4">
-              {locale === 'vi' ? 'Văn phòng đại diện' : locale === 'zh' ? '代表处' : 'Representative Office'}
+              {locale === 'vi' ? 'Trụ sở chính' : locale === 'zh' ? '总部' : 'Headquarters'}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              {locale === 'vi' ? 'Ghé thăm văn phòng đại diện của chúng tôi hoặc liên hệ để biết thêm thông tin về các giải pháp năng lượng tái tạo' : 
-               locale === 'zh' ? '访问我们的代表处或联系我们了解更多可再生能源解决方案' :
-               'Visit our representative office or contact us for more information about renewable energy solutions'}
+              {locale === 'vi' ? 'Ghé thăm văn phòng của chúng tôi hoặc liên hệ để biết thêm thông tin về các giải pháp năng lượng tái tạo' : 
+               locale === 'zh' ? '访问我们的办公室或联系我们了解更多可再生能源解决方案' :
+               'Visit our office or contact us for more information about renewable energy solutions'}
             </p>
           </div>
         </RevealOnScroll>
 
         <RevealOnScroll delay={0.2}>
           <div className="max-w-6xl mx-auto">
-            {/* Google Map */}
+            {/* Google Map - Sunrise Riverside */}
             <div className="relative w-full h-[450px] md:h-[550px] overflow-hidden border-2 border-gray-200 shadow-xl mb-12">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.954205937253!2d106.69217827480647!3d10.737992889405873!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752fbc1f3a5c7f%3A0x8f8b8b8b8b8b8b8b!2s625%20Tr%E1%BA%A7n%20Xu%C3%A2n%20So%E1%BA%A1n%2C%20T%C3%A2n%20H%C6%B0ng%2C%20Qu%E1%BA%ADn%207%2C%20Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh%2C%20Vietnam!5e0!3m2!1sen!2s!4v1732453200000!5m2!1sen!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.0372!2d106.7246!3d10.7186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f8b8b8b8b8b%3A0x8b8b8b8b8b8b8b8b!2sSunrise%20Riverside!5e0!3m2!1svi!2svn!4v1702123200000!5m2!1svi!2svn"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Golden Energy Office Location - 625 Trần Xuân Soạn, Quận 7, TP.HCM"
+                title="Golden Energy Office - Sunrise Riverside, TP.HCM"
               />
             </div>
 
@@ -492,8 +492,8 @@ export default async function HomePage({ params }: HomePageProps) {
                   {locale === 'vi' ? 'Trụ sở chính' : locale === 'zh' ? '总部' : 'Headquarters'}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  <strong className="text-gray-900">625 Trần Xuân Soạn</strong><br />
-                  Phường Tân Hưng, Quận 7<br />
+                  <strong className="text-gray-900">A2206-A2207 Tháp A</strong><br />
+                  Sunrise Riverside, Xã Nhà Bè<br />
                   TP. Hồ Chí Minh, Việt Nam
                 </p>
               </div>

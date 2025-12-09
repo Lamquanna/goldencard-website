@@ -145,28 +145,28 @@ export function EnhancedDashboardHome() {
         label: 'Tạo Task',
         icon: <Plus className="w-4 h-4" />,
         permission: 'projects.create',
-        onClick: () => console.log('New task'),
+        onClick: () => alert('Mở form tạo công việc mới'),
       },
       {
         id: 'new-lead',
         label: 'Thêm Lead',
         icon: <Target className="w-4 h-4" />,
         permission: 'crm.create',
-        onClick: () => console.log('New lead'),
+        onClick: () => alert('Mở form thêm khách hàng tiềm năng'),
       },
       {
         id: 'new-employee',
         label: 'Thêm nhân viên',
         icon: <Users className="w-4 h-4" />,
         permission: 'hrm.create',
-        onClick: () => console.log('New employee'),
+        onClick: () => alert('Mở form thêm nhân viên mới'),
       },
       {
         id: 'create-invoice',
         label: 'Tạo hóa đơn',
         icon: <DollarSign className="w-4 h-4" />,
         permission: 'finance.create',
-        onClick: () => console.log('New invoice'),
+        onClick: () => alert('Mở form tạo hóa đơn mới'),
       },
     ];
     

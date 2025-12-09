@@ -73,6 +73,10 @@ export interface Lead {
   customer_last_message_at?: string;
   admin_last_read_at?: string;
   
+  // Contact info indicator
+  has_contact_info?: boolean;
+  is_anonymous?: boolean;
+  
   // Metadata
   metadata?: Record<string, unknown>;
   

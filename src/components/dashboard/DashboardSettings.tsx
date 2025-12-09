@@ -85,25 +85,25 @@ function WidgetSettingsItem({ widget, onToggle }: WidgetSettingsItemProps) {
       exit={{ opacity: 0, x: 20 }}
       className={cn(
         'flex items-center justify-between p-3 rounded-lg border',
-        'bg-white dark:bg-gray-800',
-        'border-gray-200 dark:border-gray-700',
-        'hover:border-amber-300 dark:hover:border-amber-600',
+        'bg-white',
+        'border-gray-200',
+        'hover:border-amber-300',
         'transition-colors duration-200'
       )}
     >
       <div className="flex items-center gap-3">
         <button
-          className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="cursor-grab text-gray-400 hover:text-gray-600"
           aria-label={t.settings.dragToReorder}
         >
           <GripVertical className="w-4 h-4" />
         </button>
         <div>
-          <p className="font-medium text-gray-900 dark:text-white text-sm">
+          <p className="font-medium text-gray-900 text-sm">
             {widget.title}
           </p>
           {widget.description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500">
               {widget.description}
             </p>
           )}
@@ -286,7 +286,7 @@ export function DashboardSettings({ trigger, className }: DashboardSettingsProps
               </div>
               
               {widgets.length === 0 && (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500">
                   {t.settings.noWidgets}
                 </div>
               )}
@@ -310,8 +310,8 @@ export function DashboardSettings({ trigger, className }: DashboardSettingsProps
                         'flex items-center gap-2 p-3 rounded-lg border text-left',
                         'transition-all duration-200',
                         isActive
-                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-amber-300'
+                          ? 'border-amber-500 bg-amber-50'
+                          : 'border-gray-200 hover:border-amber-300'
                       )}
                       aria-pressed={isActive}
                     >
@@ -321,7 +321,7 @@ export function DashboardSettings({ trigger, className }: DashboardSettingsProps
                       )} />
                       <span className={cn(
                         'text-sm font-medium',
-                        isActive ? 'text-amber-700 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'
+                        isActive ? 'text-amber-700' : 'text-gray-700'
                       )}>
                         {preset.name}
                       </span>

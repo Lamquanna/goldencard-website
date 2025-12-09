@@ -120,8 +120,8 @@ const organizationStructuredData = {
   description: "Công ty năng lượng tái tạo hàng đầu Việt Nam - Điện mặt trời, điện gió, IoT thông minh",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "625 Trần Xuân Soạn",
-    addressLocality: "Quận 7",
+    streetAddress: "A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè",
+    addressLocality: "Huyện Nhà Bè",
     addressRegion: "TP. Hồ Chí Minh",
     postalCode: "700000",
     addressCountry: "VN"
@@ -162,16 +162,16 @@ const localBusinessStructuredData = {
   telephone: "+84-3333-142-88",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "625 Trần Xuân Soạn, Phường Tân Hưng",
-    addressLocality: "Quận 7",
+    streetAddress: "A2206-A2207 Tháp A, Sunrise Riverside, Xã Nhà Bè",
+    addressLocality: "Huyện Nhà Bè",
     addressRegion: "TP. Hồ Chí Minh",
     postalCode: "700000",
     addressCountry: "VN"
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 10.737992,
-    longitude: 106.694178
+    latitude: 10.7186,
+    longitude: 106.7246
   },
   openingHoursSpecification: [
     {

@@ -285,7 +285,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
       </Section>
 
       {/* Team Section - New Professional Team Component */}
-      <TeamSection />
+      <TeamSection locale={locale} />
 
       {/* Certifications */}
       <Section

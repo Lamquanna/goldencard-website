@@ -59,6 +59,9 @@ export interface Lead {
   convertedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  // Contact info indicator
+  has_contact_info?: boolean;
+  is_anonymous?: boolean;
 }
 
 // Contact Types

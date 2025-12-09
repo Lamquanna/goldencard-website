@@ -119,23 +119,23 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Light theme */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <Link href="/admin" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">GE</span>
             </div>
-            <span className="text-white font-semibold">GoldenEnergy</span>
+            <span className="text-gray-900 font-semibold">GoldenEnergy</span>
           </Link>
           <button
             onClick={onClose}
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-gray-500 hover:text-gray-900"
           >
             {Icons.close}
           </button>
@@ -151,8 +151,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-yellow-500/10 text-yellow-500'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
                 {item.icon}
@@ -163,14 +163,14 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-white font-medium">A</span>
+            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-gray-700 font-medium">A</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">Admin User</p>
-              <p className="text-xs text-gray-400 truncate">admin@goldenenergy.vn</p>
+              <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
+              <p className="text-xs text-gray-500 truncate">admin@goldenenergy.vn</p>
             </div>
             {Icons.chevronDown}
           </div>

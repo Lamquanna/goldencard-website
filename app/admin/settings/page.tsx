@@ -3,7 +3,50 @@
 // GoldenEnergy HOME Platform
 // ============================================================================
 
+'use client';
+
+import { useState } from 'react';
+
 export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState('company');
+  const [companyInfo, setCompanyInfo] = useState({
+    name: 'GoldenEnergy Vietnam',
+    taxCode: '0123456789',
+    email: 'contact@goldenenergy.vn',
+    phone: '1900 1234',
+    address: '123 Nguyễn Văn Linh, Quận 7, TP.HCM'
+  });
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+
+  const navItems = [
+    { id: 'company', name: 'Thông tin công ty', icon: '🏢' },
+    { id: 'users', name: 'Người dùng', icon: '👥' },
+    { id: 'permissions', name: 'Phân quyền', icon: '🔐' },
+    { id: 'notifications', name: 'Thông báo', icon: '🔔' },
+    { id: 'integrations', name: 'Tích hợp', icon: '🔗' },
+    { id: 'backup', name: 'Sao lưu', icon: '💾' },
+    { id: 'logs', name: 'Nhật ký', icon: '📋' },
+  ];
+
+  const handleSaveCompanyInfo = () => {
+    alert('Đã lưu thông tin công ty thành công!');
+  };
+
+  const handleAddUser = () => {
+    setShowAddUserModal(true);
+    alert('Mở form thêm người dùng mới');
+  };
+
+  const handleEditUser = (userName: string) => {
+    alert(`Mở form chỉnh sửa người dùng: ${userName}`);
+  };
+
+  const handleDeleteUser = (userName: string) => {
+    if (confirm(`Bạn có chắc muốn xóa người dùng ${userName}?`)) {
+      alert(`Đã xóa người dùng: ${userName}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,19 +59,12 @@ export default function SettingsPage() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl border border-gray-100 p-4">
             <nav className="space-y-1">
-              {[
-                { name: 'Thông tin công ty', icon: '🏢', active: true },
-                { name: 'Người dùng', icon: '👥', active: false },
-                { name: 'Phân quyền', icon: '🔐', active: false },
-                { name: 'Thông báo', icon: '🔔', active: false },
-                { name: 'Tích hợp', icon: '🔗', active: false },
-                { name: 'Sao lưu', icon: '💾', active: false },
-                { name: 'Nhật ký', icon: '📋', active: false },
-              ].map((item, i) => (
+              {navItems.map((item) => (
                 <button
-                  key={i}
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                    item.active
+                    activeTab === item.id
                       ? 'bg-yellow-50 text-yellow-700 font-medium'
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -51,7 +87,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tên công ty</label>
                 <input
                   type="text"
-                  defaultValue="GoldenEnergy Vietnam"
+                  value={companyInfo.name}
+                  onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               </div>
@@ -59,7 +96,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Mã số thuế</label>
                 <input
                   type="text"
-                  defaultValue="0123456789"
+                  value={companyInfo.taxCode}
+                  onChange={(e) => setCompanyInfo({...companyInfo, taxCode: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               </div>
@@ -67,7 +105,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
-                  defaultValue="contact@goldenenergy.vn"
+                  value={companyInfo.email}
+                  onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               </div>
@@ -75,7 +114,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Điện thoại</label>
                 <input
                   type="tel"
-                  defaultValue="1900 1234"
+                  value={companyInfo.phone}
+                  onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               </div>
@@ -83,13 +123,17 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
                 <input
                   type="text"
-                  defaultValue="123 Nguyễn Văn Linh, Quận 7, TP.HCM"
+                  value={companyInfo.address}
+                  onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               </div>
             </div>
             <div className="mt-4 flex justify-end">
-              <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600">
+              <button 
+                onClick={handleSaveCompanyInfo}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600"
+              >
                 Lưu thay đổi
               </button>
             </div>
@@ -99,7 +143,10 @@ export default function SettingsPage() {
           <div className="bg-white rounded-xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Quản lý người dùng</h3>
-              <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600">
+              <button 
+                onClick={handleAddUser}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600"
+              >
                 + Thêm người dùng
               </button>
             </div>
@@ -149,8 +196,18 @@ export default function SettingsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
-                          <button className="text-sm text-blue-600 hover:text-blue-800">Sửa</button>
-                          <button className="text-sm text-red-600 hover:text-red-800">Xóa</button>
+                          <button 
+                            onClick={() => handleEditUser(user.name)}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            Sửa
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteUser(user.name)}
+                            className="text-sm text-red-600 hover:text-red-800"
+                          >
+                            Xóa
+                          </button>
                         </div>
                       </td>
                     </tr>

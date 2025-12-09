@@ -24,7 +24,7 @@ interface MapSectionProps {
 export default function MapSection({ 
   title = "Trụ Sở Chính",
   subtitle = "Liên hệ với chúng tôi",
-  showAllLocations = false,
+  showAllLocations = true,
   className = ""
 }: MapSectionProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);

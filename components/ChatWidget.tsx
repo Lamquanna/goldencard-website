@@ -21,14 +21,25 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [showContactForm, setShowContactForm] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(true); // Default anonymous
   const [currentLeadId, setCurrentLeadId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const quickReplies = [
+  const quickReplies = locale === 'vi' ? [
     "Tư vấn lắp đặt cho gia đình",
     "Tư vấn lắp đặt doanh nghiệp",
     "Cần tìm hiểu chính sách đại lý",
     "Hỗ trợ bảo hành - Sửa chữa"
+  ] : locale === 'zh' ? [
+    "家庭安装咨询",
+    "企业安装咨询",
+    "代理政策了解",
+    "售后服务支持"
+  ] : [
+    "Residential installation consultation",
+    "Commercial installation consultation",
+    "Dealer policy inquiry",
+    "Warranty & Repair support"
   ];
 
   const autoReplies: Record<string, string> = {
@@ -41,19 +52,61 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
     "Hỗ trợ bảo hành - Sửa chữa": "Golden Energy hỗ trợ bảo hành và sửa chữa:\n\n⚡ Bảo hành:\n- Tấm pin: 25 năm\n- Inverter: 5-10 năm\n- Phụ kiện: 2-5 năm\n\n🔧 Dịch vụ:\n- Bảo trì định kỳ\n- Sửa chữa khẩn cấp 24/7\n- Vệ sinh hệ thống\n\nVui lòng cho biết:\n1. Sản phẩm cần hỗ trợ?\n2. Vấn đề gặp phải?\n3. Số điện thoại liên hệ?"
   };
 
+  const texts = {
+    vi: {
+      greeting: 'Xin chào! Quý khách đang cần Golden Energy hỗ trợ gì ạ?',
+      online: 'Trực tuyến',
+      inputPlaceholder: 'Nhập tin nhắn...',
+      contactOptional: 'Để lại thông tin để được ưu tiên hỗ trợ (tùy chọn):',
+      name: 'Họ và tên',
+      phone: 'Số điện thoại',
+      submit: 'Gửi thông tin',
+      skip: 'Bỏ qua, chat ẩn danh',
+      anonymousNote: '💡 Chat ẩn danh sẽ bị xóa sau 12h nếu không được phản hồi',
+      thankYou: 'Cảm ơn! Thông tin đã được gửi tới đội ngũ tư vấn. Chúng tôi sẽ phản hồi trong vài phút.',
+      defaultReply: 'Cảm ơn bạn! Nhân viên sẽ hỗ trợ ngay.',
+    },
+    en: {
+      greeting: 'Hello! How can Golden Energy help you today?',
+      online: 'Online',
+      inputPlaceholder: 'Type a message...',
+      contactOptional: 'Leave your contact for priority support (optional):',
+      name: 'Full name',
+      phone: 'Phone number',
+      submit: 'Submit',
+      skip: 'Skip, chat anonymously',
+      anonymousNote: '💡 Anonymous chats will be deleted after 12h if not replied',
+      thankYou: 'Thank you! Your information has been sent to our team. We will respond shortly.',
+      defaultReply: 'Thank you! Our team will assist you shortly.',
+    },
+    zh: {
+      greeting: '您好！Golden Energy可以为您提供什么帮助？',
+      online: '在线',
+      inputPlaceholder: '输入消息...',
+      contactOptional: '留下联系方式以获得优先支持（可选）：',
+      name: '姓名',
+      phone: '电话',
+      submit: '提交',
+      skip: '跳过，匿名聊天',
+      anonymousNote: '💡 匿名聊天如未回复将在12小时后删除',
+      thankYou: '谢谢！您的信息已发送给我们的团队。我们将尽快回复。',
+      defaultReply: '谢谢您！我们的团队将尽快为您服务。',
+    },
+  };
+
+  const t = texts[locale as keyof typeof texts] || texts.vi;
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Initial greeting
       setMessages([{
         id: '1',
         type: 'bot',
-        text: 'Xin chào! Quý khách đang cần Golden Energy hỗ trợ gì ạ?',
+        text: t.greeting,
         timestamp: new Date()
       }]);
     }
-  }, [isOpen]);
+  }, [isOpen, t.greeting]);
 
-  // Track fetched message IDs to prevent duplicates
   const fetchedMessageIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -71,14 +124,13 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
           const data = await response.json();
           const serverMessages = data.messages || [];
           
-          // Filter only agent messages not yet fetched
           const newAgentMessages = serverMessages
-            .filter((msg: any) => 
+            .filter((msg: { sender_type: string; id: string }) => 
               msg.sender_type === 'agent' && 
               !fetchedMessageIdsRef.current.has(msg.id)
             )
-            .map((msg: any) => {
-              fetchedMessageIdsRef.current.add(msg.id); // Mark as fetched
+            .map((msg: { id: string; message: string; created_at: string }) => {
+              fetchedMessageIdsRef.current.add(msg.id);
               return {
                 id: msg.id,
                 type: 'bot' as const,
@@ -96,17 +148,13 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
       }
     };
 
-    // Poll every 3 seconds
     const interval = setInterval(fetchNewMessages, 3000);
-    
-    // Fetch immediately when lead is created
     fetchNewMessages();
 
     return () => clearInterval(interval);
   }, [currentLeadId, isOpen]);
 
   const handleQuickReply = async (reply: string) => {
-    // Add user message
     const userMsg: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -115,19 +163,20 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
     };
     setMessages(prev => [...prev, userMsg]);
 
-    // Add bot auto-reply
     setTimeout(() => {
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        text: autoReplies[reply] || "Cảm ơn bạn! Nhân viên sẽ hỗ trợ ngay.",
+        text: autoReplies[reply] || t.defaultReply,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botMsg]);
 
-      // Show contact form after auto-reply to collect info
+      // Show optional contact form after auto-reply
       setTimeout(() => {
-        setShowContactForm(true);
+        if (!customerName && !customerPhone) {
+          setShowContactForm(true);
+        }
       }, 1000);
     }, 500);
   };
@@ -135,13 +184,6 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // If no contact info yet, show form first
-    if (!customerName || !customerPhone) {
-      setShowContactForm(true);
-      return;
-    }
-
-    // Add user message
     const userMsg: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -149,22 +191,23 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMsg]);
+    const messageText = inputText;
     setInputText("");
 
-    // Send to API
     try {
       if (!currentLeadId) {
-        // Create lead first
+        // Create anonymous or identified lead
         const leadRes = await fetch("/api/crm/leads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: customerName,
-            phone: customerPhone,
-            message: inputText,
+            name: customerName || `Khách ẩn danh ${Date.now()}`,
+            phone: customerPhone || null,
+            message: messageText,
             source: "website",
             source_url: window.location.href,
-            locale
+            locale,
+            is_anonymous: isAnonymous && !customerName && !customerPhone,
           }),
         });
 
@@ -172,33 +215,29 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
           const { lead } = await leadRes.json();
           setCurrentLeadId(lead.id);
 
-          // Send chat message
           await fetch("/api/crm/messages", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               lead_id: lead.id,
               sender_type: "customer",
-              sender_name: customerName,
-              message: inputText
+              sender_name: customerName || "Khách ẩn danh",
+              message: messageText
             }),
           });
         }
       } else {
-        // Send message to existing lead
         await fetch("/api/crm/messages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             lead_id: currentLeadId,
             sender_type: "customer",
-            sender_name: customerName,
-            message: inputText
+            sender_name: customerName || "Khách ẩn danh",
+            message: messageText
           }),
         });
       }
-      
-      // Real-time polling will handle showing admin replies
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -206,10 +245,10 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
 
   const handleSubmitContactForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerPhone) return;
+    
+    setIsAnonymous(false);
 
     try {
-      // Create lead immediately when customer submits contact info
       const conversationHistory = messages
         .filter(m => m.type === 'user')
         .map(m => m.text)
@@ -219,21 +258,21 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: customerName,
-          phone: customerPhone,
+          name: customerName || `Khách ${Date.now()}`,
+          phone: customerPhone || null,
           message: conversationHistory || "Khách hàng chat từ website",
           source: "website",
           source_url: window.location.href,
-          locale
+          locale,
+          is_anonymous: false,
+          has_contact_info: !!(customerName || customerPhone),
         }),
       });
 
       if (response.ok) {
         const { lead } = await response.json();
         setCurrentLeadId(lead.id);
-        console.log('✅ Lead created in CRM:', lead);
 
-        // Send all user messages to chat history
         for (const msg of messages.filter(m => m.type === 'user')) {
           await fetch("/api/crm/messages", {
             method: "POST",
@@ -241,7 +280,7 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
             body: JSON.stringify({
               lead_id: lead.id,
               sender_type: "customer",
-              sender_name: customerName,
+              sender_name: customerName || "Khách hàng",
               message: msg.text
             }),
           });
@@ -249,21 +288,22 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
 
         setShowContactForm(false);
         
-        // Add confirmation message
         const botMsg: Message = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          text: `Cảm ơn ${customerName}! Thông tin đã được gửi tới đội ngũ tư vấn. Anh/chị có thể tiếp tục nhắn tin ở đây, chúng tôi sẽ phản hồi trong vài phút.`,
+          text: customerName ? `Cảm ơn ${customerName}! ${t.thankYou}` : t.thankYou,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, botMsg]);
-      } else {
-        alert("Không thể gửi thông tin. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Error creating lead:", error);
-      alert("Có lỗi xảy ra. Vui lòng thử lại.");
     }
+  };
+
+  const handleSkipContactForm = () => {
+    setShowContactForm(false);
+    setIsAnonymous(true);
   };
 
   return (
@@ -307,7 +347,10 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
                   </div>
                   <div>
                     <div className="font-semibold">Golden Energy</div>
-                    <div className="text-xs text-blue-100">Trực tuyến</div>
+                    <div className="text-xs text-blue-100 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      {t.online}
+                    </div>
                   </div>
                 </div>
                 <button
@@ -359,35 +402,43 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
                   </div>
                 )}
 
-                {/* Contact Form Inline */}
+                {/* Optional Contact Form */}
                 {showContactForm && (
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-200">
                     <div className="text-sm font-medium text-gray-900 mb-3">
-                      Vui lòng để lại thông tin để được hỗ trợ tốt hơn:
+                      {t.contactOptional}
                     </div>
                     <form onSubmit={handleSubmitContactForm} className="space-y-2">
                       <input
                         type="text"
-                        placeholder="Họ và tên *"
+                        placeholder={t.name}
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <input
                         type="tel"
-                        placeholder="Số điện thoại *"
+                        placeholder={t.phone}
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <button
                         type="submit"
                         className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                       >
-                        Xác nhận
+                        {t.submit}
                       </button>
+                      <button
+                        type="button"
+                        onClick={handleSkipContactForm}
+                        className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        {t.skip}
+                      </button>
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        {t.anonymousNote}
+                      </p>
                     </form>
                   </div>
                 )}
@@ -403,7 +454,7 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Nhập tin nhắn..."
+                    placeholder={t.inputPlaceholder}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                   <button
