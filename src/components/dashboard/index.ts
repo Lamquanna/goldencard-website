@@ -24,6 +24,10 @@ export { CalendarPreview } from './CalendarPreview';
 export { ProgressWidget } from './ProgressWidget';
 export { StatsComparison } from './StatsComparison';
 export { TeamOverview } from './TeamOverview';
+export { DashboardSettings } from './DashboardSettings';
+
+// Localization
+export { dashboardLocale } from './locale';
 
 // Main Dashboard Pages
 export { DashboardHome } from './DashboardHome';

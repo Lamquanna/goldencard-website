@@ -39,6 +39,10 @@ export {
   preferenceService,
 } from './services';
 
+// API Helpers
+export { dashboardAPI, DashboardAPI } from './api';
+export type { SystemOverviewData, ModuleAnalyticsData, CalendarEvent } from './api';
+
 // ============================================================================
 // MODULE CONFIGURATION
 // ============================================================================
