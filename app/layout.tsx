@@ -2,6 +2,7 @@
 import { bodyFont, headingFont } from "./fonts";
 import "./globals.css";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
+import DevTools from "@/components/DevTools";
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
 const criticalStyles = `
@@ -233,6 +234,7 @@ export default function RootLayout({
         <AnalyticsProvider>
           {children}
         </AnalyticsProvider>
+        <DevTools />
       </body>
     </html>
   );
