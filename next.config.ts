@@ -8,11 +8,6 @@ const nextConfig: NextConfig = {
   
   // Bật compression
   compress: true,
-
-  // Ignore ESLint warnings during production build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   
   // Tối ưu images for goldenenergy.vn
   images: {

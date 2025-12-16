@@ -39,9 +39,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-// Dashboard Components
-import { DashboardSettings } from '@/components/dashboard/DashboardSettings';
-
 // ============================================================================
 // MODULE DEFINITIONS WITH SUB-MODULES
 // ============================================================================
@@ -318,7 +315,10 @@ export default function EnterpriseCommandCenter() {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              <DashboardSettings />
+              {/* Settings button placeholder */}
+              <Button variant="ghost" size="sm" className="text-gray-600">
+                <Settings className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </div>

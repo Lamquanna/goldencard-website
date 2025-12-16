@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -95,7 +95,7 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
   const modules: { id: SearchableModule; name: string; icon: string }[] = [
     { id: 'crm', name: 'CRM', icon: '💼' },
     { id: 'hrm', name: 'HRM', icon: '👥' },
-    { id: 'project', name: 'Projects', icon: '📁' },
+    { id: 'project', name: 'Projects', icon: '📋' },
     { id: 'inventory', name: 'Inventory', icon: '📦' },
     { id: 'finance', name: 'Finance', icon: '💰' },
     { id: 'files', name: 'Files', icon: '📂' },
@@ -107,10 +107,10 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
     <div className="fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-[15vh]">
       <div 
         ref={modalRef}
-        className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
       >
         {/* Search Input */}
-        <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3 p-4 border-b border-gray-200">
           <Search className="w-5 h-5 text-gray-400" />
           <input
             ref={inputRef}
@@ -119,12 +119,12 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Tìm kiếm... (leads, tasks, invoices...)"
-            className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder:text-gray-400"
+            className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder:text-gray-400"
           />
           {loading && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 ${
+            className={`p-1.5 rounded-md hover:bg-gray-100 ${
               selectedModules.length > 0 ? 'text-blue-500' : 'text-gray-400'
             }`}
           >
@@ -132,7 +132,7 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
           </button>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"
+            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400"
           >
             <X className="w-4 h-4" />
           </button>
@@ -140,15 +140,15 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
 
         {/* Module Filters */}
         {showFilters && (
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
+          <div className="p-3 border-b border-gray-200 flex flex-wrap gap-2">
             {modules.map(module => (
               <button
                 key={module.id}
                 onClick={() => toggleModule(module.id)}
                 className={`px-3 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition-colors ${
                   selectedModules.includes(module.id)
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <span>{module.icon}</span>
@@ -172,13 +172,13 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
                   onClick={() => handleSelect(result)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                     index === selectedIndex
-                      ? 'bg-blue-50 dark:bg-blue-900/30'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      ? 'bg-blue-50'
+                      : 'hover:bg-gray-50'
                   }`}
                 >
                   <span className="text-xl">{result.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 dark:text-white truncate">
+                    <div className="font-medium text-gray-900 truncate">
                       {result.title}
                     </div>
                     {result.description && (
@@ -187,7 +187,7 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
                       </div>
                     )}
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500">
+                  <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500">
                     {result.module}
                   </span>
                   <ArrowRight className="w-4 h-4 text-gray-400" />
@@ -206,10 +206,10 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
                 <button
                   key={suggestion}
                   onClick={() => setQuery(suggestion)}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50"
                 >
                   <Search className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-700 dark:text-gray-300">{suggestion}</span>
+                  <span className="text-gray-700">{suggestion}</span>
                 </button>
               ))}
             </div>
@@ -229,10 +229,10 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
                     <button
                       key={search}
                       onClick={() => setQuery(search)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50"
                     >
                       <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700 dark:text-gray-300">{search}</span>
+                      <span className="text-gray-700">{search}</span>
                     </button>
                   ))}
                 </div>
@@ -254,18 +254,18 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
                     }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                       index === selectedIndex && query.length < 2
-                        ? 'bg-blue-50 dark:bg-blue-900/30'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        ? 'bg-blue-50'
+                        : 'hover:bg-gray-50'
                     }`}
                   >
                     <span className="text-xl">{item.icon}</span>
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 dark:text-white">
+                      <div className="font-medium text-gray-900">
                         {item.titleVi}
                       </div>
                     </div>
                     {item.shortcut && (
-                      <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded text-gray-500">
+                      <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 rounded text-gray-500">
                         {item.shortcut}
                       </kbd>
                     )}
@@ -281,7 +281,7 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
               <div className="text-gray-400 mb-2">
                 <Search className="w-12 h-12 mx-auto" />
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600">
                 Không tìm thấy kết quả cho "{query}"
               </div>
             </div>
@@ -289,19 +289,19 @@ export function GlobalSearchModal({ isOpen = false, onClose }: GlobalSearchProps
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500">
+        <div className="p-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">↑</kbd>
-              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">↓</kbd>
+              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded">↑</kbd>
+              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded">↓</kbd>
               Di chuyển
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">Enter</kbd>
+              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded">Enter</kbd>
               Chọn
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">Esc</kbd>
+              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded">Esc</kbd>
               Đóng
             </span>
           </div>
@@ -329,11 +329,11 @@ export function SearchTrigger() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm text-gray-500 transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-500 transition-colors"
       >
         <Search className="w-4 h-4" />
         <span className="hidden sm:inline">Tìm kiếm...</span>
-        <kbd className="hidden sm:inline px-1.5 py-0.5 text-xs bg-white dark:bg-gray-700 rounded shadow-sm">
+        <kbd className="hidden sm:inline px-1.5 py-0.5 text-xs bg-white rounded shadow-sm">
           ⌘K
         </kbd>
       </button>

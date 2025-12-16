@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useCallback } from 'react';
 import {
@@ -52,9 +52,9 @@ import { LEAD_STATUS_CONFIG, LEAD_SOURCE_CONFIG, calculateLeadScore, getLeadRati
 // Mock data
 const generateMockLeads = (): Lead[] => {
   const names = [
-    'Nguyễn Văn An', 'Trần Thị Bình', 'Lê Minh Cường', 'Phạm Thu Dung',
-    'Hoàng Văn Em', 'Vũ Thị Phương', 'Đặng Quốc Giang', 'Bùi Thị Hạnh',
-    'Ngô Đức Ích', 'Đinh Văn Khánh', 'Lý Thị Lan', 'Mai Văn Minh',
+    'Nguyá»…n VÄƒn An', 'Tráº§n Thá»‹ BÃ¬nh', 'LÃª Minh CÆ°á»ng', 'Pháº¡m Thu Dung',
+    'HoÃ ng VÄƒn Em', 'VÅ© Thá»‹ PhÆ°Æ¡ng', 'Äáº·ng Quá»‘c Giang', 'BÃ¹i Thá»‹ Háº¡nh',
+    'NgÃ´ Äá»©c Ãch', 'Äinh VÄƒn KhÃ¡nh', 'LÃ½ Thá»‹ Lan', 'Mai VÄƒn Minh',
   ];
   const companies = [
     'ABC Corporation', 'XYZ Trading', 'Tech Solutions', 'Vietnam Solar',
@@ -143,13 +143,13 @@ export default function PipelinePage() {
   }, []);
 
   const handleLeadDelete = useCallback((leadId: string) => {
-    if (confirm('Bạn có chắc muốn xóa lead này?')) {
+    if (confirm('Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a lead nÃ y?')) {
       setLeads((prev) => prev.filter((lead) => lead.id !== leadId));
     }
   }, []);
 
   const handleLeadsDelete = useCallback((leadIds: string[]) => {
-    if (confirm(`Bạn có chắc muốn xóa ${leadIds.length} lead?`)) {
+    if (confirm(`Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a ${leadIds.length} lead?`)) {
       setLeads((prev) => prev.filter((lead) => !leadIds.includes(lead.id)));
     }
   }, []);
@@ -231,7 +231,7 @@ export default function PipelinePage() {
       : leads;
     
     // Convert to CSV
-    const headers = ['Tên', 'Email', 'SĐT', 'Công ty', 'Trạng thái', 'Score', 'Budget', 'Ngày tạo'];
+    const headers = ['TÃªn', 'Email', 'SÄT', 'CÃ´ng ty', 'Tráº¡ng thÃ¡i', 'Score', 'Budget', 'NgÃ y táº¡o'];
     const rows = exportLeads.map((lead) => [
       lead.name,
       lead.email || '',
@@ -279,19 +279,19 @@ export default function PipelinePage() {
     : leads;
 
   const mockUsers = [
-    { id: 'user-1', name: 'Nguyễn Sale A' },
-    { id: 'user-2', name: 'Trần Sale B' },
-    { id: 'user-3', name: 'Lê Manager C' },
+    { id: 'user-1', name: 'Nguyá»…n Sale A' },
+    { id: 'user-2', name: 'Tráº§n Sale B' },
+    { id: 'user-3', name: 'LÃª Manager C' },
   ];
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b bg-white dark:bg-gray-900">
+      <div className="p-6 border-b bg-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Sales Pipeline</h1>
-            <p className="text-gray-500">Quản lý leads theo giai đoạn bán hàng</p>
+            <p className="text-gray-500">Quáº£n lÃ½ leads theo giai Ä‘oáº¡n bÃ¡n hÃ ng</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ export default function PipelinePage() {
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Tìm kiếm..."
+                placeholder="TÃ¬m kiáº¿m..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -339,24 +339,24 @@ export default function PipelinePage() {
               <DialogTrigger asChild>
                 <Button onClick={() => setAddToStatus('new')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Thêm Lead
+                  ThÃªm Lead
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>Thêm Lead mới</DialogTitle>
+                  <DialogTitle>ThÃªm Lead má»›i</DialogTitle>
                   <DialogDescription>
-                    Nhập thông tin khách hàng tiềm năng mới
+                    Nháº­p thÃ´ng tin khÃ¡ch hÃ ng tiá»m nÄƒng má»›i
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Tên *</Label>
+                    <Label htmlFor="name">TÃªn *</Label>
                     <Input
                       id="name"
                       value={newLead.name}
                       onChange={(e) => setNewLead({ ...newLead, name: e.target.value })}
-                      placeholder="Nguyễn Văn A"
+                      placeholder="Nguyá»…n VÄƒn A"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -371,7 +371,7 @@ export default function PipelinePage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">Số điện thoại</Label>
+                      <Label htmlFor="phone">Sá»‘ Ä‘iá»‡n thoáº¡i</Label>
                       <Input
                         id="phone"
                         value={newLead.phone}
@@ -382,7 +382,7 @@ export default function PipelinePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="company">Công ty</Label>
+                      <Label htmlFor="company">CÃ´ng ty</Label>
                       <Input
                         id="company"
                         value={newLead.company}
@@ -391,18 +391,18 @@ export default function PipelinePage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="position">Chức vụ</Label>
+                      <Label htmlFor="position">Chá»©c vá»¥</Label>
                       <Input
                         id="position"
                         value={newLead.position}
                         onChange={(e) => setNewLead({ ...newLead, position: e.target.value })}
-                        placeholder="Giám đốc"
+                        placeholder="GiÃ¡m Ä‘á»‘c"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="source">Nguồn</Label>
+                      <Label htmlFor="source">Nguá»“n</Label>
                       <Select
                         value={newLead.source}
                         onValueChange={(value) => setNewLead({ ...newLead, source: value as LeadSource })}
@@ -431,21 +431,21 @@ export default function PipelinePage() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="notes">Ghi chú</Label>
+                    <Label htmlFor="notes">Ghi chÃº</Label>
                     <Textarea
                       id="notes"
                       value={newLead.notes}
                       onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })}
-                      placeholder="Thông tin thêm về khách hàng..."
+                      placeholder="ThÃ´ng tin thÃªm vá» khÃ¡ch hÃ ng..."
                     />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Hủy
+                    Há»§y
                   </Button>
                   <Button onClick={handleCreateLead} disabled={!newLead.name}>
-                    Tạo Lead
+                    Táº¡o Lead
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -495,14 +495,14 @@ export default function PipelinePage() {
             <SheetTitle>{selectedLead?.name}</SheetTitle>
             <SheetDescription>
               {selectedLead?.company && `${selectedLead.company}`}
-              {selectedLead?.position && ` • ${selectedLead.position}`}
+              {selectedLead?.position && ` â€¢ ${selectedLead.position}`}
             </SheetDescription>
           </SheetHeader>
           {selectedLead && (
             <div className="mt-6 space-y-6">
               {/* Contact Info */}
               <div className="space-y-3">
-                <h4 className="font-medium text-sm text-gray-500">Thông tin liên hệ</h4>
+                <h4 className="font-medium text-sm text-gray-500">ThÃ´ng tin liÃªn há»‡</h4>
                 {selectedLead.email && (
                   <p className="text-sm">{selectedLead.email}</p>
                 )}
@@ -513,10 +513,10 @@ export default function PipelinePage() {
 
               {/* Status & Score */}
               <div className="space-y-3">
-                <h4 className="font-medium text-sm text-gray-500">Trạng thái</h4>
+                <h4 className="font-medium text-sm text-gray-500">Tráº¡ng thÃ¡i</h4>
                 <div className="flex items-center gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">Giai đoạn:</span>
+                    <span className="text-sm text-gray-500">Giai Ä‘oáº¡n:</span>
                     <span className="ml-2 font-medium">
                       {LEAD_STATUS_CONFIG.find((s) => s.id === selectedLead.status)?.nameVi}
                     </span>
@@ -549,16 +549,16 @@ export default function PipelinePage() {
               {/* Notes */}
               {selectedLead.notes && (
                 <div className="space-y-3">
-                  <h4 className="font-medium text-sm text-gray-500">Ghi chú</h4>
+                  <h4 className="font-medium text-sm text-gray-500">Ghi chÃº</h4>
                   <p className="text-sm">{selectedLead.notes}</p>
                 </div>
               )}
 
               {/* Actions */}
               <div className="flex gap-2 pt-4 border-t">
-                <Button className="flex-1">Gọi điện</Button>
-                <Button variant="outline" className="flex-1">Gửi email</Button>
-                <Button variant="outline" className="flex-1">Tạo task</Button>
+                <Button className="flex-1">Gá»i Ä‘iá»‡n</Button>
+                <Button variant="outline" className="flex-1">Gá»­i email</Button>
+                <Button variant="outline" className="flex-1">Táº¡o task</Button>
               </div>
             </div>
           )}

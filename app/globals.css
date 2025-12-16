@@ -93,6 +93,22 @@
   color-scheme: only light;
 }
 
+/* ============================================================================= */
+/* FORCE LIGHT MODE FOR ERP - Override system dark mode preference */
+/* ============================================================================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: only light !important;
+  }
+  
+  /* ERP always uses light mode - override dark: classes */
+  .erp-light-mode,
+  .erp-light-mode * {
+    --tw-text-opacity: 1 !important;
+    color-scheme: only light !important;
+  }
+}
+
 /* Global font weight increase by 50% */
 body {
   font-weight: 600;

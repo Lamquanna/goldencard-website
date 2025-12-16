@@ -13,6 +13,7 @@ import { getRegistry } from '../core/pluginEngine';
 import { getPermissionEngine } from '../core/permissions';
 import { getNotificationService } from '../core/notifications';
 import type { ModuleManifest, User, Workspace, MenuItem } from '../types';
+import { teamData } from '@/lib/team-data';
 
 // -----------------------------------------------------------------------------
 // Context
@@ -240,34 +241,34 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col ${
+      className={`fixed left-0 top-0 bottom-0 bg-white border-r border-gray-200 z-40 transition-all duration-300 flex flex-col ${
         collapsed ? 'w-20' : 'w-64'
       }`}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
         {!collapsed && (
-          <Link href="/home" className="flex items-center gap-2">
+          <Link href="/erp" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF37] to-[#B8960A] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">G</span>
+              <span className="text-white font-bold text-sm">GE</span>
             </div>
             <span className="text-xl font-bold">
               <span className="text-[#D4AF37]">Golden</span>
-              <span className="text-gray-900 dark:text-white">Home</span>
+              <span className="text-gray-900">Energy</span>
             </span>
           </Link>
         )}
         {collapsed && (
-          <Link href="/home" className="mx-auto">
+          <Link href="/erp" className="mx-auto">
             <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#B8960A] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">G</span>
+              <span className="text-white font-bold text-sm">GE</span>
             </div>
           </Link>
         )}
         {!collapsed && (
           <button
             onClick={() => onCollapse(true)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
           >
             {Icons.chevronLeft}
           </button>
@@ -278,16 +279,16 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {/* Home */}
         <Link
-          href="/home"
+          href="/erp"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-            pathname === '/home'
-              ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            pathname === '/erp' || pathname === '/erp/dashboard'
+              ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-semibold'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
           }`}
-          title={collapsed ? 'Trang chủ' : undefined}
+          title={collapsed ? 'Dashboard' : undefined}
         >
           {Icons.home}
-          {!collapsed && <span className="font-medium">Trang chủ</span>}
+          {!collapsed && <span className="font-medium">Dashboard</span>}
         </Link>
 
         {/* Modules by category */}
@@ -298,11 +299,11 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
           return (
             <div key={category} className="pt-4 first:pt-0">
               {!collapsed && (
-                <div className="px-3 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                <div className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                   {categoryLabels[category] || category}
                 </div>
               )}
-              {collapsed && <div className="border-t border-gray-200 dark:border-gray-700 my-2" />}
+              {collapsed && <div className="border-t border-gray-200 my-2" />}
               
               {categoryModules.map(module => (
                 <Link
@@ -310,8 +311,8 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
                   href={module.basePath}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative ${
                     isActive(module.basePath)
-                      ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-semibold'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                   title={collapsed ? module.nameVi : undefined}
                 >
@@ -326,7 +327,7 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
                   )}
                   {/* Tooltip for collapsed */}
                   {collapsed && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                       {module.nameVi}
                     </div>
                   )}
@@ -339,10 +340,10 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
 
       {/* Expand button when collapsed */}
       {collapsed && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 border-t border-gray-200">
           <button
             onClick={() => onCollapse(false)}
-            className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
+            className="w-full p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-500"
           >
             {Icons.chevronRight}
           </button>
@@ -351,13 +352,13 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
 
       {/* Settings & Logout */}
       {!collapsed && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1">
+        <div className="p-3 border-t border-gray-200 space-y-1">
           <Link
             href="/erp/settings"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
               isActive('/erp/settings')
-                ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-semibold'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
             }`}
           >
             {Icons.settings}
@@ -403,12 +404,12 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
   }, []);
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6">
       {/* Left - Menu button (mobile) & Search */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
         >
           {Icons.menu}
         </button>
@@ -416,11 +417,11 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
         {/* Search */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors min-w-[200px] lg:min-w-[300px]"
+          className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors min-w-[200px] lg:min-w-[300px]"
         >
           {Icons.search}
           <span className="text-sm">Tìm kiếm...</span>
-          <kbd className="ml-auto hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+          <kbd className="ml-auto hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-white rounded border border-gray-200">
             <span className="text-xs">⌘</span>K
           </kbd>
         </button>
@@ -429,7 +430,7 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
       {/* Right - Actions */}
       <div className="flex items-center gap-2">
         {/* Quick Create */}
-        <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
+        <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600">
           {Icons.plus}
         </button>
 
@@ -437,7 +438,7 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
         <div className="relative">
           <button
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
+            className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
           >
             {Icons.bell}
             {unreadNotifications > 0 && (
@@ -452,14 +453,14 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
         <div className="relative">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
               <span className="text-[#D4AF37] font-bold text-sm">
                 {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
               </span>
             </div>
-            <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="hidden sm:block text-sm font-medium text-gray-700">
               {user?.fullName || user?.username || 'User'}
             </span>
           </button>
@@ -471,39 +472,27 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
+                className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
               >
-                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                  <p className="font-medium text-gray-900 dark:text-white">{user?.fullName || user?.username}</p>
+                <div className="px-4 py-2 border-b border-gray-200">
+                  <p className="font-medium text-gray-900">{user?.fullName || user?.username}</p>
                   <p className="text-sm text-gray-500">{user?.email}</p>
                 </div>
                 <div className="py-1">
                   <Link
                     href="/erp/profile"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     Hồ sơ cá nhân
                   </Link>
                   <Link
                     href="/erp/settings"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     Cài đặt
                   </Link>
-                </div>
-                <div className="border-t border-gray-200 dark:border-gray-700 py-1">
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('crm_auth');
-                      router.push('/erp/login');
-                    }}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
-                  >
-                    {Icons.logout}
-                    Đăng xuất
-                  </button>
                 </div>
               </motion.div>
             )}
@@ -525,20 +514,20 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden"
+              className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
                 {Icons.search}
                 <input
                   type="text"
                   placeholder="Tìm kiếm modules, trang, dữ liệu..."
-                  className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-500"
+                  className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-500"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   autoFocus
                 />
-                <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">ESC</kbd>
+                <kbd className="px-2 py-1 text-xs bg-gray-100 rounded">ESC</kbd>
               </div>
               <div className="max-h-[400px] overflow-y-auto p-2">
                 {/* Search results would go here */}
@@ -571,77 +560,42 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
   const [activeModules, setActiveModules] = useState<ModuleManifest[]>([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const pathname = usePathname();
 
-  // Check if on login page
-  const isLoginPage = pathname === '/erp/login';
-
   useEffect(() => {
-    const initializeApp = async () => {
-      if (isLoginPage) {
-        setLoading(false);
-        return;
-      }
+    const initializeApp = () => {
+      // No login required - use default admin user
+      const defaultEmployee = teamData[0]; // GES001 - CEO
+      
+      setUser({
+        id: 'user-GES001',
+        email: 'ges001@goldenenergy.vn',
+        username: 'GES001',
+        fullName: defaultEmployee?.nameVi || 'Admin',
+        roles: ['admin'],
+        workspaces: [],
+        preferences: {
+          theme: 'light',
+          language: 'vi',
+          notifications: {
+            email: true,
+            push: true,
+            desktop: true,
+            sound: true,
+            channels: { tasks: true, mentions: true, updates: true, marketing: false },
+          },
+          sidebar: { collapsed: false, pinnedModules: [] },
+        },
+        status: 'active',
+        createdAt: new Date(),
+      });
 
-      // Check auth
-      const token = localStorage.getItem('crm_auth');
-      if (!token) {
-        router.push('/erp/login');
-        return;
-      }
-
-      try {
-        // Verify token
-        const response = await fetch('/api/erp/auth/verify', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            username: data.user.username,
-            fullName: data.user.fullName || data.user.username,
-            roles: [data.user.role],
-            workspaces: [],
-            preferences: {
-              theme: 'light',
-              language: 'vi',
-              notifications: {
-                email: true,
-                push: true,
-                desktop: true,
-                sound: true,
-                channels: { tasks: true, mentions: true, updates: true, marketing: false },
-              },
-              sidebar: { collapsed: false, pinnedModules: [] },
-            },
-            status: 'active',
-            createdAt: new Date(),
-          });
-
-          // Load active modules
-          // In production, this would come from database
-          setActiveModules(getDefaultModules());
-        } else {
-          localStorage.removeItem('crm_auth');
-          router.push('/erp/login');
-          return;
-        }
-      } catch (error) {
-        console.error('Auth error:', error);
-        localStorage.removeItem('crm_auth');
-        router.push('/erp/login');
-        return;
-      }
-
+      setActiveModules(getDefaultModules());
       setLoading(false);
     };
 
     initializeApp();
-  }, [isLoginPage, router]);
+  }, []);
 
   // Apply theme
   useEffect(() => {
@@ -665,22 +619,13 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
     unreadNotifications,
   };
 
-  // Login page - no shell
-  if (isLoginPage) {
-    return (
-      <AppShellContext.Provider value={contextValue}>
-        {children}
-      </AppShellContext.Provider>
-    );
-  }
-
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Đang tải...</p>
+          <p className="text-gray-600">Đang tải...</p>
         </div>
       </div>
     );
@@ -688,7 +633,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
 
   return (
     <AppShellContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 erp-light-mode">
         {/* Sidebar - Desktop */}
         <div className="hidden lg:block">
           <Sidebar
@@ -723,7 +668,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
                 />
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100"
                 >
                   {Icons.close}
                 </button>
@@ -926,7 +871,7 @@ function getDefaultModules(): ModuleManifest[] {
       color: '#14B8A6',
       author: 'GoldenEnergy',
       category: 'operations',
-      basePath: '/erp/maps',
+      basePath: '/erp/map',
       routes: [],
       permissions: [],
       defaultRoles: ['admin', 'manager'],

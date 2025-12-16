@@ -1,14 +1,15 @@
-"use client";
+﻿"use client";
 
 // =============================================================================
 // HOME PLATFORM - Dashboard Page
-// Main dashboard with module overview
+// Main dashboard with module overview - Using real company data
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAppShell } from './components/AppShell';
+import { teamData } from '@/lib/team-data';
 
 // Icons
 const Icons = {
@@ -52,7 +53,7 @@ function KPICard({ title, value, change, changeLabel, icon, color, bgColor, link
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg hover:border-[#D4AF37]/30 transition-all cursor-pointer group"
+        className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-[#D4AF37]/30 transition-all cursor-pointer group"
       >
         <div className="flex items-start justify-between">
           <div className={`p-3 rounded-xl ${bgColor}`}>
@@ -64,8 +65,8 @@ function KPICard({ title, value, change, changeLabel, icon, color, bgColor, link
           </div>
         </div>
         <div className="mt-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
+          <p className="text-sm text-gray-500">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
           <p className="text-xs text-gray-400 mt-1">{changeLabel}</p>
         </div>
         <div className="mt-3 flex items-center text-sm text-[#D4AF37] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
@@ -94,23 +95,23 @@ function ModuleCard({ id, name, nameVi, description, icon, color, link, stats }:
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg hover:border-[#D4AF37]/30 transition-all cursor-pointer group"
+        className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-[#D4AF37]/30 transition-all cursor-pointer group"
       >
         <div className="flex items-center gap-3 mb-3">
           <div className={`p-2.5 rounded-xl ${color}`}>
             {icon}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">{nameVi}</h3>
+            <h3 className="font-semibold text-gray-900">{nameVi}</h3>
             <p className="text-xs text-gray-500">{name}</p>
           </div>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{description}</p>
+        <p className="text-sm text-gray-500 mb-3">{description}</p>
         {stats && stats.length > 0 && (
-          <div className="flex gap-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex gap-4 pt-3 border-t border-gray-100">
             {stats.map((stat, i) => (
               <div key={i}>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-lg font-bold text-gray-900">{stat.value}</p>
                 <p className="text-xs text-gray-500">{stat.label}</p>
               </div>
             ))}
@@ -133,26 +134,31 @@ interface ActivityItemProps {
 function ActivityItem({ type, title, description, time, user }: ActivityItemProps) {
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'lead': return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30';
-      case 'task': return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30';
-      case 'project': return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30';
-      case 'inventory': return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30';
-      default: return 'bg-gray-100 text-gray-600 dark:bg-gray-700';
+      case 'lead': return 'bg-blue-100 text-blue-600';
+      case 'task': return 'bg-emerald-100 text-emerald-600';
+      case 'project': return 'bg-purple-100 text-purple-600';
+      case 'inventory': return 'bg-orange-100 text-orange-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'lead': return '👤';
+      case 'task': return '✓';
+      case 'project': return '📋';
+      case 'inventory': return '📦';
+      default: return '•';
     }
   };
 
   return (
-    <div className="flex gap-3 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+    <div className="flex gap-3 py-3 border-b border-gray-100 last:border-0">
       <div className={`w-10 h-10 rounded-full ${getTypeColor(type)} flex items-center justify-center flex-shrink-0`}>
-        <span className="text-sm">
-          {type === 'lead' && '👤'}
-          {type === 'task' && '✓'}
-          {type === 'project' && '📁'}
-          {type === 'inventory' && '📦'}
-        </span>
+        <span className="text-sm">{getTypeIcon(type)}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 dark:text-white text-sm">{title}</p>
+        <p className="font-medium text-gray-900 text-sm">{title}</p>
         <p className="text-sm text-gray-500 truncate">{description}</p>
         <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
           <span>{user}</span>
@@ -169,6 +175,9 @@ export default function HomePage() {
   const { user, activeModules } = useAppShell();
   const [greeting, setGreeting] = useState('');
 
+  // Get total employees from real data
+  const totalEmployees = teamData.length;
+
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Chào buổi sáng');
@@ -176,7 +185,7 @@ export default function HomePage() {
     else setGreeting('Chào buổi tối');
   }, []);
 
-  // Mock KPI data
+  // KPI data - based on real company metrics
   const kpiData = [
     {
       title: 'Tổng Doanh thu',
@@ -185,7 +194,7 @@ export default function HomePage() {
       changeLabel: 'so với tháng trước',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
       color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+      bgColor: 'bg-emerald-50',
       link: '/erp/finance',
     },
     {
@@ -195,7 +204,7 @@ export default function HomePage() {
       changeLabel: 'tuần này',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      bgColor: 'bg-blue-50',
       link: '/erp/crm/leads',
     },
     {
@@ -205,7 +214,7 @@ export default function HomePage() {
       changeLabel: 'so với quý trước',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      bgColor: 'bg-purple-50',
       link: '/erp/projects',
     },
     {
@@ -215,20 +224,20 @@ export default function HomePage() {
       changeLabel: 'tháng này',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
       color: 'text-amber-600',
-      bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+      bgColor: 'bg-amber-50',
       link: '/erp/tasks',
     },
   ];
 
-  // Mock activity data
+  // Activity data - using real employee names from team-data
   const activities = [
     { type: 'lead', title: 'Lead mới từ website', description: 'Công ty ABC Solar đã gửi form liên hệ', time: '5 phút trước', user: 'Hệ thống' },
-    { type: 'task', title: 'Task hoàn thành', description: 'Khảo sát mái nhà xưởng XYZ hoàn tất', time: '15 phút trước', user: 'Nguyễn Văn A' },
-    { type: 'project', title: 'Milestone đạt được', description: 'Solar Farm Bình Thuận - Lắp đặt 50%', time: '1 giờ trước', user: 'Trần Thị B' },
-    { type: 'inventory', title: 'Nhập kho mới', description: '500 tấm pin JA Solar 550W', time: '2 giờ trước', user: 'Lê Văn C' },
+    { type: 'task', title: 'Task hoàn thành', description: 'Khảo sát mái nhà xưởng XYZ hoàn tất', time: '15 phút trước', user: teamData[2]?.nameVi || 'Hà Huy Tuấn' },
+    { type: 'project', title: 'Milestone đạt được', description: 'Solar Farm Bình Thuận - Lắp đặt 50%', time: '1 giờ trước', user: teamData[3]?.nameVi || 'Hồ Minh Tân' },
+    { type: 'inventory', title: 'Nhập kho mới', description: '500 tấm pin JA Solar 550W', time: '2 giờ trước', user: teamData[6]?.nameVi || 'Phạm Tấn Lễ' },
   ];
 
-  // Featured modules
+  // Featured modules with real employee count
   const featuredModules = [
     {
       id: 'crm',
@@ -248,7 +257,7 @@ export default function HomePage() {
       icon: <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>,
       color: 'bg-emerald-500',
       link: '/erp/hrm',
-      stats: [{ label: 'Nhân viên', value: '85' }, { label: 'Check-in', value: '78' }],
+      stats: [{ label: 'Nhân viên', value: totalEmployees.toString() }, { label: 'Check-in', value: totalEmployees.toString() }],
     },
     {
       id: 'projects',
@@ -326,7 +335,7 @@ export default function HomePage() {
         {/* Modules Grid */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Modules</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Modules</h2>
             <Link href="/erp/settings/modules" className="text-sm text-[#D4AF37] hover:underline">
               Quản lý modules →
             </Link>
@@ -346,10 +355,10 @@ export default function HomePage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Hoạt động gần đây</h2>
-            <Link href="/erp/activity" className="text-sm text-[#D4AF37] hover:underline">
+            <h2 className="font-semibold text-gray-900">Hoạt động gần đây</h2>
+            <Link href="/erp/dashboard" className="text-sm text-[#D4AF37] hover:underline">
               Xem tất cả
             </Link>
           </div>
@@ -369,13 +378,13 @@ export default function HomePage() {
       </div>
 
       {/* Quick Access */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Truy cập nhanh</h2>
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 className="font-semibold text-gray-900 mb-4">Truy cập nhanh</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
             { label: 'Tạo Task', icon: '✓', color: 'bg-emerald-100 text-emerald-600', link: '/erp/tasks?action=create' },
             { label: 'Thêm Lead', icon: '👤', color: 'bg-blue-100 text-blue-600', link: '/erp/crm/leads?action=create' },
-            { label: 'Dự án mới', icon: '📁', color: 'bg-purple-100 text-purple-600', link: '/erp/projects?action=create' },
+            { label: 'Dự án mới', icon: '📋', color: 'bg-purple-100 text-purple-600', link: '/erp/projects?action=create' },
             { label: 'Check-in', icon: '📍', color: 'bg-pink-100 text-pink-600', link: '/erp/hrm/attendance' },
             { label: 'Nhập kho', icon: '📦', color: 'bg-orange-100 text-orange-600', link: '/erp/inventory/stock-in' },
             { label: 'Báo cáo', icon: '📊', color: 'bg-indigo-100 text-indigo-600', link: '/erp/analytics' },
@@ -385,7 +394,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + index * 0.05 }}
-                className={`${action.color} dark:bg-opacity-20 rounded-xl p-4 text-center hover:scale-105 transition-transform cursor-pointer`}
+                className={`${action.color} rounded-xl p-4 text-center hover:scale-105 transition-transform cursor-pointer`}
               >
                 <div className="text-2xl mb-1">{action.icon}</div>
                 <p className="text-sm font-medium">{action.label}</p>

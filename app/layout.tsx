@@ -170,8 +170,8 @@ const localBusinessStructuredData = {
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 10.7198,
-    longitude: 106.7220
+    latitude: 10.721733,
+    longitude: 106.702509
   },
   openingHoursSpecification: [
     {

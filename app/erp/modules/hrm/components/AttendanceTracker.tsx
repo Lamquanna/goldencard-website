@@ -493,17 +493,70 @@ function StatsSummary({ records }: StatsSummaryProps) {
 
 export function AttendanceTracker({
   currentUser,
-  attendanceHistory = mockAttendanceHistory,
+  attendanceHistory: initialHistory = mockAttendanceHistory,
   geofenceSites = DEFAULT_GEOFENCE_SITES,
-  onCheckIn,
-  onCheckOut,
+  onCheckIn: externalCheckIn,
+  onCheckOut: externalCheckOut,
 }: Partial<AttendanceTrackerProps>) {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [weekOffset, setWeekOffset] = useState(0)
+  const [attendanceHistory, setAttendanceHistory] = useState(initialHistory)
+  const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(() => {
+    return initialHistory.find(a => isSameDay(new Date(a.date), new Date())) || null
+  })
 
   // Check if user has checked in today
-  const todayAttendance = attendanceHistory.find(a => isSameDay(new Date(a.date), new Date()))
-  const isCheckedIn = !!todayAttendance?.checkInTime && !todayAttendance?.checkOutTime
+  const isCheckedIn = !!todayRecord?.checkInTime && !todayRecord?.checkOutTime
+  const isCheckedOut = !!todayRecord?.checkInTime && !!todayRecord?.checkOutTime
+
+  const handleCheckIn = (method: CheckInMethod) => {
+    const now = new Date()
+    const newRecord: AttendanceRecord = {
+      id: `att-${Date.now()}`,
+      employeeId: currentUser?.id || 'emp-1',
+      employeeName: currentUser?.name || 'Nguyen Van Admin',
+      employeeCode: currentUser?.employeeCode || 'GES001',
+      department: currentUser?.department || 'Ban Giam Doc',
+      date: now,
+      checkInTime: now,
+      checkInMethod: method,
+      status: now.getHours() >= 9 ? 'late' : 'present',
+      workingHours: 0,
+      overtimeHours: 0,
+      createdAt: now,
+      updatedAt: now,
+    }
+    
+    setTodayRecord(newRecord)
+    setAttendanceHistory(prev => [newRecord, ...prev.filter(a => !isSameDay(new Date(a.date), now))])
+    
+    // Call external callback if provided
+    externalCheckIn?.(method)
+  }
+
+  const handleCheckOut = (method: CheckInMethod) => {
+    if (!todayRecord) return
+    
+    const now = new Date()
+    const checkInTime = new Date(todayRecord.checkInTime!)
+    const workingHours = (now.getTime() - checkInTime.getTime()) / (1000 * 60 * 60)
+    const overtimeHours = Math.max(0, workingHours - 8)
+    
+    const updatedRecord: AttendanceRecord = {
+      ...todayRecord,
+      checkOutTime: now,
+      checkOutMethod: method,
+      workingHours: Math.round(workingHours * 100) / 100,
+      overtimeHours: Math.round(overtimeHours * 100) / 100,
+      updatedAt: now,
+    }
+    
+    setTodayRecord(updatedRecord)
+    setAttendanceHistory(prev => [updatedRecord, ...prev.filter(a => a.id !== todayRecord.id)])
+    
+    // Call external callback if provided
+    externalCheckOut?.(method)
+  }
 
   const handleWeekChange = (direction: 'prev' | 'next') => {
     setWeekOffset(prev => (direction === 'prev' ? prev - 1 : prev + 1))
@@ -521,9 +574,9 @@ export function AttendanceTracker({
         {/* Quick Check-in */}
         <QuickCheckIn
           isCheckedIn={isCheckedIn}
-          checkInTime={todayAttendance?.checkInTime ? new Date(todayAttendance.checkInTime) : undefined}
-          onCheckIn={method => onCheckIn?.(method)}
-          onCheckOut={method => onCheckOut?.(method)}
+          checkInTime={todayRecord?.checkInTime ? new Date(todayRecord.checkInTime) : undefined}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
         />
 
         {/* Weekly Calendar */}
@@ -536,6 +589,24 @@ export function AttendanceTracker({
           />
         </div>
       </div>
+
+      {/* Today's Status */}
+      {todayRecord && (
+        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-gray-900">Hom nay</h3>
+                <p className="text-sm text-gray-600">
+                  Check-in: {todayRecord.checkInTime ? format(new Date(todayRecord.checkInTime), 'HH:mm') : '-'}
+                  {todayRecord.checkOutTime && ` | Check-out: ${format(new Date(todayRecord.checkOutTime), 'HH:mm')}`}
+                </p>
+              </div>
+              <StatusBadge status={todayRecord.status} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Attendance History */}
       <AttendanceHistory records={attendanceHistory} />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import {
@@ -237,7 +237,7 @@ export function LeadTable({
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Tìm kiếm theo tên, email, SĐT, công ty..."
+              placeholder="TÃ¬m kiáº¿m theo tÃªn, email, SÄT, cÃ´ng ty..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -251,7 +251,7 @@ export function LeadTable({
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Filter className="h-4 w-4 mr-2" />
-                  Lọc
+                  Lá»c
                   {(statusFilter !== 'all' || sourceFilter !== 'all' || ratingFilter !== 'all') && (
                     <Badge variant="secondary" className="ml-2">
                       {[statusFilter, sourceFilter, ratingFilter].filter((f) => f !== 'all').length}
@@ -262,16 +262,16 @@ export function LeadTable({
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Trạng thái</label>
+                    <label className="text-sm font-medium">Tráº¡ng thÃ¡i</label>
                     <Select
                       value={statusFilter}
                       onValueChange={(value) => setStatusFilter(value as LeadStatus | 'all')}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả trạng thái" />
+                        <SelectValue placeholder="Táº¥t cáº£ tráº¡ng thÃ¡i" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                        <SelectItem value="all">Táº¥t cáº£ tráº¡ng thÃ¡i</SelectItem>
                         {LEAD_STATUS_CONFIG.map((status) => (
                           <SelectItem key={status.id} value={status.id}>
                             <div className="flex items-center gap-2">
@@ -288,16 +288,16 @@ export function LeadTable({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Nguồn</label>
+                    <label className="text-sm font-medium">Nguá»“n</label>
                     <Select
                       value={sourceFilter}
                       onValueChange={(value) => setSourceFilter(value as LeadSource | 'all')}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả nguồn" />
+                        <SelectValue placeholder="Táº¥t cáº£ nguá»“n" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả nguồn</SelectItem>
+                        <SelectItem value="all">Táº¥t cáº£ nguá»“n</SelectItem>
                         {LEAD_SOURCE_CONFIG.map((source) => (
                           <SelectItem key={source.id} value={source.id}>
                             {source.nameVi}
@@ -308,16 +308,16 @@ export function LeadTable({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Đánh giá</label>
+                    <label className="text-sm font-medium">ÄÃ¡nh giÃ¡</label>
                     <Select
                       value={ratingFilter}
                       onValueChange={(value) => setRatingFilter(value as LeadRating | 'all')}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả" />
+                        <SelectValue placeholder="Táº¥t cáº£" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="all">Táº¥t cáº£</SelectItem>
                         <SelectItem value="hot">
                           <div className="flex items-center gap-2">
                             <Flame className="h-4 w-4 text-red-500" />
@@ -350,7 +350,7 @@ export function LeadTable({
                       setRatingFilter('all');
                     }}
                   >
-                    Xóa bộ lọc
+                    XÃ³a bá»™ lá»c
                   </Button>
                 </div>
               </PopoverContent>
@@ -369,18 +369,18 @@ export function LeadTable({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={onImport}>
                   <Upload className="h-4 w-4 mr-2" />
-                  Import từ Excel
+                  Import tá»« Excel
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onExport()}>
                   <Download className="h-4 w-4 mr-2" />
-                  Export tất cả
+                  Export táº¥t cáº£
                 </DropdownMenuItem>
                 {selectedIds.length > 0 && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onExport(selectedIds)}>
                       <Download className="h-4 w-4 mr-2" />
-                      Export đã chọn ({selectedIds.length})
+                      Export Ä‘Ã£ chá»n ({selectedIds.length})
                     </DropdownMenuItem>
                   </>
                 )}
@@ -389,23 +389,23 @@ export function LeadTable({
 
             <Button size="sm" onClick={onAddLead}>
               <Plus className="h-4 w-4 mr-2" />
-              Thêm Lead
+              ThÃªm Lead
             </Button>
           </div>
         </div>
 
         {/* Bulk Actions */}
         {selectedIds.length > 0 && (
-          <div className="flex items-center gap-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              Đã chọn {selectedIds.length} lead
+          <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+            <span className="text-sm font-medium text-blue-600">
+              ÄÃ£ chá»n {selectedIds.length} lead
             </span>
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Phân công
+                    PhÃ¢n cÃ´ng
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -431,7 +431,7 @@ export function LeadTable({
                 onClick={() => onLeadsDelete(selectedIds)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Xóa
+                XÃ³a
               </Button>
 
               <Button
@@ -439,7 +439,7 @@ export function LeadTable({
                 size="sm"
                 onClick={() => setSelectedIds([])}
               >
-                Bỏ chọn
+                Bá» chá»n
               </Button>
             </div>
           </div>
@@ -449,7 +449,7 @@ export function LeadTable({
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50 dark:bg-gray-800/50">
+              <TableRow className="bg-gray-50">
                 <TableHead className="w-12">
                   <Checkbox
                     checked={
@@ -466,7 +466,7 @@ export function LeadTable({
                     onClick={() => handleSort('name')}
                     className="-ml-3"
                   >
-                    Tên
+                    TÃªn
                     <ArrowUpDown className="h-4 w-4 ml-2" />
                   </Button>
                 </TableHead>
@@ -477,11 +477,11 @@ export function LeadTable({
                     onClick={() => handleSort('company')}
                     className="-ml-3"
                   >
-                    Công ty
+                    CÃ´ng ty
                     <ArrowUpDown className="h-4 w-4 ml-2" />
                   </Button>
                 </TableHead>
-                <TableHead>Liên hệ</TableHead>
+                <TableHead>LiÃªn há»‡</TableHead>
                 <TableHead>
                   <Button
                     variant="ghost"
@@ -489,7 +489,7 @@ export function LeadTable({
                     onClick={() => handleSort('status')}
                     className="-ml-3"
                   >
-                    Trạng thái
+                    Tráº¡ng thÃ¡i
                     <ArrowUpDown className="h-4 w-4 ml-2" />
                   </Button>
                 </TableHead>
@@ -505,7 +505,7 @@ export function LeadTable({
                   </Button>
                 </TableHead>
                 <TableHead>Budget</TableHead>
-                <TableHead>Người phụ trách</TableHead>
+                <TableHead>NgÆ°á»i phá»¥ trÃ¡ch</TableHead>
                 <TableHead>
                   <Button
                     variant="ghost"
@@ -513,7 +513,7 @@ export function LeadTable({
                     onClick={() => handleSort('createdAt')}
                     className="-ml-3"
                   >
-                    Ngày tạo
+                    NgÃ y táº¡o
                     <ArrowUpDown className="h-4 w-4 ml-2" />
                   </Button>
                 </TableHead>
@@ -525,15 +525,15 @@ export function LeadTable({
                 <TableRow>
                   <TableCell colSpan={10} className="text-center py-12">
                     <div className="text-gray-500">
-                      <p className="text-lg font-medium">Không có leads nào</p>
+                      <p className="text-lg font-medium">KhÃ´ng cÃ³ leads nÃ o</p>
                       <p className="text-sm mt-1">
                         {searchQuery || statusFilter !== 'all'
-                          ? 'Thử thay đổi bộ lọc để xem kết quả'
-                          : 'Bắt đầu bằng cách thêm lead mới'}
+                          ? 'Thá»­ thay Ä‘á»•i bá»™ lá»c Ä‘á»ƒ xem káº¿t quáº£'
+                          : 'Báº¯t Ä‘áº§u báº±ng cÃ¡ch thÃªm lead má»›i'}
                       </p>
                       <Button className="mt-4" onClick={onAddLead}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Thêm Lead
+                        ThÃªm Lead
                       </Button>
                     </div>
                   </TableCell>
@@ -542,7 +542,7 @@ export function LeadTable({
                 filteredLeads.map((lead) => (
                   <TableRow
                     key={lead.id}
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="cursor-pointer hover:bg-gray-50:bg-gray-800/50"
                     onClick={() => onLeadClick(lead)}
                   >
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -565,7 +565,7 @@ export function LeadTable({
                     </TableCell>
                     <TableCell>
                       {lead.company && (
-                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1 text-gray-600">
                           <Building2 className="h-4 w-4" />
                           {lead.company}
                         </div>
@@ -574,13 +574,13 @@ export function LeadTable({
                     <TableCell>
                       <div className="space-y-1">
                         {lead.phone && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
                             <Phone className="h-3 w-3" />
                             {lead.phone}
                           </div>
                         )}
                         {lead.email && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
                             <Mail className="h-3 w-3" />
                             {lead.email}
                           </div>
@@ -670,11 +670,11 @@ export function LeadTable({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => onLeadClick(lead)}>
                             <Eye className="h-4 w-4 mr-2" />
-                            Xem chi tiết
+                            Xem chi tiáº¿t
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => onLeadEdit(lead)}>
                             <Edit className="h-4 w-4 mr-2" />
-                            Sửa
+                            Sá»­a
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -682,7 +682,7 @@ export function LeadTable({
                             onClick={() => onLeadDelete(lead.id)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Xóa
+                            XÃ³a
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -697,7 +697,7 @@ export function LeadTable({
         {/* Summary */}
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span>
-            Hiển thị {filteredLeads.length} / {leads.length} leads
+            Hiá»ƒn thá»‹ {filteredLeads.length} / {leads.length} leads
           </span>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">

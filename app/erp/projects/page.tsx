@@ -19,6 +19,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Pause,
+  Eye,
+  Edit,
+  Trash2,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,6 +46,13 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Project, ProjectStatus, PROJECT_STATUS_CONFIG } from '@/app/erp/modules/project'
@@ -231,14 +241,22 @@ function ProjectCard({ project }: { project: Project }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.preventDefault(); window.location.href = `/erp/projects/${project.id}`; }}>
+                  <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.preventDefault(); alert('Chức năng chỉnh sửa dự án: ' + project.name); }}>
+                  <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.preventDefault(); }}>
                   <Star className="h-4 w-4 mr-2" /> Đánh dấu
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.preventDefault(); }}>
                   <Settings className="h-4 w-4 mr-2" /> Cài đặt
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">Xóa dự án</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onClick={(e) => { e.preventDefault(); if(confirm('Bạn có chắc muốn xóa dự án này?')) { alert('Đã xóa dự án: ' + project.name); } }}>
+                  <Trash2 className="h-4 w-4 mr-2" /> Xóa dự án
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -343,8 +361,67 @@ function ProjectListItem({ project }: { project: Project }) {
 // CREATE PROJECT DIALOG
 // =============================================================================
 
+// Location codes for auto-generating project code
+const locationCodes: { [key: string]: string } = {
+  'nha-be': 'NB',
+  'binh-chanh': 'BC',
+  'can-gio': 'CG',
+  'cu-chi': 'CC',
+  'hoc-mon': 'HM',
+  'thu-duc': 'TD',
+  'go-vap': 'GV',
+  'tan-binh': 'TB',
+  'tan-phu': 'TP',
+  'binh-tan': 'BT',
+  'quan-1': 'Q1',
+  'quan-2': 'Q2',
+  'quan-3': 'Q3',
+  'quan-7': 'Q7',
+  'quan-9': 'Q9',
+  'phu-nhuan': 'PN',
+  'long-an': 'LA',
+  'dong-nai': 'DN',
+  'binh-duong': 'BD',
+};
+
+// Generate unique project code
+function generateProjectCode(location: string): string {
+  const nextNumber = mockProjects.length + 1;
+  const paddedNumber = String(nextNumber).padStart(3, '0');
+  const locationSuffix = locationCodes[location] || 'XX';
+  return `PRJ${paddedNumber}-${locationSuffix}`;
+}
+
 function CreateProjectDialog() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    color: '#3B82F6',
+    description: '',
+  });
+  const [projectCode, setProjectCode] = useState('PRJ001-XX');
+
+  // Update project code when location changes
+  const handleLocationChange = (value: string) => {
+    setFormData({ ...formData, location: value });
+    setProjectCode(generateProjectCode(value));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Tạo dự án:', { ...formData, code: projectCode });
+    alert(`Đã tạo dự án thành công!\nMã dự án: ${projectCode}`);
+    setOpen(false);
+    // Reset form
+    setFormData({
+      name: '',
+      location: '',
+      color: '#3B82F6',
+      description: '',
+    });
+    setProjectCode('PRJ001-XX');
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -358,35 +435,108 @@ function CreateProjectDialog() {
         <DialogHeader>
           <DialogTitle>Tạo dự án mới</DialogTitle>
           <DialogDescription>
-            Điền thông tin để tạo dự án mới
+            Điền thông tin để tạo dự án mới. Mã dự án sẽ được tạo tự động.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Tên dự án</Label>
-            <Input placeholder="Nhập tên dự án" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Mã dự án</Label>
-              <Input placeholder="VD: PRJ" maxLength={5} />
+              <Label>Tên dự án <span className="text-red-500">*</span></Label>
+              <Input 
+                placeholder="VD: Điện mặt trời 10kW hộ gia đình" 
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Khu vực <span className="text-red-500">*</span></Label>
+                <Select 
+                  value={formData.location}
+                  onValueChange={handleLocationChange}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn khu vực" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nha-be">Nhà Bè</SelectItem>
+                    <SelectItem value="binh-chanh">Bình Chánh</SelectItem>
+                    <SelectItem value="can-gio">Cần Giờ</SelectItem>
+                    <SelectItem value="cu-chi">Củ Chi</SelectItem>
+                    <SelectItem value="hoc-mon">Hóc Môn</SelectItem>
+                    <SelectItem value="thu-duc">Thủ Đức</SelectItem>
+                    <SelectItem value="go-vap">Gò Vấp</SelectItem>
+                    <SelectItem value="tan-binh">Tân Bình</SelectItem>
+                    <SelectItem value="tan-phu">Tân Phú</SelectItem>
+                    <SelectItem value="binh-tan">Bình Tân</SelectItem>
+                    <SelectItem value="quan-1">Quận 1</SelectItem>
+                    <SelectItem value="quan-2">Quận 2</SelectItem>
+                    <SelectItem value="quan-3">Quận 3</SelectItem>
+                    <SelectItem value="quan-7">Quận 7</SelectItem>
+                    <SelectItem value="quan-9">Quận 9</SelectItem>
+                    <SelectItem value="phu-nhuan">Phú Nhuận</SelectItem>
+                    <SelectItem value="long-an">Long An</SelectItem>
+                    <SelectItem value="dong-nai">Đồng Nai</SelectItem>
+                    <SelectItem value="binh-duong">Bình Dương</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Mã dự án (Tự động)</Label>
+                <Input 
+                  value={projectCode} 
+                  readOnly 
+                  className="bg-gray-100 font-mono font-bold text-[#D4AF37]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Mã được tạo tự động theo khu vực
+                </p>
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Màu sắc</Label>
-              <Input type="color" defaultValue="#3B82F6" className="h-10" />
+              <Label>Màu sắc dự án</Label>
+              <div className="flex items-center gap-3">
+                <Input 
+                  type="color" 
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="h-10 w-20 cursor-pointer" 
+                />
+                <div className="flex gap-2">
+                  {['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#D4AF37'].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'border-gray-900' : 'border-transparent'}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setFormData({ ...formData, color })}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Mô tả dự án</Label>
+              <Textarea 
+                placeholder="Mô tả chi tiết về dự án, quy mô, yêu cầu đặc biệt..." 
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Mô tả</Label>
-            <Textarea placeholder="Mô tả về dự án..." rows={3} />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Hủy
-          </Button>
-          <Button>Tạo dự án</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Hủy
+            </Button>
+            <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo dự án
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

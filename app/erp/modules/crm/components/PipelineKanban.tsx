@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useCallback } from 'react';
 import {
@@ -132,7 +132,7 @@ function SortableLeadCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
+        'group bg-white rounded-lg border border-gray-200',
         'shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer',
         isDragging && 'opacity-50 shadow-lg scale-105'
       )}
@@ -141,7 +141,7 @@ function SortableLeadCard({
       <div
         {...attributes}
         {...listeners}
-        className="flex items-center justify-center h-6 cursor-grab active:cursor-grabbing border-b border-gray-100 dark:border-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-700/50"
+        className="flex items-center justify-center h-6 cursor-grab active:cursor-grabbing border-b border-gray-100 rounded-t-lg bg-gray-50"
       >
         <GripVertical className="h-4 w-4 text-gray-400" />
       </div>
@@ -151,11 +151,11 @@ function SortableLeadCard({
         {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+            <h4 className="font-medium text-gray-900 truncate">
               {lead.name}
             </h4>
             {lead.company && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+              <p className="text-sm text-gray-500 flex items-center gap-1 truncate">
                 <Building2 className="h-3 w-3 flex-shrink-0" />
                 {lead.company}
               </p>
@@ -186,27 +186,27 @@ function SortableLeadCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-                  Sửa thông tin
+                  Sá»­a thÃ´ng tin
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); }}>
-                  Gọi điện
+                  Gá»i Ä‘iá»‡n
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); }}>
-                  Gửi email
+                  Gá»­i email
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); }}>
-                  Tạo hoạt động
+                  Táº¡o hoáº¡t Ä‘á»™ng
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); }}>
-                  Chuyển thành Contact
+                  Chuyá»ƒn thÃ nh Contact
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="text-red-600"
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                 >
-                  Xóa
+                  XÃ³a
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -216,13 +216,13 @@ function SortableLeadCard({
         {/* Contact Info */}
         <div className="space-y-1 mb-3">
           {lead.phone && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+            <p className="text-xs text-gray-500 flex items-center gap-1">
               <Phone className="h-3 w-3" />
               {lead.phone}
             </p>
           )}
           {lead.email && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+            <p className="text-xs text-gray-500 flex items-center gap-1 truncate">
               <Mail className="h-3 w-3 flex-shrink-0" />
               {lead.email}
             </p>
@@ -249,7 +249,7 @@ function SortableLeadCard({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           {lead.assignedToId ? (
             <div className="flex items-center gap-1">
               <Avatar className="h-5 w-5">
@@ -257,12 +257,12 @@ function SortableLeadCard({
                   {lead.assignedToId.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs text-gray-500">Đã phân công</span>
+              <span className="text-xs text-gray-500">ÄÃ£ phÃ¢n cÃ´ng</span>
             </div>
           ) : (
             <span className="text-xs text-gray-400 flex items-center gap-1">
               <User className="h-3 w-3" />
-              Chưa phân công
+              ChÆ°a phÃ¢n cÃ´ng
             </span>
           )}
           
@@ -280,7 +280,7 @@ function SortableLeadCard({
             {lead.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600"
               >
                 {tag}
               </span>
@@ -300,14 +300,14 @@ function SortableLeadCard({
 // Lead Card Overlay (for drag preview)
 function LeadCardOverlay({ lead }: { lead: Lead }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-blue-500 shadow-xl p-3 w-72">
+    <div className="bg-white rounded-lg border border-blue-500 shadow-xl p-3 w-72">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+          <h4 className="font-medium text-gray-900 truncate">
             {lead.name}
           </h4>
           {lead.company && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+            <p className="text-sm text-gray-500 flex items-center gap-1 truncate">
               <Building2 className="h-3 w-3 flex-shrink-0" />
               {lead.company}
             </p>
@@ -346,7 +346,7 @@ function KanbanColumn({
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: column.color }}
           />
-          <span className="font-medium text-gray-900 dark:text-gray-100">
+          <span className="font-medium text-gray-900">
             {column.titleVi}
           </span>
           <Badge
@@ -373,10 +373,10 @@ function KanbanColumn({
       {/* Total Value */}
       {totalValue > 0 && (
         <div
-          className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 border-x"
+          className="px-3 py-1 text-xs text-gray-600 border-x"
           style={{ backgroundColor: `${column.color}08` }}
         >
-          Tổng:{' '}
+          Tá»•ng:{' '}
           {new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND',
@@ -387,7 +387,7 @@ function KanbanColumn({
 
       {/* Cards Container */}
       <div
-        className="flex-1 p-2 space-y-2 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700"
+        className="flex-1 p-2 space-y-2 overflow-y-auto bg-gray-50 rounded-b-lg border border-t-0 border-gray-200"
         style={{ minHeight: '200px' }}
       >
         <SortableContext
@@ -407,7 +407,7 @@ function KanbanColumn({
 
         {column.leads.length === 0 && (
           <div className="flex flex-col items-center justify-center h-32 text-gray-400">
-            <p className="text-sm">Không có leads</p>
+            <p className="text-sm">KhÃ´ng cÃ³ leads</p>
             <Button
               variant="ghost"
               size="sm"
@@ -415,7 +415,7 @@ function KanbanColumn({
               onClick={onAddLead}
             >
               <Plus className="h-3 w-3 mr-1" />
-              Thêm lead
+              ThÃªm lead
             </Button>
           </div>
         )}

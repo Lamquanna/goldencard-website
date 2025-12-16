@@ -506,7 +506,7 @@ export const MODULES: Record<ModuleId, ModuleInfo> = {
     name: 'Maps',
     nameVi: 'Bản đồ',
     icon: '🗺️',
-    href: '/erp/maps',
+    href: '/erp/map',
     description: 'Location and mapping',
     descriptionVi: 'Vị trí và bản đồ',
   },

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { format } from 'date-fns'
@@ -36,7 +36,7 @@ const categoryLabels: Record<NotificationCategory, string> = {
 const categoryIcons: Record<NotificationCategory, string> = {
   crm: '💼',
   hrm: '👥',
-  project: '📁',
+  project: '📋',
   inventory: '📦',
   finance: '💰',
   workflow: '🔄',
@@ -65,7 +65,7 @@ export function NotificationCenter() {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -82,18 +82,18 @@ export function NotificationCenter() {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)} 
           />
-          <div className="absolute right-0 top-full mt-2 w-[380px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+          <div className="absolute right-0 top-full mt-2 w-[380px] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Thông báo
                 </h3>
                 <div className="flex items-center gap-2">
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-sm"
+                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg text-sm"
                       title="Đánh dấu tất cả đã đọc"
                     >
                       <CheckCheck className="w-4 h-4" />
@@ -101,7 +101,7 @@ export function NotificationCenter() {
                   )}
                   <button
                     onClick={() => clearAll()}
-                    className="p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                    className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"
                     title="Xóa tất cả"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -115,8 +115,8 @@ export function NotificationCenter() {
                   onClick={() => setFilter('all')}
                   className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                     filter === 'all'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   Tất cả
@@ -127,8 +127,8 @@ export function NotificationCenter() {
                     onClick={() => setFilter(category)}
                     className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap flex items-center gap-1 ${
                       filter === category
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     <span>{categoryIcons[category]}</span>
@@ -142,11 +142,11 @@ export function NotificationCenter() {
             <div className="max-h-[400px] overflow-y-auto">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
-                  <BellOff className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                  <BellOff className="w-12 h-12 mx-auto text-gray-300 mb-3" />
                   <p className="text-gray-500">Không có thông báo</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y divide-gray-100">
                   {filteredNotifications.map(notification => (
                     <NotificationItem
                       key={notification.id}
@@ -161,7 +161,7 @@ export function NotificationCenter() {
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="p-3 border-t border-gray-200">
               <button className="w-full text-center text-sm text-blue-500 hover:text-blue-600 font-medium">
                 Xem tất cả thông báo
               </button>
@@ -194,9 +194,9 @@ function NotificationItem({
 
   return (
     <div 
-      className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-l-4 ${
+      className={`p-4 hover:bg-gray-50 transition-colors border-l-4 ${
         priorityColors[notification.priority]
-      } ${!notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+      } ${!notification.isRead ? 'bg-blue-50/50' : ''}`}
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
@@ -205,7 +205,7 @@ function NotificationItem({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <div className="font-medium text-gray-900 dark:text-white text-sm">
+            <div className="font-medium text-gray-900 text-sm">
               {notification.title}
             </div>
             {!notification.isRead && (
@@ -214,7 +214,7 @@ function NotificationItem({
           </div>
           
           {notification.message && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
               {notification.message}
             </p>
           )}
@@ -231,7 +231,7 @@ function NotificationItem({
                     e.stopPropagation()
                     onRead()
                   }}
-                  className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                  className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded"
                   title="Đánh dấu đã đọc"
                 >
                   <Check className="w-3.5 h-3.5" />
@@ -242,7 +242,7 @@ function NotificationItem({
                   e.stopPropagation()
                   onRemove()
                 }}
-                className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded"
                 title="Xóa"
               >
                 <X className="w-3.5 h-3.5" />

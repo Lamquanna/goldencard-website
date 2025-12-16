@@ -72,118 +72,63 @@ import {
   getEmployeeFullName,
   formatVND,
 } from '../index'
+import { teamData } from '@/lib/team-data'
 
 // =============================================================================
-// MOCK DATA
+// REAL DATA - GOLDEN ENERGY EMPLOYEES
 // =============================================================================
 
 const mockDepartments: Department[] = [
-  { id: 'd1', name: 'Engineering', nameVi: 'Kỹ thuật', code: 'ENG', employeeCount: 12, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'd2', name: 'Sales', nameVi: 'Kinh doanh', code: 'SALES', employeeCount: 8, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'd3', name: 'Marketing', nameVi: 'Marketing', code: 'MKT', employeeCount: 5, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'd4', name: 'HR', nameVi: 'Nhân sự', code: 'HR', employeeCount: 3, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'd5', name: 'Finance', nameVi: 'Tài chính', code: 'FIN', employeeCount: 4, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd1', name: 'Board of Directors', nameVi: 'Ban Giám đốc', code: 'BOD', employeeCount: 2, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd2', name: 'Project Management', nameVi: 'Phòng Dự án', code: 'PM', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd3', name: 'Technical', nameVi: 'Phòng Kỹ thuật', code: 'TECH', employeeCount: 4, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd4', name: 'Project Development', nameVi: 'Phòng Phát triển Dự án', code: 'PD', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd5', name: 'Accounting', nameVi: 'Phòng Kế toán', code: 'ACC', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd6', name: 'Transportation', nameVi: 'Bộ phận Vận chuyển', code: 'TRANS', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd7', name: 'Sales', nameVi: 'Phòng Kinh doanh', code: 'SALES', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'd8', name: 'Marketing', nameVi: 'Bộ phận Marketing', code: 'MKT', employeeCount: 1, createdAt: new Date(), updatedAt: new Date() },
 ]
 
-const mockEmployees: Employee[] = [
-  {
-    id: 'e1',
-    employeeCode: 'ENG0001',
-    firstName: 'Văn A',
-    lastName: 'Nguyễn',
-    email: 'vana@company.com',
-    phone: '0901234567',
-    avatar: '/avatars/avatar1.png',
-    departmentId: 'd1',
-    position: 'Senior Developer',
-    level: 'Senior',
-    employmentType: 'full_time',
-    status: 'active',
-    joinDate: new Date(2022, 5, 15),
-    baseSalary: 35000000,
+// Map department names to IDs
+const departmentMap: Record<string, string> = {
+  'Ban Giám đốc': 'd1',
+  'Phòng Dự án': 'd2',
+  'Phòng Kỹ thuật': 'd3',
+  'Phòng Phát triển Dự án': 'd4',
+  'Phòng Kế toán': 'd5',
+  'Bộ phận Vận chuyển': 'd6',
+  'Phòng Kinh doanh': 'd7',
+  'Bộ phận Marketing': 'd8',
+}
+
+// Convert team data to Employee format
+const mockEmployees: Employee[] = teamData.map((member, index) => {
+  // Parse name into first and last name
+  const nameParts = member.nameVi.split(' ')
+  const lastName = nameParts[0] // Vietnamese: họ ở đầu
+  const firstName = nameParts.slice(1).join(' ')
+  
+  return {
+    id: member.id,
+    employeeCode: member.employeeCode,
+    firstName,
+    lastName,
+    email: member.email || `${member.employeeCode.toLowerCase()}@goldenenergy.vn`,
+    phone: `0333314288${index}`,
+    avatar: member.avatar,
+    departmentId: departmentMap[member.department || 'Ban Giám đốc'] || 'd1',
+    position: member.roleVi,
+    level: member.category === 'leadership' ? 'Director' : member.category === 'management' ? 'Manager' : 'Staff',
+    employmentType: 'full_time' as EmploymentType,
+    status: 'active' as EmployeeStatus,
+    joinDate: new Date(2023, 0, 1), // Default join date
+    baseSalary: member.category === 'leadership' ? 50000000 : member.category === 'management' ? 35000000 : 20000000,
     currency: 'VND',
     isRemote: false,
     createdAt: new Date(),
     updatedAt: new Date(),
-  },
-  {
-    id: 'e2',
-    employeeCode: 'SALES0001',
-    firstName: 'Thị B',
-    lastName: 'Trần',
-    email: 'thib@company.com',
-    phone: '0907654321',
-    departmentId: 'd2',
-    position: 'Sales Manager',
-    level: 'Manager',
-    employmentType: 'full_time',
-    status: 'active',
-    joinDate: new Date(2021, 2, 1),
-    baseSalary: 40000000,
-    currency: 'VND',
-    isRemote: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'e3',
-    employeeCode: 'ENG0002',
-    firstName: 'Văn C',
-    lastName: 'Lê',
-    email: 'vanc@company.com',
-    phone: '0909876543',
-    departmentId: 'd1',
-    position: 'Junior Developer',
-    level: 'Junior',
-    employmentType: 'full_time',
-    status: 'probation',
-    joinDate: new Date(2024, 10, 1),
-    probationEndDate: new Date(2025, 1, 1),
-    baseSalary: 18000000,
-    currency: 'VND',
-    isRemote: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'e4',
-    employeeCode: 'MKT0001',
-    firstName: 'Thị D',
-    lastName: 'Phạm',
-    email: 'thid@company.com',
-    phone: '0908765432',
-    departmentId: 'd3',
-    position: 'Marketing Specialist',
-    level: 'Mid',
-    employmentType: 'full_time',
-    status: 'on_leave',
-    joinDate: new Date(2023, 7, 20),
-    baseSalary: 25000000,
-    currency: 'VND',
-    isRemote: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'e5',
-    employeeCode: 'HR0001',
-    firstName: 'Văn E',
-    lastName: 'Hoàng',
-    email: 'vane@company.com',
-    phone: '0901112222',
-    departmentId: 'd4',
-    position: 'HR Manager',
-    level: 'Manager',
-    employmentType: 'full_time',
-    status: 'active',
-    joinDate: new Date(2020, 0, 10),
-    baseSalary: 38000000,
-    currency: 'VND',
-    isRemote: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
+  }
+})
 
 // =============================================================================
 // STATUS BADGE
@@ -229,14 +174,14 @@ function EmployeeCard({ employee, department }: { employee: Employee; department
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert(`Chi tiết nhân viên:\n- Họ tên: ${getEmployeeFullName(employee)}\n- Mã NV: ${employee.employeeCode}\n- Email: ${employee.email}\n- Phòng ban: ${employee.department}\n- Chức vụ: ${employee.position}`)}>
                       <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert(`Chỉnh sửa thông tin: ${getEmployeeFullName(employee)}`)}>
                       <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem className="text-destructive" onClick={() => { if(confirm(`Bạn có chắc muốn xóa nhân viên ${getEmployeeFullName(employee)}?`)) { alert('Đã xóa nhân viên'); } }}>
                       <Trash2 className="h-4 w-4 mr-2" /> Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -363,14 +308,14 @@ function EmployeeTable({ employees, departments, selectedIds, onSelectAll, onSel
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert(`Chi tiết nhân viên:\n- Họ tên: ${getEmployeeFullName(employee)}\n- Mã NV: ${employee.employeeCode}\n- Email: ${employee.email}\n- Phòng ban: ${employee.department}\n- Chức vụ: ${employee.position}`)}>
                       <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert(`Chỉnh sửa thông tin: ${getEmployeeFullName(employee)}`)}>
                       <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem className="text-destructive" onClick={() => { if(confirm(`Bạn có chắc muốn xóa nhân viên ${getEmployeeFullName(employee)}?`)) { alert('Đã xóa nhân viên'); } }}>
                       <Trash2 className="h-4 w-4 mr-2" /> Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>

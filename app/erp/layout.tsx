@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { AppShellProvider } from './components/AppShell';
+import GlobalChatWidget from '@/components/GlobalChatWidget';
 
 export default function HomeLayout({
   children,
@@ -13,6 +14,7 @@ export default function HomeLayout({
   return (
     <AppShellProvider>
       {children}
+      <GlobalChatWidget />
     </AppShellProvider>
   );
 }
