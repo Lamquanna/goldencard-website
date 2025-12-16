@@ -472,7 +472,7 @@ export default async function HomePage({ params }: HomePageProps) {
             {/* Google Map - Sunrise Riverside Block A */}
             <div className="relative w-full h-[450px] md:h-[550px] overflow-hidden border-2 border-gray-200 shadow-xl mb-12">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d980.041316570563!2d106.7025085983731!3d10.72173327740717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f54ea311787%3A0xb4c77dac243ec26e!2sSunrise%20Riverside%2C%20Block%20A!5e0!3m2!1svi!2s!4v1765359464897!5m2!1svi!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.2178!2d106.7256!3d10.7143!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752fc85e0b5e79%3A0x5e5e5e5e5e5e5e5e!2sSunrise%20Riverside!5e0!3m2!1svi!2s!4v1702720000000!5m2!1svi!2s"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

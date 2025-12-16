@@ -5,10 +5,10 @@ import { useState, useRef, useEffect } from "react";
 import type { Locale } from "@/lib/i18n";
 
 const LOCALES = [
-  { code: "vi", label: "VIE", flag: "🇻🇳" },
-  { code: "en", label: "ENG", flag: "🇬🇧" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-  { code: "id", label: "IND", flag: "🇮🇩" },
+  { code: "vi", label: "VI", flag: "🇻🇳" },
+  { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "zh", label: "中", flag: "🇨🇳" },
+  { code: "id", label: "ID", flag: "🇮🇩" },
 ] as const;
 
 export default function LanguageSwitcher() {

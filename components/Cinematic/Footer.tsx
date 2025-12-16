@@ -97,7 +97,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
           {/* Navigation */}
           <div>
             <h3
-              className="text-gray-200 text-sm uppercase tracking-[0.15em] font-semibold mb-6"
+              className="text-white text-sm uppercase tracking-[0.15em] font-semibold mb-6"
               style={{ fontFamily: "Montserrat, sans-serif" }}
             >
               {t.navigation}

@@ -201,7 +201,7 @@ export default function Hero({
                       loading={prioritize ? undefined : "lazy"}
                       quality={95}
                       sizes="100vw"
-                      className="object-cover"
+                      className="object-cover brightness-[1.15] contrast-[1.05]"
                     />
                   </div>
                 );
