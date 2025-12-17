@@ -25,11 +25,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (singleton pattern)
-let app: FirebaseApp | null = null;
-let db: Firestore | null = null;
-let storage: FirebaseStorage | null = null;
-let auth: Auth | null = null;
-let messaging: Messaging | null = null;
+let appInstance: FirebaseApp | null = null;
+let dbInstance: Firestore | null = null;
+let storageInstance: FirebaseStorage | null = null;
+let authInstance: Auth | null = null;
+let messagingInstance: Messaging | null = null;
 
 function initializeFirebase() {
   // Skip initialization if not configured or during SSR build
@@ -40,22 +40,22 @@ function initializeFirebase() {
   
   if (!getApps().length) {
     try {
-      app = initializeApp(firebaseConfig);
+      appInstance = initializeApp(firebaseConfig);
     } catch (error) {
       console.warn('Firebase initialization failed:', error);
       return { app: null, db: null, storage: null, auth: null };
     }
   } else {
-    app = getApps()[0];
+    appInstance = getApps()[0];
   }
   
-  if (app) {
-    db = getFirestore(app);
-    storage = getStorage(app);
-    auth = getAuth(app);
+  if (appInstance) {
+    dbInstance = getFirestore(appInstance);
+    storageInstance = getStorage(appInstance);
+    authInstance = getAuth(appInstance);
   }
   
-  return { app, db, storage, auth };
+  return { app: appInstance, db: dbInstance, storage: storageInstance, auth: authInstance };
 }
 
 // Initialize messaging (only in browser and if supported)
@@ -65,13 +65,13 @@ async function initializeMessaging(): Promise<Messaging | null> {
   
   try {
     const supported = await isSupported();
-    if (supported && !messaging) {
+    if (supported && !messagingInstance) {
       const { app: firebaseApp } = initializeFirebase();
       if (firebaseApp) {
-        messaging = getMessaging(firebaseApp);
+        messagingInstance = getMessaging(firebaseApp);
       }
     }
-    return messaging;
+    return messagingInstance;
   } catch (error) {
     console.warn('Firebase Messaging not supported:', error);
     return null;
@@ -91,6 +91,9 @@ export const firebaseApp = firebase.app;
 export const firestore = firebase.db;
 export const firebaseStorage = firebase.storage;
 export const firebaseAuth = firebase.auth;
+
+// Export named instances for convenience
+export const { app, db, storage, auth } = firebase;
 
 // Helper to get non-null Firestore instance
 export function getFirestoreInstance() {
