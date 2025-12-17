@@ -89,8 +89,9 @@ node scripts/seed-firebase-auth.js
 Script này sẽ:
 - Tạo Firebase Auth accounts cho 12 nhân viên
 - Email format: `ges001@goldenenergy.vn`
-- Mật khẩu mặc định: `Golden@2024`
+- Mật khẩu mặc định: `1`
 - Tự động tạo profile trong Firestore collection `employees`
+- Đánh dấu `mustChangePassword: true` để yêu cầu đổi password lần đầu
 
 ### Danh sách tài khoản được tạo:
 

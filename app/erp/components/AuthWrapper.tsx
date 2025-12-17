@@ -56,8 +56,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // If user is logged in or on login page, show content
-  if (user || pathname?.includes('/login')) {
+  // If user is logged in or on login/change-password page, show content
+  if (user || pathname?.includes('/login') || pathname?.includes('/change-password')) {
     return <>{children}</>;
   }
 

@@ -23,7 +23,7 @@ node scripts/seed-firebase-auth.js
 
 **Kết quả:** 12 tài khoản nhân viên được tạo với:
 - Email: `ges001@goldenenergy.vn` đến `ges012@goldenenergy.vn`
-- Password: `Golden@2024`
+- Password: `1` (phải đổi sau lần đăng nhập đầu)
 
 ## Bước 3: Test Login
 
@@ -35,7 +35,7 @@ Truy cập: `http://localhost:3000/erp/login`
 
 **Test account:**
 - Mã NV: `GES001`
-- Password: `Golden@2024`
+- Password: `1`
 
 ---
 

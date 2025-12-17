@@ -154,7 +154,7 @@ const employees = [
 ];
 
 // Default password for all accounts
-const DEFAULT_PASSWORD = 'Golden@2024';
+const DEFAULT_PASSWORD = '1';
 
 async function createEmployeeAccount(employee) {
   const email = `${employee.employeeCode.toLowerCase()}@goldenenergy.vn`;
@@ -180,6 +180,7 @@ async function createEmployeeAccount(employee) {
       department: employee.department,
       category: employee.category,
       isActive: true,
+      mustChangePassword: true, // Require password change on first login
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });

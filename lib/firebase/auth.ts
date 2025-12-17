@@ -29,6 +29,8 @@ export interface EmployeeProfile {
   avatar?: string;
   category: 'leadership' | 'management' | 'engineering' | 'support';
   isActive: boolean;
+  mustChangePassword?: boolean;
+  passwordChangedAt?: Date;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;

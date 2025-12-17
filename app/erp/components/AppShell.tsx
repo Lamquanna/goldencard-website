@@ -577,6 +577,10 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  
+  // Check if on special pages (no sidebar/header)
+  const isLoginPage = pathname === '/erp/login';
+  const isChangePasswordPage = pathname === '/erp/change-password';
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -657,6 +661,15 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
           <p className="text-gray-600">Đang tải...</p>
         </div>
       </div>
+    );
+  }
+
+  // If on login or change password page, render without shell
+  if (isLoginPage || isChangePasswordPage) {
+    return (
+      <AppShellContext.Provider value={contextValue}>
+        {children}
+      </AppShellContext.Provider>
     );
   }
 

@@ -23,8 +23,17 @@ export default function ERPLoginPage() {
     setLoading(true);
 
     try {
-      await signInEmployee(employeeCode, password);
-      router.push('/erp/dashboard');
+      const user = await signInEmployee(employeeCode, password);
+      
+      // Check if user needs to change password
+      const { getEmployeeProfile } = await import('@/lib/firebase/auth');
+      const profile = await getEmployeeProfile(user.uid);
+      
+      if (profile?.mustChangePassword) {
+        router.push('/erp/change-password');
+      } else {
+        router.push('/erp/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại');
     } finally {
@@ -144,7 +153,7 @@ export default function ERPLoginPage() {
                   <p>• Mã: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">GES003</code> - Tuan Ha (COO)</p>
                 </div>
                 <p className="text-xs text-slate-500 mt-2">
-                  Mật khẩu mặc định: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">Golden@2024</code>
+                  Mật khẩu mặc định: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">1</code>
                 </p>
               </div>
             </div>
