@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRegistry } from '../core/pluginEngine';
 import { getPermissionEngine } from '../core/permissions';
 import { getNotificationService } from '../core/notifications';
+import { signOutEmployee } from '@/lib/firebase/auth';
 import type { ModuleManifest, User, Workspace, MenuItem } from '../types';
 import { teamData } from '@/lib/team-data';
 
@@ -493,6 +494,21 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
                   >
                     Cài đặt
                   </Link>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await signOutEmployee();
+                        setUserMenuOpen(false);
+                        router.push('/erp/login');
+                      } catch (error) {
+                        console.error('Logout error:', error);
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-t border-gray-200 mt-1"
+                  >
+                    {Icons.logout}
+                    Đăng xuất
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -563,32 +579,45 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const initializeApp = () => {
-      // No login required - use default admin user
-      const defaultEmployee = teamData[0]; // GES001 - CEO
+    const initializeApp = async () => {
+      // Import Firebase auth functions dynamically to avoid SSR issues
+      const { getCurrentUser, getEmployeeProfile } = await import('@/lib/firebase/auth');
       
-      setUser({
-        id: 'user-GES001',
-        email: 'ges001@goldenenergy.vn',
-        username: 'GES001',
-        fullName: defaultEmployee?.nameVi || 'Admin',
-        roles: ['admin'],
-        workspaces: [],
-        preferences: {
-          theme: 'light',
-          language: 'vi',
-          notifications: {
-            email: true,
-            push: true,
-            desktop: true,
-            sound: true,
-            channels: { tasks: true, mentions: true, updates: true, marketing: false },
-          },
-          sidebar: { collapsed: false, pinnedModules: [] },
-        },
-        status: 'active',
-        createdAt: new Date(),
-      });
+      const currentUser = getCurrentUser();
+      
+      if (currentUser) {
+        try {
+          // Get employee profile from Firestore
+          const profile = await getEmployeeProfile(currentUser.uid);
+          
+          if (profile) {
+            setUser({
+              id: currentUser.uid,
+              email: profile.email,
+              username: profile.employeeCode,
+              fullName: profile.nameVi,
+              roles: profile.category === 'leadership' ? ['admin'] : ['user'],
+              workspaces: [],
+              preferences: {
+                theme: 'light',
+                language: 'vi',
+                notifications: {
+                  email: true,
+                  push: true,
+                  desktop: true,
+                  sound: true,
+                  channels: { tasks: true, mentions: true, updates: true, marketing: false },
+                },
+                sidebar: { collapsed: false, pinnedModules: [] },
+              },
+              status: 'active',
+              createdAt: new Date(),
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load employee profile:', error);
+        }
+      }
 
       setActiveModules(getDefaultModules());
       setLoading(false);
