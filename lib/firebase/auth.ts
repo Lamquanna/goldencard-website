@@ -45,7 +45,9 @@ const USERS_COLLECTION = 'employees';
  * @param password - Password
  */
 export async function signInEmployee(employeeCode: string, password: string) {
-  if (!auth) throw new Error('Firebase Auth not initialized');
+  if (!auth) {
+    throw new Error('Hệ thống xác thực chưa được khởi tạo. Vui lòng kiểm tra cấu hình Firebase.');
+  }
   
   // Convert employee code to email format
   const email = `${employeeCode.toLowerCase()}@goldenenergy.vn`;
@@ -56,14 +58,25 @@ export async function signInEmployee(employeeCode: string, password: string) {
     
     // Update last login
     if (db) {
-      await updateDoc(doc(db, USERS_COLLECTION, user.uid), {
-        lastLogin: serverTimestamp(),
-      });
+      try {
+        await updateDoc(doc(db, USERS_COLLECTION, user.uid), {
+          lastLogin: serverTimestamp(),
+        });
+      } catch (updateError) {
+        console.warn('Failed to update last login:', updateError);
+        // Don't throw - login was successful, just logging failed
+      }
     }
     
     return user;
   } catch (error: any) {
     console.error('Sign in error:', error);
+    
+    // Check for network errors
+    if (error.code === 'auth/network-request-failed') {
+      throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.');
+    }
+    
     throw new Error(getAuthErrorMessage(error.code));
   }
 }

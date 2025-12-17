@@ -10,8 +10,19 @@ import { getAuth, Auth } from 'firebase/auth';
 // Check if Firebase is configured
 const isFirebaseConfigured = Boolean(
   process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
-  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
 );
+
+// Log configuration status (only in development)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('Firebase Configuration Status:', {
+    configured: isFirebaseConfigured,
+    hasApiKey: Boolean(process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
+    hasProjectId: Boolean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
+    hasAuthDomain: Boolean(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN),
+  });
+}
 
 // Firebase configuration from environment variables
 const firebaseConfig = {

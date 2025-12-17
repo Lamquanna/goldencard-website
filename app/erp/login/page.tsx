@@ -143,17 +143,14 @@ export default function ERPLoginPage() {
               </Button>
             </form>
 
-            {/* Footer Info */}
+            {/* Help Text */}
             <div className="mt-6 pt-6 border-t border-slate-200">
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
-                <p className="text-sm font-medium text-slate-700">Tài khoản mẫu:</p>
-                <div className="space-y-1 text-xs text-slate-600">
-                  <p>• Mã: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">GES001</code> - Jimmy Ha (CEO)</p>
-                  <p>• Mã: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">GES002</code> - Rita Kim Anh (CFO)</p>
-                  <p>• Mã: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">GES003</code> - Tuan Ha (COO)</p>
-                </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  Mật khẩu mặc định: <code className="bg-white px-2 py-0.5 rounded border border-slate-300 font-mono">1</code>
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="text-sm text-slate-600 text-center">
+                  Liên hệ bộ phận IT nếu bạn quên mật khẩu hoặc cần hỗ trợ đăng nhập
+                </p>
+                <p className="text-xs text-slate-500 text-center mt-2">
+                  Email: <a href="mailto:it@goldenenergy.vn" className="text-slate-700 hover:underline">it@goldenenergy.vn</a>
                 </p>
               </div>
             </div>
