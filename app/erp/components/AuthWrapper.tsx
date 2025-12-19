@@ -16,22 +16,42 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthWrapper: Setting up auth listener for path:', pathname);
+    
+    // Set a timeout fallback to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.warn('AuthWrapper: Auth check timeout, stopping loading state');
+      setLoading(false);
+      
+      // If still no user and not on login/change-password page, redirect
+      if (!user && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+        console.log('AuthWrapper: Timeout redirect to login');
+        router.push('/erp/login');
+      }
+    }, 3000); // 3 second timeout
+    
     // Listen to auth state changes
     const unsubscribe = onAuthChange((currentUser) => {
+      console.log('AuthWrapper: Auth state changed, user:', currentUser?.uid || 'null');
+      clearTimeout(timeoutId);
       setUser(currentUser);
       setLoading(false);
 
-      // If no user and not on login page, redirect to login
-      if (!currentUser && !pathname?.includes('/login')) {
+      // If no user and not on login/change-password page, redirect to login
+      if (!currentUser && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+        console.log('AuthWrapper: Redirecting to login');
         router.push('/erp/login');
       }
     });
 
-    return () => unsubscribe();
-  }, [router, pathname]);
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
+  }, [router, pathname, user]);
 
-  // Show loading state
-  if (loading) {
+  // Show loading state (but only if not on login or change-password page)
+  if (loading && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
         <div className="text-center">
@@ -50,7 +70,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
               />
             </svg>
           </div>
-          <p className="text-slate-600 font-medium">Đang tải...</p>
+          <p className="text-slate-600 font-medium">Đang kiểm tra xác thực...</p>
+          <p className="text-slate-400 text-sm mt-2">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
     );

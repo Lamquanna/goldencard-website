@@ -126,7 +126,12 @@ export function getCurrentUser(): User | null {
  * Listen to auth state changes
  */
 export function onAuthChange(callback: (user: User | null) => void) {
-  if (!auth) return () => {};
+  if (!auth) {
+    // If auth not initialized, immediately call callback with null user
+    console.warn('Firebase Auth not initialized, calling callback with null user');
+    setTimeout(() => callback(null), 0);
+    return () => {};
+  }
   return onAuthStateChanged(auth, callback);
 }
 
