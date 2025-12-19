@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2, Lock, User } from 'lucide-react';
+import { AlertCircle, Loader2, Lock, User, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ERPLoginPage() {
@@ -17,6 +17,13 @@ export default function ERPLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [firebaseStatus, setFirebaseStatus] = useState<'checking' | 'ready' | 'error'>('checking');
+
+  // Check Firebase initialization on mount
+  useEffect(() => {
+    // Set ready immediately - Firebase will handle errors during actual login
+    setFirebaseStatus('ready');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +51,7 @@ export default function ERPLoginPage() {
       
       // Handle network errors with retry suggestion
       if (err.message.includes('mạng') || err.message.includes('network')) {
-        setError(`${err.message} (Lần thử: ${retryCount + 1})`);
+        setError(`${err.message} ${retryCount > 0 ? `(Lần thử: ${retryCount + 1})` : ''}`);
         setRetryCount(prev => prev + 1);
       } else {
         setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.');
@@ -78,7 +85,7 @@ export default function ERPLoginPage() {
           <p className="text-slate-600">Hệ thống quản lý nội bộ</p>
         </div>
 
-        {/* Login Card */}
+        {/* Login Card */
         <Card className="shadow-2xl border-slate-200">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl font-bold text-center">Đăng nhập</CardTitle>
@@ -150,6 +157,11 @@ export default function ERPLoginPage() {
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Đang đăng nhập...
                   </>
+                ) : firebaseStatus === 'checking' ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Đang kiểm tra hệ thống...
+                  </>
                 ) : (
                   'Đăng nhập'
                 )}
@@ -158,19 +170,32 @@ export default function ERPLoginPage() {
 
             {/* Help Text */}
             <div className="mt-6 pt-6 border-t border-slate-200">
-              <p className="text-sm text-slate-600 text-center">
-                Liên hệ bộ phận IT nếu bạn quên mật khẩu hoặc cần hỗ trợ
-              </p>
-              <p className="text-xs text-slate-500 text-center mt-2">
-                Email: <a href="mailto:it@goldenenergy.vn" className="text-slate-700 hover:underline">it@goldenenergy.vn</a>
-              </p>
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="text-sm text-slate-600 text-center">
+                  Liên hệ bộ phận IT nếu bạn quên mật khẩu hoặc cần hỗ trợ đăng nhập
+                </p>
+                
+                {/* Debug info in development */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-500 space-y-1">
+                    <p>🔧 Debug Info:</p>
+                    <p>Firebase Status: <span className="font-mono">{firebaseStatus}</span></p>
+                    <p>Retry Count: <span className="font-mono">{retryCount}</span></p>
+                    <p className="text-blue-600">Check browser console (F12) for detailed logs</p>
+                  </div>
+                )}
+                
+                <p className="text-xs text-slate-500 text-center mt-2">
+                  Email: <a href="mailto:it@goldenenergy.vn" className="text-slate-700 hover:underline">it@goldenenergy.vn</a>
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Footer */}
         <p className="text-center text-sm text-slate-500 mt-6">
-          © 2024 Golden Energy. All rights reserved.
+          &copy; 2024 Golden Energy. All rights reserved.
         </p>
       </div>
     </div>

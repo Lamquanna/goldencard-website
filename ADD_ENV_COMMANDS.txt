@@ -1,0 +1,26 @@
+# Copy và paste từng lệnh sau vào PowerShell
+# Nhấn Enter sau mỗi lệnh, nhập giá trị khi được hỏi
+
+# 1. API Key
+echo "AIzaSyBJQrhYBKPTpomR_FTbh33NglD8THJkiic" | vercel env add NEXT_PUBLIC_FIREBASE_API_KEY production
+
+# 2. Auth Domain  
+echo "goldenenergy-bead9.firebaseapp.com" | vercel env add NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN production
+
+# 3. Project ID
+echo "goldenenergy-bead9" | vercel env add NEXT_PUBLIC_FIREBASE_PROJECT_ID production
+
+# 4. Storage Bucket
+echo "goldenenergy-bead9.firebasestorage.app" | vercel env add NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET production
+
+# 5. Messaging Sender ID
+echo "343432638836" | vercel env add NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID production
+
+# 6. App ID
+echo "1:343432638836:web:8502db00136985ce753c21" | vercel env add NEXT_PUBLIC_FIREBASE_APP_ID production
+
+# 7. Measurement ID
+echo "G-M4PXZTDFGM" | vercel env add NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID production
+
+# Sau khi add xong, redeploy:
+vercel --prod
