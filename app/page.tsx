@@ -1,53 +1,14 @@
 ﻿// ============================================================================
-// ENTERPRISE COMMAND CENTER - MAIN ENTRY POINT
-// GoldenEnergy Enterprise Platform - Unified Business Management
-// LIGHT THEME ONLY - White background, Black text
+// ROOT PAGE - REDIRECT TO DEFAULT LOCALE (Vietnamese)
+// This ensures goldenenergy.vn/ redirects to the main Golden Energy homepage
 // ============================================================================
 
-'use client';
+import { redirect } from 'next/navigation';
 
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import {
-  Users,
-  FolderKanban,
-  Package,
-  DollarSign,
-  Building2,
-  Shield,
-  Settings,
-  LayoutDashboard,
-  ArrowRight,
-  Sparkles,
-  TrendingUp,
-  BarChart3,
-  FileText,
-  Calendar,
-  Clock,
-  Truck,
-  Receipt,
-  UserCheck,
-  Kanban,
-  GanttChart,
-  Boxes,
-  FileSpreadsheet,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-// UI Components
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
-// ============================================================================
-// MODULE DEFINITIONS WITH SUB-MODULES
-// ============================================================================
-
-interface SubModule {
-  id: string;
-  title: string;
-  route: string;
-  icon: React.ElementType;
+export default function RootPage() {
+  // Redirect to Vietnamese homepage as default
+  redirect('/vi');
+}
 }
 
 interface ModuleItem {
