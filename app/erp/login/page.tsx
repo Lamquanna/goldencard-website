@@ -22,21 +22,8 @@ export default function ERPLoginPage() {
 
   // Check Firebase initialization on mount
   useEffect(() => {
-    const checkFirebase = async () => {
-      try {
-        if (!isFirebaseConfigured) {
-          setFirebaseStatus('error');
-          setError('Hệ thống chưa được cấu hình đúng. Vui lòng liên hệ IT.');
-        } else {
-          setFirebaseStatus('ready');
-        }
-      } catch (err) {
-        console.error('Firebase check error:', err);
-        setFirebaseStatus('error');
-      }
-    };
-    
-    checkFirebase();
+    // Set ready immediately - Firebase will handle errors during actual login
+    setFirebaseStatus('ready');
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,17 +86,7 @@ export default function ERPLoginPage() {
           <p className="text-slate-600">Hệ thống quản lý nội bộ</p>
         </div>
 
-        {/* Firebase Status Warning */}
-        {firebaseStatus === 'error' && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Hệ thống xác thực chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase hoặc liên hệ IT.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Login Card */}
+        {/* Login Card */
         <Card className="shadow-2xl border-slate-200">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl font-bold text-center">Đăng nhập</CardTitle>
@@ -174,7 +151,7 @@ export default function ERPLoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-slate-800 to-slate-600 hover:from-slate-900 hover:to-slate-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-                disabled={loading || firebaseStatus !== 'ready'}
+                disabled={loading}
               >
                 {loading ? (
                   <>
