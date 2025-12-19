@@ -14,13 +14,15 @@ const isFirebaseConfigured = Boolean(
   process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
 );
 
-// Log configuration status (only in development)
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('Firebase Configuration Status:', {
+// Log configuration status (always log in browser for debugging)
+if (typeof window !== 'undefined') {
+  console.log('🔥 Firebase Configuration Status:', {
     configured: isFirebaseConfigured,
     hasApiKey: Boolean(process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
     hasProjectId: Boolean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
     hasAuthDomain: Boolean(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN),
+    apiKeyPrefix: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.substring(0, 10) + '...',
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
 
@@ -43,27 +45,48 @@ let authInstance: Auth | null = null;
 let messagingInstance: Messaging | null = null;
 
 function initializeFirebase() {
-  // Skip initialization if not configured or during SSR build
-  if (!isFirebaseConfigured && typeof window === 'undefined') {
-    console.warn('Firebase not configured - using mock mode');
+  // Skip initialization during SSR build
+  if (typeof window === 'undefined') {
+    console.log('⏭️  Skipping Firebase initialization during SSR');
     return { app: null, db: null, storage: null, auth: null };
   }
   
+  // Check configuration
+  if (!isFirebaseConfigured) {
+    console.error('❌ Firebase not configured - missing environment variables');
+    console.error('Required: NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_PROJECT_ID, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
+    return { app: null, db: null, storage: null, auth: null };
+  }
+  
+  // Initialize only once
   if (!getApps().length) {
     try {
+      console.log('🚀 Initializing Firebase...');
       appInstance = initializeApp(firebaseConfig);
+      console.log('✅ Firebase initialized successfully');
     } catch (error) {
-      console.warn('Firebase initialization failed:', error);
+      console.error('❌ Firebase initialization failed:', error);
       return { app: null, db: null, storage: null, auth: null };
     }
   } else {
     appInstance = getApps()[0];
+    console.log('♻️  Using existing Firebase instance');
   }
   
+  // Initialize services
   if (appInstance) {
-    dbInstance = getFirestore(appInstance);
-    storageInstance = getStorage(appInstance);
-    authInstance = getAuth(appInstance);
+    try {
+      dbInstance = getFirestore(appInstance);
+      storageInstance = getStorage(appInstance);
+      authInstance = getAuth(appInstance);
+      console.log('✅ Firebase services initialized:', {
+        firestore: Boolean(dbInstance),
+        storage: Boolean(storageInstance),
+        auth: Boolean(authInstance),
+      });
+    } catch (error) {
+      console.error('❌ Firebase services initialization failed:', error);
+    }
   }
   
   return { app: appInstance, db: dbInstance, storage: storageInstance, auth: authInstance };

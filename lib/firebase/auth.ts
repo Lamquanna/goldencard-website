@@ -45,16 +45,27 @@ const USERS_COLLECTION = 'employees';
  * @param password - Password
  */
 export async function signInEmployee(employeeCode: string, password: string) {
+  // Check if Firebase is initialized
   if (!auth) {
-    throw new Error('Hệ thống xác thực chưa được khởi tạo. Vui lòng kiểm tra cấu hình Firebase.');
+    console.error('Firebase Auth not initialized');
+    throw new Error('Hệ thống xác thực chưa được khởi tạo. Vui lòng liên hệ IT để kiểm tra cấu hình Firebase.');
+  }
+  
+  // Validate inputs
+  if (!employeeCode || !password) {
+    throw new Error('Vui lòng nhập đầy đủ mã nhân viên và mật khẩu.');
   }
   
   // Convert employee code to email format
-  const email = `${employeeCode.toLowerCase()}@goldenenergy.vn`;
+  const email = `${employeeCode.toLowerCase().trim()}@goldenenergy.vn`;
+  
+  console.log('Attempting to sign in with email:', email);
   
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    
+    console.log('Sign in successful, user ID:', user.uid);
     
     // Update last login
     if (db) {
@@ -62,19 +73,34 @@ export async function signInEmployee(employeeCode: string, password: string) {
         await updateDoc(doc(db, USERS_COLLECTION, user.uid), {
           lastLogin: serverTimestamp(),
         });
+        console.log('Last login updated successfully');
       } catch (updateError) {
         console.warn('Failed to update last login:', updateError);
         // Don't throw - login was successful, just logging failed
       }
+    } else {
+      console.warn('Firestore not initialized, skipping last login update');
     }
     
     return user;
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    console.error('Sign in error details:', {
+      code: error.code,
+      message: error.message,
+      email: email,
+    });
     
-    // Check for network errors
+    // Handle specific error cases
     if (error.code === 'auth/network-request-failed') {
-      throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.');
+      throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
+    }
+    
+    if (error.code === 'auth/invalid-api-key') {
+      throw new Error('Cấu hình Firebase không hợp lệ. Vui lòng liên hệ IT.');
+    }
+    
+    if (error.code === 'auth/app-deleted') {
+      throw new Error('Firebase app đã bị xóa. Vui lòng liên hệ IT.');
     }
     
     throw new Error(getAuthErrorMessage(error.code));

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInEmployee } from '@/lib/firebase/auth';
+import { isFirebaseConfigured } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2, Lock, User } from 'lucide-react';
+import { AlertCircle, Loader2, Lock, User, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ERPLoginPage() {
@@ -16,6 +17,27 @@ export default function ERPLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [firebaseStatus, setFirebaseStatus] = useState<'checking' | 'ready' | 'error'>('checking');
+
+  // Check Firebase initialization on mount
+  useEffect(() => {
+    const checkFirebase = async () => {
+      try {
+        if (!isFirebaseConfigured) {
+          setFirebaseStatus('error');
+          setError('Hệ thống chưa được cấu hình đúng. Vui lòng liên hệ IT.');
+        } else {
+          setFirebaseStatus('ready');
+        }
+      } catch (err) {
+        console.error('Firebase check error:', err);
+        setFirebaseStatus('error');
+      }
+    };
+    
+    checkFirebase();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +45,11 @@ export default function ERPLoginPage() {
     setLoading(true);
 
     try {
+      console.log('Login attempt with employee code:', employeeCode);
+      
       const user = await signInEmployee(employeeCode, password);
+      
+      console.log('Login successful, checking profile...');
       
       // Check if user needs to change password
       const { getEmployeeProfile } = await import('@/lib/firebase/auth');
@@ -35,7 +61,15 @@ export default function ERPLoginPage() {
         router.push('/erp/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Đăng nhập thất bại');
+      console.error('Login error:', err);
+      
+      // Handle network errors with retry suggestion
+      if (err.message.includes('mạng') || err.message.includes('network')) {
+        setError(`${err.message} ${retryCount > 0 ? `(Lần thử: ${retryCount + 1})` : ''}`);
+        setRetryCount(prev => prev + 1);
+      } else {
+        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.');
+      }
     } finally {
       setLoading(false);
     }
@@ -64,6 +98,16 @@ export default function ERPLoginPage() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Golden Energy ERP</h1>
           <p className="text-slate-600">Hệ thống quản lý nội bộ</p>
         </div>
+
+        {/* Firebase Status Warning */}
+        {firebaseStatus === 'error' && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Hệ thống xác thực chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase hoặc liên hệ IT.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Login Card */}
         <Card className="shadow-2xl border-slate-200">
@@ -130,12 +174,17 @@ export default function ERPLoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-slate-800 to-slate-600 hover:from-slate-900 hover:to-slate-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-                disabled={loading}
+                disabled={loading || firebaseStatus !== 'ready'}
               >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Đang đăng nhập...
+                  </>
+                ) : firebaseStatus === 'checking' ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Đang kiểm tra hệ thống...
                   </>
                 ) : (
                   'Đăng nhập'
@@ -149,6 +198,17 @@ export default function ERPLoginPage() {
                 <p className="text-sm text-slate-600 text-center">
                   Liên hệ bộ phận IT nếu bạn quên mật khẩu hoặc cần hỗ trợ đăng nhập
                 </p>
+                
+                {/* Debug info in development */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-500 space-y-1">
+                    <p>🔧 Debug Info:</p>
+                    <p>Firebase Status: <span className="font-mono">{firebaseStatus}</span></p>
+                    <p>Retry Count: <span className="font-mono">{retryCount}</span></p>
+                    <p className="text-blue-600">Check browser console (F12) for detailed logs</p>
+                  </div>
+                )}
+                
                 <p className="text-xs text-slate-500 text-center mt-2">
                   Email: <a href="mailto:it@goldenenergy.vn" className="text-slate-700 hover:underline">it@goldenenergy.vn</a>
                 </p>
