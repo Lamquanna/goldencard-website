@@ -215,7 +215,18 @@ const TRANSLATIONS = {
     panelCount: 'Số lượng tấm pin',
     requiredArea: 'Diện tích cần thiết',
     areaWarning: '⚠️ Diện tích mái không đủ!',
+    areaWarningDetail: 'Mái của bạn chỉ đủ lắp được',
     areaOk: '✅ Diện tích mái đủ',
+    idealCapacity: 'Công suất theo nhu cầu',
+    actualCapacity: 'Công suất có thể lắp',
+    roofLimitation: 'Giới hạn bởi diện tích mái',
+    suggestion: 'Gợi ý',
+    suggestionInsufficientRoof: 'Với diện tích mái hiện tại, bạn có thể lắp hệ thống điện mặt trời công suất',
+    suggestionInsufficientRoof2: 'Để đạt được công suất mong muốn, bạn cần',
+    suggestionOption1: '1. Tăng diện tích mái khả dụng lên',
+    suggestionOption2: '2. Sử dụng tấm pin công suất cao hơn để giảm số lượng tấm cần thiết',
+    suggestionOption3: '3. Xem xét lắp hệ thống trên nhiều mái (nếu có)',
+    coveragePercent: 'Đáp ứng được',
     disclaimer: 'Đây chỉ là ước tính sơ bộ dựa trên mức tiêu thụ trung bình và 5 giờ nắng/ngày. Vui lòng liên hệ chuyên gia để khảo sát chi tiết và báo giá chính xác.',
     contactExpert: 'Liên hệ chuyên gia miễn phí',
     tooltipBill: 'Nhập số tiền hóa đơn điện trung bình hàng tháng của bạn',
@@ -262,7 +273,18 @@ const TRANSLATIONS = {
     panelCount: 'Number of panels',
     requiredArea: 'Required area',
     areaWarning: '⚠️ Insufficient roof area!',
+    areaWarningDetail: 'Your roof can only fit',
     areaOk: '✅ Sufficient roof area',
+    idealCapacity: 'Required capacity',
+    actualCapacity: 'Available capacity',
+    roofLimitation: 'Limited by roof area',
+    suggestion: 'Suggestion',
+    suggestionInsufficientRoof: 'With the current roof area, you can install a solar system with capacity',
+    suggestionInsufficientRoof2: 'To achieve the desired capacity, you need',
+    suggestionOption1: '1. Increase available roof area to',
+    suggestionOption2: '2. Use higher wattage panels to reduce the number of panels needed',
+    suggestionOption3: '3. Consider installing on multiple roofs (if available)',
+    coveragePercent: 'Covers',
     disclaimer: 'This is a rough estimate based on average consumption and 5 peak sun hours/day. Please contact our experts for detailed site survey and accurate quotation.',
     contactExpert: 'Contact expert for free',
     tooltipBill: 'Enter your average monthly electricity bill amount',
@@ -309,7 +331,18 @@ const TRANSLATIONS = {
     panelCount: '面板数量',
     requiredArea: '所需面积',
     areaWarning: '⚠️ 屋顶面积不足！',
+    areaWarningDetail: '您的屋顶只能安装',
     areaOk: '✅ 屋顶面积充足',
+    idealCapacity: '所需容量',
+    actualCapacity: '可安装容量',
+    roofLimitation: '受屋顶面积限制',
+    suggestion: '建议',
+    suggestionInsufficientRoof: '根据当前屋顶面积，您可以安装容量为',
+    suggestionInsufficientRoof2: '要达到理想容量，您需要',
+    suggestionOption1: '1. 增加可用屋顶面积至',
+    suggestionOption2: '2. 使用更高功率的面板以减少所需面板数量',
+    suggestionOption3: '3. 考虑在多个屋顶上安装（如有）',
+    coveragePercent: '覆盖',
     disclaimer: '此为参考估算，基于平均消耗和每天5小时峰值日照。如需详细咨询及准确报价，请联系我们的专家免费指导。',
     contactExpert: '免费联系专家',
     tooltipBill: '输入您的平均每月电费金额',
@@ -376,26 +409,49 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
   const SYSTEM_EFFICIENCY = 0.8; // Hiệu suất hệ thống 80% (mất mát inverter, dây, nhiệt độ)
   const capacityKW = dailyConsumptionKWh / (PEAK_SUN_HOURS * SYSTEM_EFFICIENCY);
   
-  // Bước 4: Tính số lượng tấm pin
-  const panelCount = Math.ceil((capacityKW * 1000) / selectedPanel.wattage);
+  // Bước 4: Tính số lượng tấm pin theo nhu cầu
+  const idealPanelCount = Math.ceil((capacityKW * 1000) / selectedPanel.wattage);
   
   // Bước 5: Tính diện tích cần thiết (using actual panel dimensions)
   // Panel area in m² (convert from mm to m)
   const PANEL_AREA = (selectedPanel.lengthMm / 1000) * (selectedPanel.widthMm / 1000);
   const SPACING_FACTOR = 1.2; // Thêm 20% cho khoảng cách
-  const requiredArea = panelCount * PANEL_AREA * SPACING_FACTOR;
+  const idealRequiredArea = idealPanelCount * PANEL_AREA * SPACING_FACTOR;
+  
+  // Kiểm tra diện tích mái có đủ không
+  const areaInsufficient = idealRequiredArea > roofArea && roofArea > 0;
+  
+  // Nếu mái không đủ, tính toán lại dựa trên diện tích mái có sẵn
+  let actualPanelCount = idealPanelCount;
+  let actualCapacityKW = capacityKW;
+  let actualRequiredArea = idealRequiredArea;
+  
+  if (areaInsufficient) {
+    // Tính số tấm pin tối đa có thể lắp trên mái
+    actualPanelCount = Math.floor(roofArea / (PANEL_AREA * SPACING_FACTOR));
+    // Tính lại công suất thực tế có thể lắp được
+    actualCapacityKW = (actualPanelCount * selectedPanel.wattage) / 1000;
+    // Tính lại diện tích thực tế cần
+    actualRequiredArea = actualPanelCount * PANEL_AREA * SPACING_FACTOR;
+  }
+  
+  // Sử dụng giá trị thực tế cho hiển thị
+  const panelCount = actualPanelCount;
+  const requiredArea = actualRequiredArea;
+  const displayCapacityKW = actualCapacityKW;
   
   // Tổng trọng lượng
   const totalWeight = panelCount * selectedPanel.weightKg;
-  
-  const areaInsufficient = requiredArea > roofArea && roofArea > 0;
 
-  // Get recommended inverter based on capacity
+  // Get recommended inverter based on actual capacity (not ideal)
   const getRecommendedInverter = (): InverterType => {
-    if (capacityKW <= 15) {
+    // Sử dụng công suất thực tế có thể lắp được (actualCapacityKW)
+    const targetCapacity = actualCapacityKW;
+    
+    if (targetCapacity <= 15) {
       // For small systems, recommend based on roof conditions
       return INVERTER_TYPES.find(inv => inv.type === 'string') || INVERTER_TYPES[0];
-    } else if (capacityKW <= 50) {
+    } else if (targetCapacity <= 50) {
       // For medium systems, hybrid is good for flexibility
       return INVERTER_TYPES.find(inv => inv.type === 'hybrid') || INVERTER_TYPES[2];
     } else {
@@ -663,15 +719,43 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
             {t.results}
           </h3>
 
+          {/* Warning Message if Roof is Insufficient */}
+          {areaInsufficient && (
+            <div className="mb-6 p-6 bg-red-50 border-2 border-red-300 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div className="flex-1">
+                  <h4 className="text-lg font-bold text-red-700 mb-2">{t.areaWarning}</h4>
+                  <p className="text-sm text-red-800 mb-3">
+                    <strong>{t.suggestionInsufficientRoof} {displayCapacityKW.toFixed(2)} kW</strong> ({panelCount} tấm × {selectedPanel.wattage}W)
+                  </p>
+                  <p className="text-sm text-red-800 mb-3">
+                    {t.suggestionInsufficientRoof2} <strong>{capacityKW.toFixed(2)} kW</strong> ({t.coveragePercent} <strong>{((displayCapacityKW/capacityKW)*100).toFixed(0)}%</strong> nhu cầu):
+                  </p>
+                  <ul className="text-sm text-red-800 space-y-1 ml-4">
+                    <li>{t.suggestionOption1} <strong>{idealRequiredArea.toFixed(1)} m²</strong> (hiện tại: {roofArea} m²)</li>
+                    <li>{t.suggestionOption2}</li>
+                    <li>{t.suggestionOption3}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {/* Capacity */}
             <div className="bg-white p-5 text-center border-2 border-[#D4AF37] rounded-lg shadow-lg">
               <div className="text-black text-xs uppercase tracking-wider mb-2 font-bold">
-                {t.capacity}
+                {areaInsufficient ? t.actualCapacity : t.capacity}
               </div>
               <div className="text-black text-2xl font-bold">
-                {capacityKW.toFixed(2)} <span className="text-sm">kW</span>
+                {displayCapacityKW.toFixed(2)} <span className="text-sm">kW</span>
               </div>
+              {areaInsufficient && (
+                <div className="text-xs text-red-600 mt-1">
+                  {t.roofLimitation}
+                </div>
+              )}
             </div>
 
             {/* Panel Count */}
@@ -692,8 +776,15 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
               <div className="text-black text-2xl font-bold">
                 {formatNumber(requiredArea)} <span className="text-sm">m²</span>
               </div>
-              <div className={`text-xs mt-1 ${areaInsufficient ? 'text-red-500' : 'text-green-600'}`}>
-                {areaInsufficient ? t.areaWarning : t.areaOk}
+              <div className={`text-xs mt-1 font-semibold ${areaInsufficient ? 'text-red-600' : 'text-green-600'}`}>
+                {areaInsufficient ? (
+                  <>
+                    <div>{t.areaWarningDetail}</div>
+                    <div className="mt-1">{formatNumber(roofArea)} / {formatNumber(idealRequiredArea)} m²</div>
+                  </>
+                ) : (
+                  t.areaOk
+                )}
               </div>
             </div>
 
@@ -722,9 +813,9 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
                 
                 <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterCapacity}:</div>
                 <div className="text-lg text-green-700 font-bold mb-3">
-                  {capacityKW < recommendedInverter.minCapacityKW 
+                  {displayCapacityKW < recommendedInverter.minCapacityKW 
                     ? recommendedInverter.minCapacityKW 
-                    : Math.ceil(capacityKW * 1.1)} kW
+                    : Math.ceil(displayCapacityKW * 1.1)} kW
                 </div>
 
                 <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterBrands}:</div>

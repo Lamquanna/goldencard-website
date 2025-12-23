@@ -94,6 +94,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
     </svg>
   ),
+  users: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
   sun: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -354,6 +359,21 @@ function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
       {/* Settings & Logout */}
       {!collapsed && (
         <div className="p-3 border-t border-gray-200 space-y-1">
+          {/* Users Management - Admin Only */}
+          {user?.role === 'admin' && (
+            <Link
+              href="/erp/users"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                isActive('/erp/users')
+                  ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-semibold'
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              }`}
+            >
+              {Icons.users}
+              <span className="font-medium">Quản lý User</span>
+            </Link>
+          )}
+          
           <Link
             href="/erp/settings"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
@@ -497,7 +517,17 @@ function Header({ user, onMenuClick, unreadNotifications }: HeaderProps) {
                   <button
                     onClick={async () => {
                       try {
-                        await signOutEmployee();
+                        // Clear localStorage
+                        localStorage.removeItem('erp_token');
+                        localStorage.removeItem('erp_user');
+                        
+                        // Try Firebase signout as fallback
+                        try {
+                          await signOutEmployee();
+                        } catch (e) {
+                          console.log('Firebase signout not available');
+                        }
+                        
                         setUserMenuOpen(false);
                         router.push('/erp/login');
                       } catch (error) {
@@ -584,43 +614,76 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
 
   useEffect(() => {
     const initializeApp = async () => {
-      // Import Firebase auth functions dynamically to avoid SSR issues
-      const { getCurrentUser, getEmployeeProfile } = await import('@/lib/firebase/auth');
-      
-      const currentUser = getCurrentUser();
-      
-      if (currentUser) {
-        try {
-          // Get employee profile from Firestore
-          const profile = await getEmployeeProfile(currentUser.uid);
-          
-          if (profile) {
-            setUser({
-              id: currentUser.uid,
-              email: profile.email,
-              username: profile.employeeCode,
-              fullName: profile.nameVi,
-              roles: profile.category === 'leadership' ? ['admin'] : ['user'],
-              workspaces: [],
-              preferences: {
-                theme: 'light',
-                language: 'vi',
-                notifications: {
-                  email: true,
-                  push: true,
-                  desktop: true,
-                  sound: true,
-                  channels: { tasks: true, mentions: true, updates: true, marketing: false },
-                },
-                sidebar: { collapsed: false, pinnedModules: [] },
+      try {
+        // Get user from localStorage (new system)
+        const storedUser = localStorage.getItem('erp_user');
+        const storedToken = localStorage.getItem('erp_token');
+        
+        if (storedUser && storedToken) {
+          const userData = JSON.parse(storedUser);
+          setUser({
+            id: userData.username,
+            email: userData.email || '',
+            username: userData.username,
+            fullName: userData.full_name || userData.username,
+            role: userData.role,
+            roles: [userData.role],
+            workspaces: [],
+            preferences: {
+              theme: 'light',
+              language: 'vi',
+              notifications: {
+                email: true,
+                push: true,
+                desktop: true,
+                sound: true,
+                channels: { tasks: true, mentions: true, updates: true, marketing: false },
               },
-              status: 'active',
-              createdAt: new Date(),
-            });
+              sidebar: { collapsed: false, pinnedModules: [] },
+            },
+            status: 'active',
+            createdAt: new Date(),
+          });
+        } else {
+          // Try Firebase auth as fallback (for backwards compatibility)
+          try {
+            const { getCurrentUser, getEmployeeProfile } = await import('@/lib/firebase/auth');
+            const currentUser = getCurrentUser();
+            
+            if (currentUser) {
+              const profile = await getEmployeeProfile(currentUser.uid);
+              if (profile) {
+                setUser({
+                  id: currentUser.uid,
+                  email: profile.email,
+                  username: profile.employeeCode,
+                  fullName: profile.nameVi,
+                  role: profile.category === 'leadership' ? 'admin' : 'user',
+                  roles: profile.category === 'leadership' ? ['admin'] : ['user'],
+                  workspaces: [],
+                  preferences: {
+                    theme: 'light',
+                    language: 'vi',
+                    notifications: {
+                      email: true,
+                      push: true,
+                      desktop: true,
+                      sound: true,
+                      channels: { tasks: true, mentions: true, updates: true, marketing: false },
+                    },
+                    sidebar: { collapsed: false, pinnedModules: [] },
+                  },
+                  status: 'active',
+                  createdAt: new Date(),
+                });
+              }
+            }
+          } catch (firebaseError) {
+            console.log('Firebase auth not available, using new system');
           }
-        } catch (error) {
-          console.error('Failed to load employee profile:', error);
         }
+      } catch (error) {
+        console.error('Failed to load user:', error);
       }
 
       setActiveModules(getDefaultModules());

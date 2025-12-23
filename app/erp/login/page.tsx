@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInEmployee } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,11 +11,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ERPLoginPage() {
   const router = useRouter();
-  const [employeeCode, setEmployeeCode] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,31 +22,37 @@ export default function ERPLoginPage() {
     setLoading(true);
 
     try {
-      console.log('Login attempt with employee code:', employeeCode);
+      console.log('Login attempt with username:', username);
       
-      const user = await signInEmployee(employeeCode, password);
+      const response = await fetch('/api/erp/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Đăng nhập thất bại');
+      }
+
+      // Save token and user info to localStorage
+      localStorage.setItem('erp_token', data.token);
+      localStorage.setItem('erp_user', JSON.stringify(data.user));
+
+      console.log('Login successful:', data.user);
       
-      console.log('Login successful, checking profile...');
-      
-      // Check if user needs to change password
-      const { getEmployeeProfile } = await import('@/lib/firebase/auth');
-      const profile = await getEmployeeProfile(user.uid);
-      
-      if (profile?.mustChangePassword) {
-        router.push('/erp/change-password');
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        router.push('/erp');
       } else {
-        router.push('/erp/dashboard');
+        router.push('/erp');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      
-      // Handle network errors with retry suggestion
-      if (err.message.includes('mạng') || err.message.includes('network')) {
-        setError(`${err.message} (Lần thử: ${retryCount + 1})`);
-        setRetryCount(prev => prev + 1);
-      } else {
-        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.');
-      }
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.');
     } finally {
       setLoading(false);
     }
@@ -88,26 +92,27 @@ export default function ERPLoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Employee Code Input */}
+              {/* Username Input */}
               <div className="space-y-2">
-                <Label htmlFor="employeeCode" className="text-slate-700 font-medium">
-                  Mã nhân viên
+                <Label htmlFor="username" className="text-slate-700 font-medium">
+                  Tên đăng nhập
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
-                    id="employeeCode"
+                    id="username"
                     type="text"
-                    placeholder="GES001"
-                    value={employeeCode}
-                    onChange={(e) => setEmployeeCode(e.target.value.toUpperCase())}
+                    placeholder="admin hoặc GES001"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="pl-10 h-12 bg-slate-50 border-slate-300 focus:border-slate-500 focus:ring-slate-500"
                     required
                     disabled={loading}
+                    autoComplete="username"
                   />
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Ví dụ: GES001 (sẽ được chuyển thành ges001@goldenenergy.vn)
+                  Sử dụng tài khoản admin hoặc mã nhân viên được cấp
                 </p>
               </div>
 
@@ -127,6 +132,7 @@ export default function ERPLoginPage() {
                     className="pl-10 h-12 bg-slate-50 border-slate-300 focus:border-slate-500 focus:ring-slate-500"
                     required
                     disabled={loading}
+                    autoComplete="current-password"
                   />
                 </div>
               </div>
