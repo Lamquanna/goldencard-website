@@ -227,7 +227,7 @@ const TRANSLATIONS = {
     suggestionOption2: '2. Sử dụng tấm pin công suất cao hơn để giảm số lượng tấm cần thiết',
     suggestionOption3: '3. Xem xét lắp hệ thống trên nhiều mái (nếu có)',
     coveragePercent: 'Đáp ứng được',
-    disclaimer: 'Đây chỉ là ước tính sơ bộ dựa trên mức tiêu thụ trung bình và 5 giờ nắng/ngày. Vui lòng liên hệ chuyên gia để khảo sát chi tiết và báo giá chính xác.',
+    disclaimer: 'Đây chỉ là ước tính sơ bộ dựa trên mức tiêu thụ trung bình và 3.5 giờ nắng/ngày. Vui lòng liên hệ chuyên gia để khảo sát chi tiết và báo giá chính xác.',
     contactExpert: 'Liên hệ chuyên gia miễn phí',
     tooltipBill: 'Nhập số tiền hóa đơn điện trung bình hàng tháng của bạn',
     tooltipPanel: 'Chọn loại tấm pin phù hợp với ngân sách và không gian',
@@ -237,7 +237,7 @@ const TRANSLATIONS = {
     formulaTitle: 'Công thức tính (Chuẩn Việt Nam)',
     formulaStep1: '1. Tiêu thụ tháng (kWh) = Hóa đơn ÷ 2,500 VNĐ/kWh',
     formulaStep2: '2. Tiêu thụ ngày = Tiêu thụ tháng ÷ 30 ngày',
-    formulaStep3: '3. Công suất cần = Tiêu thụ ngày ÷ (4.5h nắng × 80% hiệu suất)',
+    formulaStep3: '3. Công suất cần = Tiêu thụ ngày ÷ (3.5h nắng × 80% hiệu suất)',
     formulaStep4: '4. Số tấm = (Công suất × 1000W) ÷ Công suất tấm',
     formulaStep5: '5. Diện tích = Số tấm × diện tích tấm × 1.2 (khoảng cách 20%)',
     // Panel specifications
@@ -285,7 +285,7 @@ const TRANSLATIONS = {
     suggestionOption2: '2. Use higher wattage panels to reduce the number of panels needed',
     suggestionOption3: '3. Consider installing on multiple roofs (if available)',
     coveragePercent: 'Covers',
-    disclaimer: 'This is a rough estimate based on average consumption and 5 peak sun hours/day. Please contact our experts for detailed site survey and accurate quotation.',
+    disclaimer: 'This is a rough estimate based on average consumption and 3.5 peak sun hours/day. Please contact our experts for detailed site survey and accurate quotation.',
     contactExpert: 'Contact expert for free',
     tooltipBill: 'Enter your average monthly electricity bill amount',
     tooltipPanel: 'Choose panel type suitable for your budget and space',
@@ -295,7 +295,7 @@ const TRANSLATIONS = {
     formulaTitle: 'Calculation Formula (Vietnam Standard)',
     formulaStep1: '1. Monthly consumption (kWh) = Bill ÷ 2,500 VND/kWh',
     formulaStep2: '2. Daily consumption = Monthly ÷ 30 days',
-    formulaStep3: '3. Required capacity = Daily ÷ (4.5h sun × 80% efficiency)',
+    formulaStep3: '3. Required capacity = Daily ÷ (3.5h sun × 80% efficiency)',
     formulaStep4: '4. Panel count = (Capacity × 1000W) ÷ Panel wattage',
     formulaStep5: '5. Area = Panels × panel area × 1.2 (20% spacing)',
     // Panel specifications
@@ -343,7 +343,7 @@ const TRANSLATIONS = {
     suggestionOption2: '2. 使用更高功率的面板以减少所需面板数量',
     suggestionOption3: '3. 考虑在多个屋顶上安装（如有）',
     coveragePercent: '覆盖',
-    disclaimer: '此为参考估算，基于平均消耗和每天5小时峰值日照。如需详细咨询及准确报价，请联系我们的专家免费指导。',
+    disclaimer: '此为参考估算，基于平均消耗和每天3.5小时峰值日照。如需详细咨询及准确报价，请联系我们的专家免费指导。',
     contactExpert: '免费联系专家',
     tooltipBill: '输入您的平均每月电费金额',
     tooltipPanel: '选择适合您预算和空间的面板类型',
@@ -353,7 +353,7 @@ const TRANSLATIONS = {
     formulaTitle: '计算公式（越南标准）',
     formulaStep1: '1. 月消耗（kWh）= 电费 ÷ 2,500越南盾/kWh',
     formulaStep2: '2. 日消耗 = 月消耗 ÷ 30天',
-    formulaStep3: '3. 所需容量 = 日消耗 ÷（4.5h峰值日照 × 80%效率）',
+    formulaStep3: '3. 所需容量 = 日消耗 ÷（3.5h峰值日照 × 80%效率）',
     formulaStep4: '4. 面板数 =（容量 × 1000W）÷ 面板功率',
     formulaStep5: '5. 面积 = 面板数 × 面板面积 × 1.2（20%间距）',
     // Panel specifications
@@ -405,7 +405,7 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
   
   // Bước 3: Tính công suất hệ thống cần thiết (kW)
   // Công thức: Công suất = Tiêu thụ hàng ngày / (Giờ nắng × Hiệu suất hệ thống)
-  const PEAK_SUN_HOURS = 4.5; // Giờ nắng peak trung bình Việt Nam (4-5h)
+  const PEAK_SUN_HOURS = 3.5; // Giờ nắng peak trung bình Việt Nam (3-4h thực tế)
   const SYSTEM_EFFICIENCY = 0.8; // Hiệu suất hệ thống 80% (mất mát inverter, dây, nhiệt độ)
   const capacityKW = dailyConsumptionKWh / (PEAK_SUN_HOURS * SYSTEM_EFFICIENCY);
   
@@ -725,7 +725,7 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
               <div className="flex items-start gap-3">
                 <span className="text-2xl">⚠️</span>
                 <div className="flex-1">
-                  <h4 className="text-lg font-bold text-red-700 mb-2">{t.areaWarning}</h4>
+                  <h4 className="text-lg font-bold text-red-700 mb-2">Diện tích mái không đủ!</h4>
                   <p className="text-sm text-red-800 mb-3">
                     <strong>{t.suggestionInsufficientRoof} {displayCapacityKW.toFixed(2)} kW</strong> ({panelCount} tấm × {selectedPanel.wattage}W)
                   </p>
@@ -815,8 +815,11 @@ export default function SolarCalculator({ locale = 'vi' }: Props) {
                 <div className="text-lg text-green-700 font-bold mb-3">
                   {displayCapacityKW < recommendedInverter.minCapacityKW 
                     ? recommendedInverter.minCapacityKW 
-                    : Math.ceil(displayCapacityKW * 1.1)} kW
+                    : Math.ceil(displayCapacityKW * 1.05)} kW
                 </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  (Dựa trên công suất có thể lắp: {displayCapacityKW.toFixed(2)} kW + 5% dự phòng)
+                </p>
 
                 <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterBrands}:</div>
                 <div className="flex flex-wrap gap-2">
