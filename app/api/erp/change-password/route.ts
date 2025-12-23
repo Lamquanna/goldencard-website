@@ -23,16 +23,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if it's admin account
-    if (username === 'admin') {
-      // Admin is hardcoded, cannot change password through this endpoint
-      // Admin would need to be added to database first
-      return NextResponse.json(
-        { error: "Vui lòng liên hệ quản trị viên hệ thống để đổi mật khẩu admin" },
-        { status: 403 }
-      );
-    }
-
     try {
       // Verify user exists and current password is correct (if provided)
       let userResult;
