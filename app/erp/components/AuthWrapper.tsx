@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { onAuthChange, getCurrentUser } from '@/lib/firebase/auth';
-import { User } from 'firebase/auth';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -12,43 +10,32 @@ interface AuthWrapperProps {
 export function AuthWrapper({ children }: AuthWrapperProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthWrapper: Setting up auth listener for path:', pathname);
+    console.log('AuthWrapper: Checking auth for path:', pathname);
     
-    // Set a timeout fallback to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      console.warn('AuthWrapper: Auth check timeout, stopping loading state');
+    // Check if user is authenticated via localStorage token
+    const token = localStorage.getItem('erp_token');
+    const userStr = localStorage.getItem('erp_user');
+    
+    if (token && userStr) {
+      console.log('AuthWrapper: User authenticated');
+      setAuthenticated(true);
+      setLoading(false);
+    } else {
+      console.log('AuthWrapper: No auth token found');
+      setAuthenticated(false);
       setLoading(false);
       
-      // If still no user and not on login/change-password page, redirect
-      if (!user && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
-        console.log('AuthWrapper: Timeout redirect to login');
-        router.push('/erp/login');
-      }
-    }, 3000); // 3 second timeout
-    
-    // Listen to auth state changes
-    const unsubscribe = onAuthChange((currentUser) => {
-      console.log('AuthWrapper: Auth state changed, user:', currentUser?.uid || 'null');
-      clearTimeout(timeoutId);
-      setUser(currentUser);
-      setLoading(false);
-
-      // If no user and not on login/change-password page, redirect to login
-      if (!currentUser && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+      // If no token and not on login/change-password page, redirect to login
+      if (!pathname?.includes('/login') && !pathname?.includes('/change-password')) {
         console.log('AuthWrapper: Redirecting to login');
         router.push('/erp/login');
       }
-    });
-
-    return () => {
-      clearTimeout(timeoutId);
-      unsubscribe();
-    };
-  }, [router, pathname, user]);
+    }
+  }, [router, pathname]);
 
   // Show loading state (but only if not on login or change-password page)
   if (loading && !pathname?.includes('/login') && !pathname?.includes('/change-password')) {
@@ -78,7 +65,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   // If user is logged in or on login/change-password page, show content
-  if (user || pathname?.includes('/login') || pathname?.includes('/change-password')) {
+  if (authenticated || pathname?.includes('/login') || pathname?.includes('/change-password')) {
     return <>{children}</>;
   }
 
