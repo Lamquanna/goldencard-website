@@ -200,11 +200,3 @@ CREATE TABLE IF NOT EXISTS erp_users (
     );
   }
 }
-  } catch (error) {
-    console.error('Error creating user:', error);
-    return NextResponse.json(
-      { error: "Có lỗi xảy ra khi tạo user" },
-      { status: 500 }
-    );
-  }
-}

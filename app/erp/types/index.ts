@@ -166,6 +166,7 @@ export interface User {
   phone?: string;
   department?: string;
   position?: string;
+  role?: string; // Primary role for simplified checks
   roles: string[];
   workspaces: UserWorkspace[];
   preferences: UserPreferences;

@@ -208,9 +208,10 @@ interface SidebarProps {
   modules: ModuleManifest[];
   collapsed: boolean;
   onCollapse: (collapsed: boolean) => void;
+  user: User | null;
 }
 
-function Sidebar({ modules, collapsed, onCollapse }: SidebarProps) {
+function Sidebar({ modules, collapsed, onCollapse, user }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -745,6 +746,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
             modules={activeModules}
             collapsed={sidebarCollapsed}
             onCollapse={setSidebarCollapsed}
+            user={user}
           />
         </div>
 
@@ -770,6 +772,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
                   modules={activeModules}
                   collapsed={false}
                   onCollapse={() => {}}
+                  user={user}
                 />
                 <button
                   onClick={() => setSidebarOpen(false)}
