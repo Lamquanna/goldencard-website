@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-// Admin account (hardcoded for initial setup)
+// Admin account (hardcoded for initial setup) - Default password is "1"
 const ADMIN_ACCOUNT = {
   username: "admin",
-  password: "Admin@2025",
+  password: "1",
   role: "admin",
   email: "admin@goldenenergy.vn",
   full_name: "Administrator",
   employee_code: "ADMIN",
+  requires_password_change: true,
 };
 
 // Simple authentication endpoint
@@ -25,10 +26,12 @@ export async function POST(request: NextRequest) {
     }
 
     let user = null;
+    let requiresPasswordChange = false;
 
     // Check if it's admin account first
     if (username === ADMIN_ACCOUNT.username && password === ADMIN_ACCOUNT.password) {
       user = ADMIN_ACCOUNT;
+      requiresPasswordChange = ADMIN_ACCOUNT.requires_password_change;
       console.log("Admin login successful");
     } else {
       // Try to find user in database
@@ -40,7 +43,15 @@ export async function POST(request: NextRequest) {
 
         if (userResult.length > 0) {
           user = userResult[0];
+          requiresPasswordChange = user.requires_password_change ?? true;
           console.log("User login successful:", user.username);
+          
+          // Update last login timestamp
+          await sql`
+            UPDATE erp_users 
+            SET last_login = NOW() 
+            WHERE username = ${username}
+          `;
         }
       } catch (dbError) {
         console.error("Database error during login:", dbError);
@@ -62,6 +73,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         token,
+        requires_password_change: requiresPasswordChange,
         user: {
           username: user.username,
           role: user.role,

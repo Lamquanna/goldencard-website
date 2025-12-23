@@ -1,11 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser } from '@/lib/firebase/auth';
-import { updatePassword } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,11 +16,25 @@ export default function ChangePasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    // Get user from localStorage
+    const userStr = localStorage.getItem('erp_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setUsername(user.username);
+    } else {
+      // If no user, redirect to login
+      router.push('/erp/login');
+    }
+  }, [router]);
 
   const validatePassword = (password: string) => {
-    if (password.length < 6) {
-      return 'Mật khẩu phải có ít nhất 6 ký tự';
+    if (password.length < 4) {
+      return 'Mật khẩu phải có ít nhất 4 ký tự';
     }
     if (password === '1') {
       return 'Vui lòng không sử dụng mật khẩu mặc định';
@@ -35,6 +45,7 @@ export default function ChangePasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
 
     // Validation
     const passwordError = validatePassword(newPassword);
@@ -51,26 +62,31 @@ export default function ChangePasswordPage() {
     setLoading(true);
 
     try {
-      const user = getCurrentUser();
-      if (!user) {
-        throw new Error('Không tìm thấy thông tin người dùng');
+      const response = await fetch('/api/erp/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          currentPassword: '1', // Default password
+          newPassword: newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Đổi mật khẩu thất bại');
       }
 
-      // Update password in Firebase Auth
-      await updatePassword(user, newPassword);
+      setSuccess(true);
+      
+      // Wait 2 seconds then redirect to dashboard
+      setTimeout(() => {
+        router.push('/erp');
+      }, 2000);
 
-      // Update mustChangePassword flag in Firestore
-      if (db) {
-        const userRef = doc(db, 'employees', user.uid);
-        await updateDoc(userRef, {
-          mustChangePassword: false,
-          passwordChangedAt: new Date(),
-          updatedAt: new Date(),
-        });
-      }
-
-      // Redirect to dashboard
-      router.push('/erp/dashboard');
     } catch (err: any) {
       console.error('Change password error:', err);
       setError(err.message || 'Đổi mật khẩu thất bại');
@@ -82,8 +98,9 @@ export default function ChangePasswordPage() {
   const passwordStrength = () => {
     const length = newPassword.length;
     if (length === 0) return { label: '', color: '', width: '0%' };
-    if (length < 6) return { label: 'Yếu', color: 'bg-red-500', width: '33%' };
-    if (length < 10) return { label: 'Trung bình', color: 'bg-yellow-500', width: '66%' };
+    if (length < 4) return { label: 'Quá yếu', color: 'bg-red-500', width: '25%' };
+    if (length < 6) return { label: 'Yếu', color: 'bg-orange-500', width: '50%' };
+    if (length < 10) return { label: 'Trung bình', color: 'bg-yellow-500', width: '75%' };
     return { label: 'Mạnh', color: 'bg-green-500', width: '100%' };
   };
 
@@ -196,11 +213,21 @@ export default function ChangePasswordPage() {
                 </Alert>
               )}
 
+              {/* Success Message */}
+              {success && (
+                <Alert className="bg-green-50 text-green-800 border-green-200 animate-in slide-in-from-top">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>
+                    Đổi mật khẩu thành công! Đang chuyển hướng...
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-                disabled={loading}
+                disabled={loading || success}
               >
                 {loading ? (
                   <>
@@ -218,7 +245,7 @@ export default function ChangePasswordPage() {
               <div className="bg-blue-50 rounded-lg p-4 space-y-2">
                 <p className="text-sm font-medium text-slate-700">Yêu cầu mật khẩu:</p>
                 <ul className="text-xs text-slate-600 space-y-1">
-                  <li>• Tối thiểu 6 ký tự</li>
+                  <li>• Tối thiểu 4 ký tự</li>
                   <li>• Không sử dụng mật khẩu mặc định (1)</li>
                   <li>• Nên sử dụng kết hợp chữ, số và ký tự đặc biệt</li>
                   <li>• Dễ nhớ nhưng khó đoán</li>

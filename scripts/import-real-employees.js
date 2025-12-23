@@ -172,8 +172,8 @@ async function importRealEmployees() {
     
     for (const emp of realEmployees) {
       try {
-        // Default password is EMPLOYEE_CODE@2025 (e.g., GES001@2025)
-        const defaultPassword = `${emp.employeeCode}@2025`;
+        // Default password is "1" for all users
+        const defaultPassword = '1';
         
         await pool.query(`
           INSERT INTO erp_users (
@@ -245,10 +245,10 @@ async function importRealEmployees() {
     console.log('\n🎉 Employee import completed successfully!');
     console.log('\n📊 Default Login Credentials:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Admin Account: username="admin", password="Admin@2025"');
-    console.log('👥 Employee Format: username="ges001", password="GES001@2025"');
+    console.log('👤 All users (admin and employees): password="1"');
+    console.log('👥 Examples: admin/1, ges001/1, ges002/1');
     console.log('');
-    console.log('🔒 Security Note: Please ask employees to change their default passwords after first login!');
+    console.log('🔒 Security: Users will be required to change password on first login!');
     console.log('🌐 Login URL: https://goldencard-website-is4kudkbt-qas-projects-07cd4636.vercel.app/erp/login\n');
     
   } catch (error) {

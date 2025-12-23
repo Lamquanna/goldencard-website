@@ -44,10 +44,12 @@ export default function ERPLoginPage() {
 
       console.log('Login successful:', data.user);
       
-      // Redirect based on role
-      if (data.user.role === 'admin') {
-        router.push('/erp');
+      // Check if password change is required
+      if (data.requires_password_change) {
+        console.log('Password change required, redirecting...');
+        router.push('/erp/change-password');
       } else {
+        // Redirect to dashboard
         router.push('/erp');
       }
     } catch (err: any) {
