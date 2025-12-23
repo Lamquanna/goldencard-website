@@ -33,13 +33,8 @@ CREATE INDEX IF NOT EXISTS idx_erp_users_employee_code ON erp_users(employee_cod
 CREATE INDEX IF NOT EXISTS idx_erp_users_role ON erp_users(role);
 CREATE INDEX IF NOT EXISTS idx_erp_users_is_active ON erp_users(is_active);
 
--- Insert sample users for testing
-INSERT INTO erp_users (username, employee_code, full_name, email, phone, role, department, password, is_active)
-VALUES 
-  ('ges001', 'GES001', 'Nguyễn Văn A', 'nva@goldenenergy.vn', '0901234567', 'manager', 'Kinh doanh', 'GES001@2025', true),
-  ('ges002', 'GES002', 'Trần Thị B', 'ttb@goldenenergy.vn', '0912345678', 'staff', 'Kế toán', 'GES002@2025', true),
-  ('ges003', 'GES003', 'Lê Văn C', 'lvc@goldenenergy.vn', '0923456789', 'technical', 'Kỹ thuật', 'GES003@2025', true)
-ON CONFLICT (username) DO NOTHING;
+-- Note: Real employee data should be imported using scripts/import-real-employees.js
+-- This ensures employee codes match the company's official team roster
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
