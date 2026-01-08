@@ -22,7 +22,11 @@ import {
   Eye,
   Edit,
   Trash2,
+  Bell,
+  AlertTriangle,
 } from 'lucide-react'
+import { format, differenceInDays, isAfter } from 'date-fns'
+import { vi } from 'date-fns/locale'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -69,11 +73,11 @@ const mockProjects: Project[] = [
     description: 'Thiết kế lại giao diện website công ty',
     color: '#3B82F6',
     status: 'active',
-    startDate: new Date(2025, 0, 15),
-    endDate: new Date(2025, 3, 15),
-    progress: 45,
+    startDate: new Date(2026, 0, 5),  // 5/1/2026
+    endDate: new Date(2026, 0, 20),   // 20/1/2026 - Gần deadline!
+    progress: 65, // Tiến độ chưa đạt 80%
     totalTasks: 24,
-    completedTasks: 11,
+    completedTasks: 16,
     ownerId: 'u1',
     owner: { id: 'u1', name: 'Nguyễn Văn A' },
     members: [
@@ -94,11 +98,11 @@ const mockProjects: Project[] = [
     description: 'Phát triển ứng dụng di động cho khách hàng',
     color: '#10B981',
     status: 'active',
-    startDate: new Date(2025, 1, 1),
-    endDate: new Date(2025, 5, 30),
-    progress: 25,
+    startDate: new Date(2026, 0, 1),  // 1/1/2026
+    endDate: new Date(2026, 0, 15),   // 15/1/2026 - Rất gần deadline
+    progress: 45, // Tiến độ thấp!
     totalTasks: 48,
-    completedTasks: 12,
+    completedTasks: 22,
     ownerId: 'u2',
     owner: { id: 'u2', name: 'Trần Thị B' },
     members: [
@@ -120,8 +124,8 @@ const mockProjects: Project[] = [
     description: 'Triển khai hệ thống CRM mới',
     color: '#8B5CF6',
     status: 'planning',
-    startDate: new Date(2025, 2, 1),
-    endDate: new Date(2025, 6, 30),
+    startDate: new Date(2026, 1, 1),
+    endDate: new Date(2026, 5, 30),
     progress: 10,
     totalTasks: 16,
     completedTasks: 2,
@@ -169,6 +173,7 @@ const mockProjects: Project[] = [
     color: '#EF4444',
     status: 'on_hold',
     startDate: new Date(2025, 1, 1),
+    endDate: new Date(2026, 0, 10), // 10/1/2026 - Đã quá deadline
     progress: 35,
     totalTasks: 12,
     completedTasks: 4,
@@ -184,6 +189,41 @@ const mockProjects: Project[] = [
     updatedAt: new Date(),
   },
 ]
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+function getProgressColor(progress: number, daysLeft: number, endDate: Date | undefined): string {
+  if (!endDate) return 'bg-blue-500'
+  
+  const now = new Date()
+  const isNearDeadline = daysLeft <= 7 && isAfter(endDate, now)
+  
+  // Đỏ: Gần deadline (≤7 ngày) và tiến độ < 80%
+  if (isNearDeadline && progress < 80) {
+    return 'bg-red-500'
+  }
+  
+  // Vàng: Gần deadline và tiến độ 80-90%
+  if (isNearDeadline && progress >= 80 && progress < 90) {
+    return 'bg-yellow-500'
+  }
+  
+  // Xanh: Tiến độ ≥ 90%
+  if (progress >= 90) {
+    return 'bg-green-500'
+  }
+  
+  // Xanh dương: Mặc định
+  return 'bg-blue-500'
+}
+
+function shouldShowAlert(progress: number, daysLeft: number, endDate: Date | undefined): boolean {
+  if (!endDate) return false
+  const now = new Date()
+  return daysLeft <= 7 && isAfter(endDate, now) && progress < 80
+}
 
 // =============================================================================
 // STATUS ICON
@@ -213,11 +253,22 @@ function StatusIcon({ status }: { status: ProjectStatus }) {
 
 function ProjectCard({ project }: { project: Project }) {
   const statusConfig = PROJECT_STATUS_CONFIG[project.status]
+  const daysLeft = project.endDate ? differenceInDays(project.endDate, new Date()) : 0
+  const progressColor = getProgressColor(project.progress, daysLeft, project.endDate)
+  const showAlert = shouldShowAlert(project.progress, daysLeft, project.endDate)
 
   return (
     <Link href={`/erp/projects/${project.id}`}>
-      <Card className="hover:shadow-md transition-all cursor-pointer group h-full">
+      <Card className={`hover:shadow-md transition-all cursor-pointer group h-full ${showAlert ? 'border-red-300 border-2' : ''}`}>
         <CardContent className="p-4">
+          {/* Alert Badge */}
+          {showAlert && (
+            <div className="mb-3 flex items-center gap-2 text-xs bg-red-50 text-red-700 p-2 rounded-md">
+              <AlertTriangle className="h-3 w-3" />
+              <span className="font-medium">Cảnh báo: Gần deadline, tiến độ chậm!</span>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
@@ -268,13 +319,32 @@ function ProjectCard({ project }: { project: Project }) {
             </p>
           )}
 
+          {/* Timeline */}
+          {project.startDate && project.endDate && (
+            <div className="flex items-center gap-4 mb-4 text-xs">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>{format(project.startDate, 'dd/MM/yyyy', { locale: vi })}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className={`h-3 w-3 ${daysLeft <= 7 && daysLeft > 0 ? 'text-red-500' : 'text-muted-foreground'}`} />
+                <span className={daysLeft <= 7 && daysLeft > 0 ? 'text-red-500 font-medium' : 'text-muted-foreground'}>
+                  {format(project.endDate, 'dd/MM/yyyy', { locale: vi })}
+                  {daysLeft > 0 && ` (${daysLeft} ngày)`}
+                  {daysLeft === 0 && ' (Hôm nay!)'}
+                  {daysLeft < 0 && ` (Quá ${Math.abs(daysLeft)} ngày)`}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Progress */}
           <div className="space-y-2 mb-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Tiến độ</span>
-              <span className="font-medium">{project.progress}%</span>
+              <span className={`font-medium ${showAlert ? 'text-red-600' : ''}`}>{project.progress}%</span>
             </div>
-            <Progress value={project.progress} className="h-2" />
+            <Progress value={project.progress} className={`h-2 ${progressColor}`} />
             <p className="text-xs text-muted-foreground">
               {project.completedTasks}/{project.totalTasks} công việc hoàn thành
             </p>
@@ -312,10 +382,19 @@ function ProjectCard({ project }: { project: Project }) {
 
 function ProjectListItem({ project }: { project: Project }) {
   const statusConfig = PROJECT_STATUS_CONFIG[project.status]
+  const daysLeft = project.endDate ? differenceInDays(project.endDate, new Date()) : 0
+  const progressColor = getProgressColor(project.progress, daysLeft, project.endDate)
+  const showAlert = shouldShowAlert(project.progress, daysLeft, project.endDate)
 
   return (
     <Link href={`/erp/projects/${project.id}`}>
-      <div className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+      <div className={`flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors ${showAlert ? 'border-red-300 border-2 bg-red-50/30' : ''}`}>
+        {showAlert && (
+          <div className="flex-shrink-0">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+          </div>
+        )}
+        
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0"
           style={{ backgroundColor: project.color }}
@@ -324,23 +403,42 @@ function ProjectListItem({ project }: { project: Project }) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold truncate">{project.name}</h3>
             <Badge variant="outline" className={`${statusConfig.color} text-white border-0`}>
               {statusConfig.labelVi}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground truncate">{project.description}</p>
+          
+          {/* Timeline */}
+          {project.startDate && project.endDate && (
+            <div className="flex items-center gap-3 mt-2 text-xs">
+              <span className="text-muted-foreground">
+                📅 {format(project.startDate, 'dd/MM/yyyy')} - {format(project.endDate, 'dd/MM/yyyy')}
+              </span>
+              {daysLeft > 0 && (
+                <span className={`font-medium ${daysLeft <= 7 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  ⏱️ Còn {daysLeft} ngày
+                </span>
+              )}
+            </div>
+          )}
+          
+          {/* Progress bar */}
+          <div className="mt-2">
+            <Progress value={project.progress} className={`h-1.5 ${progressColor}`} />
+          </div>
         </div>
 
         <div className="flex items-center gap-6 flex-shrink-0">
           <div className="text-center">
-            <p className="text-lg font-semibold">{project.progress}%</p>
+            <p className={`text-lg font-semibold ${showAlert ? 'text-red-600' : ''}`}>{project.progress}%</p>
             <p className="text-xs text-muted-foreground">Tiến độ</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-semibold">{project.totalTasks}</p>
-            <p className="text-xs text-muted-foreground">Công việc</p>
+            <p className="text-lg font-semibold">{project.completedTasks}/{project.totalTasks}</p>
+            <p className="text-xs text-muted-foreground">Hoàn thành</p>
           </div>
           <div className="flex items-center -space-x-2">
             {project.members.slice(0, 3).map((member, idx) => (

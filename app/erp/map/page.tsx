@@ -58,9 +58,9 @@ const helpGuide = {
 // Tọa độ trụ sở công ty
 const COMPANY_HQ = {
   name: 'Golden Energy Solutions',
-  address: 'Sunrise Riverside Block A, Nguyễn Hữu Thọ, Nhà Bè',
-  lat: 10.7217334,
-  lng: 106.7029635,
+  address: 'Sunrise Riverside, Block A, Nguyễn Hữu Thọ/Đ. D1 ấp 5, Phước Kiển, Nhà Bè, Thành phố Hồ Chí Minh 70000',
+  lat: 10.740842,
+  lng: 106.703168,
   phone: '1900 6868 66',
   email: 'info@goldenenergy.vn',
 };
@@ -72,8 +72,8 @@ const mockLocations = [
     type: 'warehouse',
     name: 'Kho chính',
     address: 'Sunrise Riverside, Quận 7',
-    lat: 10.7217334,
-    lng: 106.7029635,
+    lat: 10.740842,
+    lng: 106.703168,
     status: 'active',
     items: 1250,
   },

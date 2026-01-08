@@ -90,7 +90,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
                 letterSpacing: "0.025em",
               }}
             >
-              {t.slogan}
+              <span className="energy-text">Năng</span> lượng sạch, cuộc sống xanh, tương lai vàng
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
           <div>
             <h3
               className="text-white text-sm uppercase tracking-[0.15em] font-semibold mb-6"
-              style={{ fontFamily: "Montserrat, sans-serif" }}
+              style={{ fontFamily: "Montserrat, sans-serif", color: "#FFFFFF" }}
             >
               {t.navigation}
             </h3>
@@ -124,7 +124,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
           <div>
             <h3
               className="text-white text-sm uppercase tracking-[0.15em] font-semibold mb-6"
-              style={{ fontFamily: "Montserrat, sans-serif" }}
+              style={{ fontFamily: "Montserrat, sans-serif", color: "#FFFFFF" }}
             >
               {t.contact}
             </h3>
@@ -136,13 +136,13 @@ export default function Footer({ navItems, locale }: FooterProps) {
                 📞 03333 142 88 / 0903 117 277
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                🏢 A2206-A2207 Tháp A, Sunrise Riverside
+                🏢 Sunrise Riverside, Block A, Nguyễn Hữu Thọ/Đ. D1 ấp 5, Phước Kiển, Nhà Bè, Thành phố Hồ Chí Minh 70000
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                🏢 625 Trần Xuân Soạn, Phường Tân Hưng
+                🏢 625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                📦 354/2/3 Nguyễn Văn Linh, Phường Bình Thuận
+                📦 354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, Quận 7, TP.HCM
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.7rem", opacity: 0.8 }}>
                 {locale === 'vi' ? 'Giờ làm việc: 8:00 - 17:30 (T2-T7)' : locale === 'zh' ? '工作时间：8:00 - 17:30' : 'Hours: 8:00 AM - 5:30 PM (Mon-Sat)'}
