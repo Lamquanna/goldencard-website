@@ -18,7 +18,7 @@ export interface AuthUser {
 export function getAuthUser(): AuthUser | null {
   if (typeof window === 'undefined') return null;
   
-  const token = localStorage.getItem('crm_auth');
+  const token = localStorage.getItem('erp_token');
   if (!token) return null;
 
   try {

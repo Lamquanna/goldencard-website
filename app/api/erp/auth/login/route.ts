@@ -15,10 +15,12 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Query database for user
+      // Query database for user (case-insensitive username)
       const userResult = await sql`
         SELECT * FROM erp_users 
-        WHERE username = ${username} AND password = ${password} AND is_active = true
+        WHERE LOWER(username) = LOWER(${username}) 
+          AND password = ${password} 
+          AND is_active = true
       `;
 
       if (userResult.length === 0) {

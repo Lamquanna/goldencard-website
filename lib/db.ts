@@ -7,7 +7,8 @@ export const sql = DATABASE_URL ? neon(DATABASE_URL) : null as any;
 
 // Database initialization
 export async function initDatabase() {
-  // Create crm_users table (avoid 'user' reserved keyword)
+  // Create legacy crm_users table for backwards compatibility (references erp_users)
+  // Note: Main authentication now uses erp_users table
   await sql`
     CREATE TABLE IF NOT EXISTS crm_users (
       id SERIAL PRIMARY KEY,

@@ -14,27 +14,72 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthWrapper: Checking auth for path:', pathname);
-    
-    // Check if user is authenticated via localStorage token
-    const token = localStorage.getItem('erp_token');
-    const userStr = localStorage.getItem('erp_user');
-    
-    if (token && userStr) {
-      console.log('AuthWrapper: User authenticated');
-      setAuthenticated(true);
-      setLoading(false);
-    } else {
-      console.log('AuthWrapper: No auth token found');
-      setAuthenticated(false);
-      setLoading(false);
+    const checkAuth = async () => {
+      console.log('AuthWrapper: Checking auth for path:', pathname);
       
-      // If no token and not on login/change-password page, redirect to login
-      if (!pathname?.includes('/login') && !pathname?.includes('/change-password')) {
-        console.log('AuthWrapper: Redirecting to login');
-        router.push('/erp/login');
+      // Check if user is authenticated via localStorage token
+      const token = localStorage.getItem('erp_token');
+      const userStr = localStorage.getItem('erp_user');
+      
+      if (!token || !userStr) {
+        console.log('AuthWrapper: No auth token found');
+        setAuthenticated(false);
+        setLoading(false);
+        
+        // If no token and not on login/change-password page, redirect to login
+        if (!pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+          console.log('AuthWrapper: Redirecting to login');
+          router.push('/erp/login');
+        }
+        return;
       }
-    }
+
+      // Verify token with backend
+      try {
+        console.log('AuthWrapper: Verifying token with backend...');
+        const response = await fetch('/api/erp/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            console.log('AuthWrapper: Token valid, user authenticated');
+            // Update user info in localStorage if needed
+            localStorage.setItem('erp_user', JSON.stringify(data.user));
+            setAuthenticated(true);
+          } else {
+            console.log('AuthWrapper: Token invalid');
+            // Clear invalid token
+            localStorage.removeItem('erp_token');
+            localStorage.removeItem('erp_user');
+            setAuthenticated(false);
+            if (!pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+              router.push('/erp/login');
+            }
+          }
+        } else {
+          console.log('AuthWrapper: Token verification failed');
+          // Clear invalid token
+          localStorage.removeItem('erp_token');
+          localStorage.removeItem('erp_user');
+          setAuthenticated(false);
+          if (!pathname?.includes('/login') && !pathname?.includes('/change-password')) {
+            router.push('/erp/login');
+          }
+        }
+      } catch (error) {
+        console.error('AuthWrapper: Error verifying token:', error);
+        setAuthenticated(false);
+        // Don't clear token on network error, just fail silently
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router, pathname]);
 
   // Show loading state (but only if not on login or change-password page)

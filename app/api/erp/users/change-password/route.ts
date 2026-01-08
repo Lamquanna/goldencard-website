@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     try {
       // Try database first
       if (sql) {
-        const userResult = await sql`SELECT * FROM crm_users WHERE username = ${username}`;
+        const userResult = await sql`SELECT * FROM erp_users WHERE username = ${username}`;
         
         if (userResult.length > 0) {
           user = userResult[0];
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
           
           // Update password in database
           await sql`
-            UPDATE crm_users 
+            UPDATE erp_users 
             SET password = ${newPassword}, updated_at = CURRENT_TIMESTAMP 
             WHERE username = ${username}
           `;

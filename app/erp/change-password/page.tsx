@@ -80,6 +80,12 @@ export default function ChangePasswordPage() {
         throw new Error(data.error || 'Đổi mật khẩu thất bại');
       }
 
+      // Update user info in localStorage if returned
+      if (data.user) {
+        localStorage.setItem('erp_user', JSON.stringify(data.user));
+        console.log('Updated user info in localStorage:', data.user);
+      }
+
       setSuccess(true);
       
       // Wait 2 seconds then redirect to dashboard

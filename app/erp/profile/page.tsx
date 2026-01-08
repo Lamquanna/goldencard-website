@@ -23,27 +23,30 @@ export default function ProfilePage() {
   const [editForm, setEditForm] = useState<Partial<UserProfile>>({});
 
   useEffect(() => {
-    // Load user profile from localStorage token
-    const token = localStorage.getItem('crm_auth');
-    if (token) {
+    // Load user profile from localStorage (ERP system)
+    const token = localStorage.getItem('erp_token');
+    const userStr = localStorage.getItem('erp_user');
+    
+    if (userStr) {
       try {
-        const decoded = JSON.parse(atob(token.split('.')[1] || token));
+        const user = JSON.parse(userStr);
         setProfile({
-          id: decoded.id || '1',
-          employeeCode: decoded.employeeCode || 'GES001',
-          fullName: decoded.fullName || decoded.username || 'User',
-          email: decoded.email || 'user@goldenenergy.vn',
-          phone: decoded.phone || '0909 xxx xxx',
-          position: decoded.position || 'Nhân viên',
-          department: decoded.department || 'Chưa xác định',
-          joinDate: decoded.joinDate || '2024-01-01',
-          bio: decoded.bio || '',
+          id: user.id || user.username,
+          employeeCode: user.employee_code || user.employeeCode || 'N/A',
+          fullName: user.full_name || user.fullName || user.username || 'User',
+          email: user.email || 'user@goldenenergy.vn',
+          phone: user.phone || '0909 xxx xxx',
+          position: user.role || user.position || 'Nhân viên',
+          department: user.department || 'Chưa xác định',
+          joinDate: user.created_at || user.joinDate || '2024-01-01',
+          bio: user.bio || '',
         });
       } catch (e) {
+        console.error('Error loading profile:', e);
         // Fallback profile
         setProfile({
           id: '1',
-          employeeCode: 'GES001',
+          employeeCode: 'N/A',
           fullName: 'User',
           email: 'user@goldenenergy.vn',
           phone: '0909 xxx xxx',
@@ -52,6 +55,9 @@ export default function ProfilePage() {
           joinDate: '2024-01-01',
         });
       }
+    } else {
+      // No user data, redirect to login
+      window.location.href = '/erp/login';
     }
   }, []);
 

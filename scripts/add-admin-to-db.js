@@ -47,13 +47,13 @@ async function addAdminToDatabase() {
         'admin@goldenenergy.vn',
         'admin',
         'Ban Giám đốc',
-        '1',
-        true,
+        'Admin@2025',
+        false,
         true
       )
       ON CONFLICT (username) DO UPDATE SET
-        password = '1',
-        requires_password_change = true,
+        password = 'Admin@2025',
+        requires_password_change = false,
         updated_at = NOW()
       RETURNING username, employee_code, full_name, role
     `);
@@ -63,8 +63,8 @@ async function addAdminToDatabase() {
     console.log(`   Employee Code: ${result.rows[0].employee_code}`);
     console.log(`   Full Name: ${result.rows[0].full_name}`);
     console.log(`   Role: ${result.rows[0].role}`);
-    console.log(`   Password: 1`);
-    console.log(`   Requires Password Change: true\n`);
+    console.log(`   Password: Admin@2025`);
+    console.log(`   Requires Password Change: false\n`);
 
     // Verify all users
     const allUsers = await pool.query(`
@@ -91,10 +91,10 @@ async function addAdminToDatabase() {
     console.log('└──────────────┴──────────┴─────────────────────────┴─────────┴──────────┘');
 
     console.log('\n🎉 Admin account setup completed!');
-    console.log('\n📝 All accounts now in database:');
-    console.log('   - admin/1');
-    console.log('   - ges001/1 to ges012/1');
-    console.log('\n🔒 All users will be required to change password on first login\n');
+    console.log('\n📝 Login credentials:');
+    console.log('   Username: admin');
+    console.log('   Password: Admin@2025');
+    console.log('\n📌 Admin can now login and create additional users\n');
     
   } catch (error) {
     console.error('❌ Error:', error.message);

@@ -69,7 +69,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
 
   const fetchUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('crm_auth');
+      const token = localStorage.getItem('erp_token');
       
       if (!token) {
         setUser(null);
@@ -96,7 +96,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         });
         setError(null);
       } else {
-        localStorage.removeItem('crm_auth');
+        localStorage.removeItem('erp_token');
         setUser(null);
         setError('Session expired');
       }
@@ -177,7 +177,8 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem('crm_auth');
+    localStorage.removeItem('erp_token');
+    localStorage.removeItem('erp_user');
     setUser(null);
   }, []);
 

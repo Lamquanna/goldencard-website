@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     let user = null;
     
     try {
-      const userResult = await sql`SELECT * FROM crm_users WHERE username = ${username}`;
+      const userResult = await sql`SELECT * FROM erp_users WHERE username = ${username}`;
       if (userResult.length > 0) {
         user = userResult[0];
       }

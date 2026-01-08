@@ -60,9 +60,17 @@ export async function POST(request: NextRequest) {
 
       console.log(`Password changed successfully for user: ${username}`);
 
+      // Return updated user info
       return NextResponse.json({
         success: true,
-        message: "Đổi mật khẩu thành công"
+        message: "Đổi mật khẩu thành công",
+        user: {
+          username: user.username,
+          role: user.role,
+          email: user.email,
+          full_name: user.full_name,
+          employee_code: user.employee_code,
+        }
       });
 
     } catch (dbError) {

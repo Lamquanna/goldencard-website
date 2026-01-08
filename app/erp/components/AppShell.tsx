@@ -622,6 +622,7 @@ export function AppShellProvider({ children }: AppShellProviderProps) {
         
         if (storedUser && storedToken) {
           const userData = JSON.parse(storedUser);
+          console.log('AppShell: Loading user from localStorage:', userData);
           setUser({
             id: userData.username,
             email: userData.email || '',

@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { teamData } from "@/lib/team-data";
+import { sql } from "@/lib/db";
 
-// Valid roles for the ERP system
-const VALID_ROLES = ['admin', 'manager', 'sale', 'staff', 'hr', 'warehouse', 'engineer', 'ceo', 'cfo', 'cto'];
-
-// Build employee map from team data
-const EMPLOYEES: Record<string, { name: string; role: string; email: string }> = {};
-teamData.forEach((member) => {
-  EMPLOYEES[member.employeeCode] = {
-    name: member.nameVi,
-    role: member.roleVi,
-    email: member.email || `${member.employeeCode.toLowerCase()}@goldenenergy.vn`,
-  };
-});
-
-// Verify token endpoint
+// Verify token endpoint - Check against PostgreSQL database
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -25,75 +12,57 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
 
-    // Validate token
-    if (token && token.length > 0) {
-      // New simple token format: CODE|timestamp|random
-      if (token.includes('|')) {
-        const [code, timestampStr] = token.split('|');
-        const timestamp = parseInt(timestampStr, 10);
-        
-        // Check if token is expired (24 hours)
-        if (Date.now() - timestamp > 24 * 60 * 60 * 1000) {
-          return NextResponse.json({ error: "Token expired" }, { status: 401 });
-        }
-        
-        // Get employee info
-        const employee = EMPLOYEES[code];
-        if (employee) {
-          return NextResponse.json({
-            valid: true,
-            user: {
-              id: `user-${code}`,
-              username: code,
-              employeeCode: code,
-              role: employee.role.includes('CEO') ? 'admin' : 
-                    employee.role.includes('CFO') || employee.role.includes('CTO') ? 'manager' :
-                    employee.role.includes('Trưởng') ? 'manager' : 'staff',
-              email: employee.email,
-              fullName: employee.name,
-              position: employee.role,
-            },
-          });
-        }
-      }
-      
-      // Legacy: try to decode base64 token
-      try {
-        const decoded = Buffer.from(token, "base64").toString("utf-8");
-        
-        // Old format: username:role
-        const parts = decoded.split(":");
-        
-        if (parts.length >= 2) {
-          const username = parts[0];
-          const role = parts[1];
-          
-          if (username && VALID_ROLES.includes(role)) {
-            return NextResponse.json({
-              valid: true,
-              user: {
-                id: `user-${username}`,
-                username,
-                role,
-                email: `${username}@goldenenergy.vn`,
-                fullName: username === 'admin' ? 'Admin User' : 
-                         username === 'sale' ? 'Nhân viên Sale' :
-                         username === 'manager' ? 'Quản lý' :
-                         username === 'hr' ? 'Nhân sự' :
-                         username === 'warehouse' ? 'Kho' :
-                         username === 'engineer' ? 'Kỹ thuật' :
-                         username,
-              },
-            });
-          }
-        }
-      } catch {
-        // Invalid token format
-      }
+    if (!token || token.length === 0) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  } catch {
+    try {
+      // Decode base64 token: format is "username:role:timestamp"
+      const decoded = Buffer.from(token, "base64").toString("utf-8");
+      const parts = decoded.split(":");
+      
+      if (parts.length < 2) {
+        return NextResponse.json({ error: "Invalid token format" }, { status: 401 });
+      }
+
+      const username = parts[0];
+      const role = parts[1];
+
+      // Verify user exists in database and is active
+      const userResult = await sql`
+        SELECT * FROM erp_users 
+        WHERE username = ${username} AND is_active = true
+      `;
+
+      if (userResult.length === 0) {
+        return NextResponse.json({ error: "User not found or inactive" }, { status: 401 });
+      }
+
+      const user = userResult[0];
+
+      // Return user info
+      return NextResponse.json({
+        valid: true,
+        user: {
+          id: `user-${user.id}`,
+          username: user.username,
+          employeeCode: user.employee_code,
+          role: user.role,
+          email: user.email,
+          fullName: user.full_name,
+          position: user.role,
+          department: user.department,
+          phone: user.phone,
+        },
+      });
+
+    } catch (decodeError) {
+      console.error("Token decode error:", decodeError);
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+  } catch (error) {
+    console.error("Token verification error:", error);
     return NextResponse.json(
       { error: "Token verification failed" },
       { status: 500 }

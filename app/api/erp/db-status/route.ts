@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to query database
-    const result = await sql`SELECT COUNT(*) as count FROM crm_users`;
-    const users = await sql`SELECT username, role, email, created_at FROM crm_users ORDER BY created_at DESC`;
+    const result = await sql`SELECT COUNT(*) as count FROM erp_users`;
+    const users = await sql`SELECT username, role, email, created_at FROM erp_users ORDER BY created_at DESC`;
     
     return NextResponse.json({ 
       status: 'connected',

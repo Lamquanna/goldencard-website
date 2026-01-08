@@ -140,6 +140,13 @@ const priorityConfig = {
 export default function TasksPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [showHelp, setShowHelp] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    dueDate: '',
+  });
 
   const filteredTasks = activeTab === 'all' 
     ? mockTasks 
@@ -171,7 +178,7 @@ export default function TasksPage() {
             <HelpCircle className="w-5 h-5" />
           </Button>
         </div>
-        <Button className="bg-[#D4AF37] hover:bg-[#B8960A] text-white">
+        <Button className="bg-[#D4AF37] hover:bg-[#B8960A] text-white" onClick={() => setShowCreateModal(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Tạo công việc
         </Button>
@@ -356,6 +363,104 @@ export default function TasksPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Task Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md bg-white">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Tạo công việc mới</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  placeholder="Nhập tiêu đề công việc"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mô tả
+                </label>
+                <textarea
+                  placeholder="Nhập mô tả chi tiết"
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 min-h-[100px]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Độ ưu tiên
+                  </label>
+                  <select
+                    value={newTask.priority}
+                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+                  >
+                    <option value="low">Thấp</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="high">Cao</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hạn chót
+                  </label>
+                  <Input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="flex-1 bg-[#D4AF37] hover:bg-[#B8960A] text-white"
+                  onClick={() => {
+                    if (newTask.title) {
+                      alert('Tính năng tạo công việc đang được phát triển!');
+                      setShowCreateModal(false);
+                      setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
+                    } else {
+                      alert('Vui lòng nhập tiêu đề công việc');
+                    }
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tạo công việc
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
