@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 // PUT - Update leave request (approve, reject, cancel)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { action, approverId, rejectReason } = body;
 
@@ -164,10 +164,10 @@ export async function PUT(
 // DELETE - Delete leave request
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if request exists and is pending
     const leaveRequest = await sql`
