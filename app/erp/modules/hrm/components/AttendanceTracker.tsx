@@ -523,6 +523,7 @@ export function AttendanceTracker({
       date: now,
       checkInTime: now,
       checkInMethod: method,
+      workMode: 'office', // Default to office mode
       status: now.getHours() >= 9 ? 'late' : 'present',
       workingHours: 0,
       overtimeHours: 0,
