@@ -33,7 +33,7 @@ export function useTravelModeDetector({
 }: TravelModeDetectorProps) {
   const [lastPosition, setLastPosition] = useState<GeolocationPosition | null>(null)
   const [isTraveling, setIsTraveling] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (!isActive) {
@@ -116,7 +116,7 @@ export function RealTimeLocationTracker({
     duration: 0
   })
   const [error, setError] = useState<string | null>(null)
-  const watchIdRef = useRef<number>()
+  const watchIdRef = useRef<number | undefined>(undefined)
 
   // Auto-detect travel mode
   const { isTraveling } = useTravelModeDetector({

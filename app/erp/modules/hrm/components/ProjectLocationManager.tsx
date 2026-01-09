@@ -471,8 +471,8 @@ export function ProjectLocationManager() {
     } else {
       // Create new
       const newProject: ProjectLocation = {
-        id: `proj-${Date.now()}`,
         ...data as ProjectLocation,
+        id: `proj-${Date.now()}`,
         projectManagerId: 'current-user-id', // Should be from context
         createdAt: new Date(),
         updatedAt: new Date(),
