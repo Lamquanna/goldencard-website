@@ -492,6 +492,7 @@ function generateProjectCode(location: string): string {
 
 function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -506,19 +507,49 @@ function CreateProjectDialog() {
     setProjectCode(generateProjectCode(value));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Tạo dự án:', { ...formData, code: projectCode });
-    alert(`Đã tạo dự án thành công!\nMã dự án: ${projectCode}`);
-    setOpen(false);
-    // Reset form
-    setFormData({
-      name: '',
-      location: '',
-      color: '#3B82F6',
-      description: '',
-    });
-    setProjectCode('PRJ001-XX');
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/erp/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          projectKey: projectCode,
+          description: formData.description,
+          color: formData.color,
+          location: formData.location,
+          startDate: new Date().toISOString().split('T')[0],
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create project');
+      }
+
+      alert(`✅ Đã tạo dự án thành công!\nMã dự án: ${projectCode}`);
+      setOpen(false);
+      
+      // Reset form
+      setFormData({
+        name: '',
+        location: '',
+        color: '#3B82F6',
+        description: '',
+      });
+      setProjectCode('PRJ001-XX');
+      
+      // Reload page to show new project
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error creating project:', error);
+      alert(`❌ Lỗi: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -626,12 +657,12 @@ function CreateProjectDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSubmitting}>
               Hủy
             </Button>
-            <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white">
+            <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white" disabled={isSubmitting}>
               <Plus className="h-4 w-4 mr-2" />
-              Tạo dự án
+              {isSubmitting ? 'Đang tạo...' : 'Tạo dự án'}
             </Button>
           </DialogFooter>
         </form>

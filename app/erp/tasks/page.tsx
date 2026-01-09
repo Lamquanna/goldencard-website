@@ -141,6 +141,9 @@ export default function TasksPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [showHelp, setShowHelp] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tasks, setTasks] = useState(mockTasks);
+  const [isLoading, setIsLoading] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -148,15 +151,47 @@ export default function TasksPage() {
     dueDate: '',
   });
 
+  // Load tasks from API
+  React.useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/erp/tasks');
+      if (response.ok) {
+        const data = await response.json();
+        // Transform API data to match UI format
+        const transformedTasks = data.map((task: any) => ({
+          id: task.id.toString(),
+          title: task.title,
+          description: task.description || '',
+          status: task.status,
+          priority: task.priority,
+          dueDate: task.dueDate || '',
+          assignee: { name: 'Unknown', initials: 'U' },
+          project: 'General',
+          tags: task.tags || [],
+        }));
+        setTasks([...mockTasks, ...transformedTasks]);
+      }
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredTasks = activeTab === 'all' 
-    ? mockTasks 
-    : mockTasks.filter(t => t.status === activeTab);
+    ? tasks 
+    : tasks.filter(t => t.status === activeTab);
 
   const taskCounts = {
-    all: mockTasks.length,
-    todo: mockTasks.filter(t => t.status === 'todo').length,
-    in_progress: mockTasks.filter(t => t.status === 'in_progress').length,
-    completed: mockTasks.filter(t => t.status === 'completed').length,
+    all: tasks.length,
+    todo: tasks.filter(t => t.status === 'todo').length,
+    in_progress: tasks.filter(t => t.status === 'in_progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
   };
 
   return (
@@ -443,18 +478,46 @@ export default function TasksPage() {
                 </Button>
                 <Button
                   className="flex-1 bg-[#D4AF37] hover:bg-[#B8960A] text-white"
-                  onClick={() => {
-                    if (newTask.title) {
-                      alert('Tính năng tạo công việc đang được phát triển!');
+                  disabled={isSubmitting}
+                  onClick={async () => {
+                    if (!newTask.title) {
+                      alert('Vui lòng nhập tiêu đề công việc');
+                      return;
+                    }
+
+                    setIsSubmitting(true);
+                    try {
+                      const response = await fetch('/api/erp/tasks', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          title: newTask.title,
+                          description: newTask.description,
+                          priority: newTask.priority,
+                          dueDate: newTask.dueDate || null,
+                        }),
+                      });
+
+                      if (!response.ok) {
+                        throw new Error('Failed to create task');
+                      }
+
+                      alert('✅ Tạo công việc thành công!');
                       setShowCreateModal(false);
                       setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
-                    } else {
-                      alert('Vui lòng nhập tiêu đề công việc');
+                      
+                      // Reload tasks
+                      await loadTasks();
+                    } catch (error) {
+                      console.error('Error creating task:', error);
+                      alert('❌ Có lỗi xảy ra khi tạo công việc');
+                    } finally {
+                      setIsSubmitting(false);
                     }
                   }}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Tạo công việc
+                  {isSubmitting ? 'Đang tạo...' : 'Tạo công việc'}
                 </Button>
               </div>
             </CardContent>
