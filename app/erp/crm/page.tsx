@@ -758,13 +758,13 @@ function AddLeadDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Hủy disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSubmitting}>
               Hủy
             </Button>
             <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white" disabled={isSubmitting}>
               <Plus className="w-4 h-4 mr-2" />
               {isSubmitting ? 'Đang thêm...' : 'Thêm khách hàng'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

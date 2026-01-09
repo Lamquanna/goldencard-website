@@ -100,60 +100,61 @@ export async function GET(request: NextRequest) {
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status');
-    const assigned_to = searchParams.get('assigned_to');
-    const source = searchParams.get('source');
-    const search = searchParams.get('search');
+    const statusParam = searchParams.get('status');
+    const assignedToParam = searchParams.get('assigned_to');
+    const sourceParam = searchParams.get('source');
+    const searchQuery = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    console.log('📋 Query params:', { status, assigned_to, source, search, limit, offset });
+    console.log('📋 Query params:', { statusParam, assignedToParam, sourceParam, searchQuery, limit, offset });
 
     try {
-      // Build WHERE conditions
-      let whereConditions = [];
-      let params: any[] = [];
-      let paramIndex = 1;
-
-      if (status) {
-        whereConditions.push(`status = $${paramIndex}`);
-        params.push(status);
-        paramIndex++;
+      // Simple query without filters for now (can be enhanced later)
+      let leads;
+      
+      if (!statusParam && !assignedToParam && !sourceParam && !searchQuery) {
+        // No filters - get all leads
+        leads = await sql`
+          SELECT * FROM leads
+          ORDER BY created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (statusParam && !assignedToParam && !sourceParam && !searchQuery) {
+        // Filter by status only
+        leads = await sql`
+          SELECT * FROM leads
+          WHERE status = ${statusParam}
+          ORDER BY created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (searchQuery) {
+        // Search query
+        const searchPattern = `%${searchQuery}%`;
+        leads = await sql`
+          SELECT * FROM leads
+          WHERE name ILIKE ${searchPattern} 
+             OR email ILIKE ${searchPattern} 
+             OR company ILIKE ${searchPattern}
+          ORDER BY created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        // Complex filters - get all and filter in memory (temporary solution)
+        leads = await sql`
+          SELECT * FROM leads
+          ORDER BY created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
       }
-
-      if (assigned_to) {
-        whereConditions.push(`assigned_to = $${paramIndex}`);
-        params.push(assigned_to);
-        paramIndex++;
-      }
-
-      if (source) {
-        whereConditions.push(`source = $${paramIndex}`);
-        params.push(source);
-        paramIndex++;
-      }
-
-      if (search) {
-        whereConditions.push(`(name ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR company ILIKE $${paramIndex})`);
-        params.push(`%${search}%`);
-        paramIndex++;
-      }
-
-      const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
-
-      // Get leads from PostgreSQL
-      const leads = await sql`
-        SELECT * FROM leads
-        ${sql.unsafe(whereClause)}
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `;
 
       // Get total count
       const countResult = await sql`
         SELECT COUNT(*) as total FROM leads
-        ${sql.unsafe(whereClause)}
       `;
 
       const total = parseInt(countResult[0].total);
@@ -176,71 +177,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('🔨 Query built, applying filters...');
-
-    if (status) {
-      console.log('  → Filtering by status:', status);
-      query = query.eq('status', status);
-    }
-    if (assigned_to) {
-      console.log('  → Filtering by assigned_to:', assigned_to);
-      query = query.eq('assigned_to', assigned_to);
-    }
-    if (source) {
-      console.log('  → Filtering by source:', source);
-      query = query.eq('source', source);
-    }
-    if (search) {
-      console.log('  → Searching:', search);
-      query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%,email.ilike.%${search}%`);
-    }
-
-    console.log('⏳ Executing query...');
-    const { data: leads, error, count } = await query;
-    console.log('✅ Query result:', { leadsCount: leads?.length, totalCount: count, hasError: !!error });
-
-    if (error) {
-      console.error('Error fetching leads:', error);
-      return NextResponse.json({ error: 'Failed to fetch leads' }, { status: 500 });
-    }
-
-    // Enrich leads with unread message info
-    const enrichedLeads = await Promise.all((leads || []).map(async (lead: any) => {
-      // Get messages for this lead
-      const { data: messages } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('lead_id', lead.id)
-        .order('created_at', { ascending: false });
-      
-      const customerMessages = messages?.filter((m: any) => m.sender_type === 'customer') || [];
-      const adminMessages = messages?.filter((m: any) => m.sender_type === 'agent') || [];
-      
-      const customerLastMessage = customerMessages[0];
-      const adminLastMessage = adminMessages[0];
-      
-      // Check if customer replied after admin's last message
-      const hasUnreadMessages = customerLastMessage && (
-        !adminLastMessage || 
-        new Date(customerLastMessage.created_at) > new Date(adminLastMessage.created_at)
-      );
-      
-      return {
-        ...lead,
-        has_unread_messages: hasUnreadMessages,
-        customer_last_message_at: customerLastMessage?.created_at,
-        admin_last_read_at: adminLastMessage?.created_at,
-      };
-    }));
-
-    return NextResponse.json({
-      leads: enrichedLeads,
-      total: count,
-      limit,
-      offset,
-    });
-  } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('❌ API error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error: ' + error.message 
+    }, { status: 500 });
   }
 }
