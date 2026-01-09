@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const result = await sql(query, params)
     
     // Transform snake_case to camelCase
-    const expenses = result.rows.map(row => ({
+    const expenses = result.rows.map((row: any) => ({
       id: row.id,
       expenseNumber: row.expense_number,
       title: row.title,

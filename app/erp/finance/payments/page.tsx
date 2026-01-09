@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ import {
   Building2
 } from 'lucide-react'
 import { exportToExcel } from '@/lib/excel-export'
+import { toast } from 'sonner'
 
 interface Payment {
   id: string
@@ -31,29 +32,6 @@ interface Payment {
   method?: string
 }
 
-const mockPayments: Payment[] = [
-  {
-    id: '1',
-    invoiceNumber: 'INV-2024-001',
-    customer: 'Công ty TNHH ABC',
-    company: 'abc@company.vn',
-    amount: 181500000,
-    dueDate: '10/02/2024',
-    paidDate: '08/02/2024',
-    status: 'paid',
-    method: 'Chuyển khoản'
-  },
-  {
-    id: '2',
-    invoiceNumber: 'INV-2024-002',
-    customer: 'Công ty CP XYZ',
-    company: 'info@xyz.vn',
-    amount: 187500000,
-    dueDate: '15/02/2024',
-    status: 'overdue',
-  }
-]
-
 const STATUS_CONFIG = {
   paid: { label: 'Đã thanh toán', color: 'bg-green-100 text-green-700', icon: CheckCircle },
   pending: { label: 'Chờ duyệt', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
@@ -61,8 +39,29 @@ const STATUS_CONFIG = {
 }
 
 export default function PaymentsPage() {
-  const [payments] = useState<Payment[]>(mockPayments)
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    loadPayments()
+  }, [])
+
+  const loadPayments = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/erp/payments')
+      if (!response.ok) throw new Error('Failed to fetch payments')
+      const data = await response.json()
+      setPayments(data.payments || [])
+    } catch (error) {
+      console.error('Error loading payments:', error)
+      toast.error('Không thể tải danh sách thanh toán')
+      setPayments([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredPayments = payments.filter(payment =>
     payment.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||

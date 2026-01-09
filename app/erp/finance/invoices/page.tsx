@@ -12,32 +12,24 @@ export default function InvoicesPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Mock data - replace with API call later
-    const mockInvoices = [
-      {
-        id: 1,
-        invoiceNumber: 'INV-2024-001',
-        customerName: 'Công ty TNHH ABC',
-        amount: 181500000,
-        status: 'paid',
-        issueDate: '2024-01-15',
-        dueDate: '2024-02-15',
-        items: []
-      },
-      {
-        id: 2,
-        invoiceNumber: 'INV-2024-002',
-        customerName: 'Công ty Cổ phần XYZ',
-        amount: 187500000,
-        status: 'overdue',
-        issueDate: '2024-01-10',
-        dueDate: '2024-01-25',
-        items: []
-      }
-    ]
-    setInvoices(mockInvoices)
-    setIsLoading(false)
+    loadInvoices()
   }, [])
+
+  const loadInvoices = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/erp/invoices')
+      if (!response.ok) throw new Error('Failed to fetch invoices')
+      const data = await response.json()
+      setInvoices(data.invoices || [])
+    } catch (error) {
+      console.error('Error loading invoices:', error)
+      toast.error('Không thể tải danh sách hóa đơn')
+      setInvoices([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleExportExcel = () => {
     if (invoices.length === 0) {

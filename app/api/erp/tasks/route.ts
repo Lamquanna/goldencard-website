@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     const result = await sql(query, params)
     
-    const tasks = result.rows.map(row => ({
+    const tasks = result.rows.map((row: any) => ({
       id: row.id,
       title: row.title,
       description: row.description,

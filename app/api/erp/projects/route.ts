@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     const result = await sql(query, params)
     
-    const projects = result.rows.map(row => ({
+    const projects = result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       projectKey: row.project_key,

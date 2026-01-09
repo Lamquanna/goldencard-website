@@ -141,6 +141,10 @@ export default function TasksPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [showHelp, setShowHelp] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tasks, setTasks] = useState(mockTasks);
   const [isLoading, setIsLoading] = useState(false);
@@ -149,6 +153,13 @@ export default function TasksPage() {
     description: '',
     priority: 'medium',
     dueDate: '',
+  });
+  const [editingTask, setEditingTask] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    dueDate: '',
+    status: 'todo',
   });
 
   // Load tasks from API
@@ -180,6 +191,77 @@ export default function TasksPage() {
       console.error('Error loading tasks:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleViewTask = (task: any) => {
+    setSelectedTask(task);
+    setShowViewModal(true);
+  };
+
+  const handleEditTask = (task: any) => {
+    setSelectedTask(task);
+    setEditingTask({
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      status: task.status,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleDeleteTask = (task: any) => {
+    setSelectedTask(task);
+    setShowDeleteModal(true);
+  };
+
+  const handleUpdateTask = async () => {
+    if (!selectedTask || !editingTask.title) {
+      alert('Vui lòng nhập tiêu đề công việc');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/erp/tasks/${selectedTask.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingTask),
+      });
+
+      if (!response.ok) throw new Error('Failed to update task');
+
+      alert('✅ Cập nhật công việc thành công!');
+      setShowEditModal(false);
+      await loadTasks();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      alert('❌ Có lỗi xảy ra khi cập nhật');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedTask) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/erp/tasks/${selectedTask.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete task');
+
+      alert('✅ Xóa công việc thành công!');
+      setShowDeleteModal(false);
+      await loadTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('❌ Có lỗi xảy ra khi xóa');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -385,9 +467,32 @@ export default function TasksPage() {
                               {task.assignee.initials}
                             </AvatarFallback>
                           </Avatar>
-                          <Button variant="ghost" size="icon" className="text-gray-400">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <div className="relative group">
+                            <Button variant="ghost" size="icon" className="text-gray-400">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                            {/* Dropdown Menu */}
+                            <div className="absolute right-0 mt-1 w-40 bg-white border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                              <button
+                                onClick={() => handleViewTask(task)}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-t-lg"
+                              >
+                                Xem chi tiết
+                              </button>
+                              <button
+                                onClick={() => handleEditTask(task)}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                              >
+                                Sửa
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTask(task)}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -518,6 +623,177 @@ export default function TasksPage() {
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   {isSubmitting ? 'Đang tạo...' : 'Tạo công việc'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* View Task Modal */}
+      {showViewModal && selectedTask && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md bg-white">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Chi tiết công việc</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Tiêu đề</label>
+                <p className="text-gray-900">{selectedTask.title}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Mô tả</label>
+                <p className="text-gray-600">{selectedTask.description || 'Không có mô tả'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Trạng thái</label>
+                  <Badge className={statusConfig[selectedTask.status as keyof typeof statusConfig].color}>
+                    {statusConfig[selectedTask.status as keyof typeof statusConfig].label}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Độ ưu tiên</label>
+                  <Badge className={priorityConfig[selectedTask.priority as keyof typeof priorityConfig].color}>
+                    {priorityConfig[selectedTask.priority as keyof typeof priorityConfig].label}
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Hạn chót</label>
+                <p className="text-gray-900">{selectedTask.dueDate || 'Chưa xác định'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Task Modal */}
+      {showEditModal && selectedTask && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md bg-white">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Chỉnh sửa công việc</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={editingTask.title}
+                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
+                <textarea
+                  value={editingTask.description}
+                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 min-h-[100px]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                  <select
+                    value={editingTask.status}
+                    onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+                  >
+                    <option value="todo">Chưa bắt đầu</option>
+                    <option value="in_progress">Đang thực hiện</option>
+                    <option value="completed">Hoàn thành</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Độ ưu tiên</label>
+                  <select
+                    value={editingTask.priority}
+                    onChange={(e) => setEditingTask({ ...editingTask, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+                  >
+                    <option value="low">Thấp</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="high">Cao</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Hạn chót</label>
+                <Input
+                  type="date"
+                  value={editingTask.dueDate}
+                  onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="flex-1 bg-[#D4AF37] hover:bg-[#B8960A] text-white"
+                  disabled={isSubmitting}
+                  onClick={handleUpdateTask}
+                >
+                  {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedTask && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md bg-white">
+            <CardHeader>
+              <CardTitle className="text-red-600">Xác nhận xóa</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700">
+                Bạn có chắc chắn muốn xóa công việc <strong>{selectedTask.title}</strong>? 
+                Hành động này không thể hoàn tác.
+              </p>
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isSubmitting}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  disabled={isSubmitting}
+                  onClick={handleConfirmDelete}
+                >
+                  {isSubmitting ? 'Đang xóa...' : 'Xóa'}
                 </Button>
               </div>
             </CardContent>

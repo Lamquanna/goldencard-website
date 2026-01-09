@@ -112,9 +112,13 @@ export interface CreateLeadInput {
   name: string;
   phone?: string;
   email?: string;
+  company?: string;
   message?: string;
   source: LeadSource;
   source_url?: string;
+  status?: LeadStatus;
+  priority?: LeadPriority;
+  assigned_to?: string;
   
   // Auto-captured
   utm_source?: string;

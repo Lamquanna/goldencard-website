@@ -4,12 +4,13 @@ import { sql } from '@/lib/db'
 // GET /api/erp/tasks/:id - Get single task
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const result = await sql(
       'SELECT * FROM erp_tasks WHERE id = $1',
-      [parseInt(params.id)]
+      [parseInt(id)]
     )
 
     if (result.rows.length === 0) {
@@ -45,9 +46,10 @@ export async function GET(
 // PATCH /api/erp/tasks/:id - Update task
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { title, description, status, priority, dueDate, assigneeId, projectId, tags } = body
 
@@ -96,7 +98,7 @@ export async function PATCH(
     }
 
     updates.push(`updated_at = CURRENT_TIMESTAMP`)
-    values.push(parseInt(params.id))
+    values.push(parseInt(id))
 
     const query = `
       UPDATE erp_tasks 
@@ -139,12 +141,13 @@ export async function PATCH(
 // DELETE /api/erp/tasks/:id - Delete task
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const result = await sql(
       'DELETE FROM erp_tasks WHERE id = $1 RETURNING id',
-      [parseInt(params.id)]
+      [parseInt(id)]
     )
 
     if (result.rows.length === 0) {
