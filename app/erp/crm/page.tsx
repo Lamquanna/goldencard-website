@@ -508,6 +508,7 @@ function TopDeals() {
 // Component dialog thêm khách hàng tiềm năng mới
 function AddLeadDialog() {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -518,20 +519,58 @@ function AddLeadDialog() {
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Thêm khách hàng tiềm năng:', formData);
-    alert('Đã thêm khách hàng tiềm năng thành công!');
-    setFormData({
-      name: '',
-      company: '',
-      email: '',
-      phone: '',
-      source: '',
-      rating: 'medium',
-      notes: '',
-    });
-    setOpen(false);
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/erp/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          company: formData.company || null,
+          email: formData.email || null,
+          phone: formData.phone || null,
+          source: formData.source || 'manual',
+          message: formData.notes || null,
+          priority: formData.rating,
+          status: 'new',
+          locale: 'vi',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create lead');
+      }
+
+      const result = await response.json();
+      console.log('Lead created successfully:', result);
+      
+      alert('✅ Đã thêm khách hàng tiềm năng thành công!');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        source: '',
+        rating: 'medium',
+        notes: '',
+      });
+      setOpen(false);
+      
+      // Reload page to show new lead
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating lead:', error);
+      alert('❌ Có lỗi xảy ra khi thêm khách hàng. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -584,7 +623,7 @@ function AddLeadDialog() {
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">
                   <Mail className="w-4 h-4 inline mr-1" />
-                  Email <span className="text-red-500">*</span>
+                  Email
                 </Label>
                 <Input
                   id="email"
@@ -592,7 +631,6 @@ function AddLeadDialog() {
                   placeholder="email@company.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
                   className="border-gray-300"
                 />
               </div>
@@ -721,12 +759,12 @@ function AddLeadDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Hủy disabled={isSubmitting}>
               Hủy
             </Button>
-            <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white">
+            <Button type="submit" className="bg-[#D4AF37] hover:bg-[#B8962E] text-white" disabled={isSubmitting}>
               <Plus className="w-4 h-4 mr-2" />
-              Thêm khách hàng
-            </Button>
+              {isSubmitting ? 'Đang thêm...' : 'Thêm khách hàng'}
           </DialogFooter>
         </form>
       </DialogContent>

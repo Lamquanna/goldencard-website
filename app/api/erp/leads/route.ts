@@ -1,19 +1,18 @@
-// API route: Create new lead
-// POST /api/crm/leads
+// API route: Create new lead - ERP version
+// POST /api/erp/leads
 
 import { NextRequest, NextResponse } from 'next/server';
-import { mockSupabase } from '@/lib/supabase/mock';
+import { sql } from '@/lib/db';
 import type { CreateLeadInput } from '@/lib/types/crm';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = mockSupabase as unknown as any;
     const body = await request.json() as CreateLeadInput;
 
     // Validate required fields
-    if (!body.name || !body.source) {
+    if (!body.name) {
       return NextResponse.json(
-        { error: 'Name and source are required' },
+        { error: 'Name is required' },
         { status: 400 }
       );
     }
@@ -26,45 +25,70 @@ export async function POST(request: NextRequest) {
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
-    // Create lead
-    const { data: lead, error: leadError } = await supabase
-      .from('leads')
-      .insert({
-        ...body,
-        device_type: body.device_type || deviceType,
-        ip_address: body.ip_address || ipAddress,
-        browser: userAgent.slice(0, 200),
-        locale: body.locale || 'vi',
-      })
-      .select()
-      .single();
+    try {
+      // Insert lead into PostgreSQL database
+      const result = await sql`
+        INSERT INTO leads (
+          name,
+          email,
+          phone,
+          company,
+          message,
+          status,
+          priority,
+          source,
+          source_url,
+          device_type,
+          ip_address,
+          browser,
+          locale,
+          assigned_to,
+          created_at,
+          updated_at,
+          unread
+        ) VALUES (
+          ${body.name},
+          ${body.email || null},
+          ${body.phone || null},
+          ${body.company || null},
+          ${body.message || null},
+          ${body.status || 'new'},
+          ${body.priority || 'medium'},
+          ${body.source || 'manual'},
+          ${body.source_url || null},
+          ${body.device_type || deviceType},
+          ${body.ip_address || ipAddress},
+          ${userAgent.slice(0, 200)},
+          ${body.locale || 'vi'},
+          ${body.assigned_to || null},
+          NOW(),
+          NOW(),
+          true
+        )
+        RETURNING *
+      `;
 
-    if (leadError) {
-      console.error('Error creating lead:', leadError);
+      const lead = result[0];
+      console.log('✅ Lead created in PostgreSQL:', lead.id);
+
+      return NextResponse.json({ 
+        success: true, 
+        lead,
+        message: 'Lead created successfully'
+      }, { status: 201 });
+
+    } catch (dbError: any) {
+      console.error('❌ Database error creating lead:', dbError);
       return NextResponse.json(
-        { error: 'Failed to create lead' },
+        { error: 'Failed to save lead to database: ' + dbError.message },
         { status: 500 }
       );
     }
 
-    // Create initial event
-    await supabase
-      .from('lead_events')
-      .insert({
-        lead_id: lead.id,
-        event_type: 'created',
-        description: `Lead created from ${body.source}`,
-        metadata: {
-          device: deviceType,
-          source_url: body.source_url,
-        },
-      });
-
-    return NextResponse.json({ success: true, lead }, { status: 201 });
-  } catch (error) {
-    console.error('API error:', error);
+  } catch (error: any) {
+    console.error('❌ API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error: ' + error.message },
       { status: 500 }
     );
   }
@@ -72,10 +96,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Use mock data for local testing
-    const supabase = mockSupabase as unknown as any;
-    
-    console.log('🔍 GET /api/crm/leads - Starting');
+    console.log('🔍 GET /api/erp/leads - Fetching from PostgreSQL');
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams;
@@ -88,16 +109,72 @@ export async function GET(request: NextRequest) {
 
     console.log('📋 Query params:', { status, assigned_to, source, search, limit, offset });
 
-    // Build query
-    let query = supabase
-      .from('leads')
-      .select(`
-        *,
-        assigned_user:assigned_to(id, full_name, email, avatar_url)
-      `, { count: 'exact' })
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    try {
+      // Build WHERE conditions
+      let whereConditions = [];
+      let params: any[] = [];
+      let paramIndex = 1;
+
+      if (status) {
+        whereConditions.push(`status = $${paramIndex}`);
+        params.push(status);
+        paramIndex++;
+      }
+
+      if (assigned_to) {
+        whereConditions.push(`assigned_to = $${paramIndex}`);
+        params.push(assigned_to);
+        paramIndex++;
+      }
+
+      if (source) {
+        whereConditions.push(`source = $${paramIndex}`);
+        params.push(source);
+        paramIndex++;
+      }
+
+      if (search) {
+        whereConditions.push(`(name ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR company ILIKE $${paramIndex})`);
+        params.push(`%${search}%`);
+        paramIndex++;
+      }
+
+      const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+      // Get leads from PostgreSQL
+      const leads = await sql`
+        SELECT * FROM leads
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+
+      // Get total count
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM leads
+        ${sql.unsafe(whereClause)}
+      `;
+
+      const total = parseInt(countResult[0].total);
+
+      console.log(`✅ Found ${leads.length} leads (total: ${total})`);
+
+      return NextResponse.json({
+        success: true,
+        leads,
+        total,
+        limit,
+        offset
+      });
+
+    } catch (dbError: any) {
+      console.error('❌ Database error fetching leads:', dbError);
+      return NextResponse.json(
+        { error: 'Failed to fetch leads: ' + dbError.message },
+        { status: 500 }
+      );
+    }
 
     console.log('🔨 Query built, applying filters...');
 
