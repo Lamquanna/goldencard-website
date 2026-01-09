@@ -47,12 +47,25 @@ export function exportToExcel<T extends Record<string, unknown>>(
   // Set column widths
   ws['!cols'] = columns.map(col => ({ wch: col.width || 15 }));
 
-  // Create workbook
+  // Create workbook with proper encoding for Vietnamese
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  
+  // Set workbook properties for better UTF-8 support
+  wb.Props = {
+    Title: filename,
+    Subject: "Export Data",
+    Author: "Golden Energy ERP",
+    CreatedDate: new Date()
+  };
+  
+  XLSX.utils.book_append_sheet(wb, ws, 'Dữ liệu');
 
-  // Generate file and download
-  XLSX.writeFile(wb, `${filename}.xlsx`);
+  // Generate file with UTF-8 BOM for Vietnamese characters
+  XLSX.writeFile(wb, filename, { 
+    bookType: 'xlsx',
+    type: 'binary',
+    cellStyles: true
+  });
 }
 
 // Tasks Export Config
