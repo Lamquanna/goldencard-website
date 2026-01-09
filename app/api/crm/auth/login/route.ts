@@ -1,38 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-// Simple authentication endpoint
+// Simple authentication endpoint - Database only
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
 
-    let user = null;
+    // Validate inputs
+    if (!username || !password) {
+      return NextResponse.json(
+        { error: "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu" },
+        { status: 400 }
+      );
+    }
 
-    // Try to find user in database
     try {
+      // Query database for user
       const userResult = await sql`
         SELECT * FROM crm_users 
         WHERE username = ${username} AND password = ${password}
       `;
 
-      if (userResult.length > 0) {
-        user = userResult[0];
+      if (userResult.length === 0) {
+        return NextResponse.json(
+          { error: "Tên đăng nhập hoặc mật khẩu không đúng" },
+          { status: 401 }
+        );
       }
-    } catch (dbError) {
-      console.error("Database error, falling back to in-memory users:", dbError);
-      
-      // Fallback to in-memory users if database is not available
-      const fallbackUsers = [
-        { username: "admin", password: "admin000", role: "admin", email: "sales@goldenenergy.vn" },
-        { username: "sale", password: "Goldencard", role: "sale", email: "" },
-      ];
-      
-      user = fallbackUsers.find(
-        (u) => u.username === username && u.password === password
-      );
-    }
 
-    if (user) {
+      const user = userResult[0];
+      
+      console.log(`CRM login successful: ${user.username}`);
+
       // Generate a simple token (in production, use JWT)
       const token = Buffer.from(
         `${user.username}:${user.role}:${Date.now()}`
@@ -46,12 +45,14 @@ export async function POST(request: NextRequest) {
           role: user.role,
         },
       });
-    }
 
-    return NextResponse.json(
-      { error: "Tên đăng nhập hoặc mật khẩu không đúng" },
-      { status: 401 }
-    );
+    } catch (dbError) {
+      console.error("Database error during CRM login:", dbError);
+      return NextResponse.json(
+        { error: "Không thể kết nối cơ sở dữ liệu. Vui lòng liên hệ quản trị viên." },
+        { status: 503 }
+      );
+    }
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
