@@ -80,6 +80,57 @@ export type EmployeeStatus = 'active' | 'on_leave' | 'probation' | 'resigned' | 
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern' | 'freelance'
 export type AttendanceStatus = 'present' | 'absent' | 'late' | 'early_leave' | 'half_day' | 'work_from_home'
 export type CheckInMethod = 'gps' | 'wifi' | 'face_id' | 'manual' | 'qr_code' | 'biometric'
+
+// Work Mode Types - Chế độ làm việc
+export type WorkMode = 'office' | 'field_work' | 'construction_site' | 'remote'
+
+export const WORK_MODE_CONFIG = {
+  office: {
+    label: 'Office Work',
+    labelVi: 'Làm việc văn phòng',
+    icon: 'Building2',
+    color: 'bg-blue-500',
+    description: 'Fixed location, periodic location checks',
+    descriptionVi: 'Vị trí cố định, kiểm tra định kỳ',
+    requiresLocation: true,
+    allowMovement: false,
+    checkInterval: 2 * 60 * 60 * 1000, // 2 hours
+  },
+  field_work: {
+    label: 'Field Work',
+    labelVi: 'Công tác ngoài',
+    icon: 'Car',
+    color: 'bg-green-500',
+    description: 'Mobile work (sales, meetings, site visits)',
+    descriptionVi: 'Công việc di động (sale, họp khách, thăm công trường)',
+    requiresLocation: true,
+    allowMovement: true,
+    checkInterval: 4 * 60 * 60 * 1000, // 4 hours - longer interval
+  },
+  construction_site: {
+    label: 'Construction Site',
+    labelVi: 'Công trường xây dựng',
+    icon: 'HardHat',
+    color: 'bg-orange-500',
+    description: 'Project site work with multiple locations',
+    descriptionVi: 'Làm việc tại công trường, nhiều địa điểm dự án',
+    requiresLocation: true,
+    allowMovement: true,
+    checkInterval: 3 * 60 * 60 * 1000, // 3 hours
+  },
+  remote: {
+    label: 'Remote Work',
+    labelVi: 'Làm việc từ xa',
+    icon: 'Home',
+    color: 'bg-purple-500',
+    description: 'Work from home or remote location',
+    descriptionVi: 'Làm việc tại nhà hoặc địa điểm từ xa',
+    requiresLocation: false,
+    allowMovement: true,
+    checkInterval: null, // No location check
+  },
+}
+
 export type LeaveType = 'annual' | 'sick' | 'unpaid' | 'maternity' | 'paternity' | 'bereavement' | 'marriage' | 'other'
 export type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 export type PayrollStatus = 'draft' | 'processing' | 'approved' | 'paid' | 'cancelled'
@@ -166,11 +217,103 @@ export interface GeofenceSite {
   updatedAt: Date
 }
 
+// =============================================================================
+// PROJECT LOCATION INTERFACE
+// =============================================================================
+
+export interface ProjectLocation {
+  id: string
+  projectName: string
+  projectCode: string
+  
+  // Location
+  address: string
+  latitude: number
+  longitude: number
+  radius: number // Default 200m for construction sites
+  
+  // Project Info
+  description?: string
+  startDate: Date
+  endDate?: Date
+  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled'
+  
+  // Management
+  projectManagerId: string
+  projectManager?: Employee
+  
+  // Team Members
+  teamMembers?: ProjectMember[]
+  
+  // Check-in History
+  checkIns?: Attendance[]
+  
+  // Photos/Documents
+  photos?: string[]
+  documents?: string[]
+  
+  createdAt: Date
+  updatedAt: Date
+  createdBy: string
+}
+
+export interface ProjectMember {
+  id: string
+  projectId: string
+  employeeId: string
+  employee?: Employee
+  role: 'manager' | 'supervisor' | 'engineer' | 'technician' | 'worker'
+  roleVi: string
+  joinDate: Date
+  leaveDate?: Date
+  isActive: boolean
+}
+
+export const PROJECT_STATUS_CONFIG = {
+  planning: {
+    label: 'Planning',
+    labelVi: 'Đang lên kế hoạch',
+    color: 'bg-gray-500',
+    icon: 'FileText',
+  },
+  active: {
+    label: 'Active',
+    labelVi: 'Đang triển khai',
+    color: 'bg-green-500',
+    icon: 'Play',
+  },
+  on_hold: {
+    label: 'On Hold',
+    labelVi: 'Tạm dừng',
+    color: 'bg-yellow-500',
+    icon: 'Pause',
+  },
+  completed: {
+    label: 'Completed',
+    labelVi: 'Hoàn thành',
+    color: 'bg-blue-500',
+    icon: 'CheckCircle2',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    labelVi: 'Đã hủy',
+    color: 'bg-red-500',
+    icon: 'XCircle',
+  },
+}
+
 export interface Attendance {
   id: string
   employeeId: string
   employee?: Employee
   date: Date
+  
+  // Work Mode - CHẾ ĐỘ LÀM VIỆC
+  workMode: WorkMode
+  workModeReason?: string // Lý do chọn chế độ công tác/công trường
+  projectId?: string // ID dự án (cho construction_site)
+  projectLocation?: string // Địa điểm dự án
+  clientName?: string // Tên khách hàng (cho field_work)
   
   // Check In
   checkInTime?: Date
@@ -179,12 +322,24 @@ export interface Attendance {
   checkInSiteId?: string
   checkInPhoto?: string // Face ID photo
   
-  // Check Out
+  // Location Tracking History
+  locationChecks?: {
+    timestamp: Date
+    location: { lat: number; lng: number }
+    isValid: boolean
+    distance?: number // Distance from original check-in point
+  }[]
+  
+  // Check Out - KHÔNG CẦN THIẾT NỮA
   checkOutTime?: Date
   checkOutMethod?: CheckInMethod
   checkOutLocation?: { lat: number; lng: number }
   checkOutSiteId?: string
   checkOutPhoto?: string
+  
+  // Auto-cancel if out of range
+  cancelledAt?: Date
+  cancelReason?: string
   
   // Status & Notes
   status: AttendanceStatus
@@ -583,5 +738,180 @@ export const DEFAULT_GEOFENCE_SITES: GeofenceSite[] = [
     updatedAt: new Date(),
   },
 ]
+
+// =============================================================================
+// CHECK-IN LOCATION MANAGEMENT (Like WiFi Manager on iPhone)
+// =============================================================================
+
+export type LocationType = 'office' | 'project_site' | 'task_location' | 'event' | 'business_trip' | 'teambuilding'
+export type LocationStatus = 'active' | 'disabled' | 'archived'
+
+export interface CheckInLocation {
+  id: string                          // "loc-001"
+  locationCode: string                // "GES-LOC-001"
+  locationName: string                // "Văn phòng HCM", "Công trường Bình Dương"
+  locationType: LocationType          // Type of location
+  address: string                     // Full address
+  latitude: number                    // GPS coordinates
+  longitude: number                   // GPS coordinates
+  radius: number                      // Check-in radius in meters (default 200m)
+  status: LocationStatus              // active, disabled, archived
+  
+  // Association
+  projectId?: string                  // Link to project if applicable
+  taskId?: string                     // Link to task if applicable
+  eventId?: string                    // Link to event (teambuilding, business trip)
+  
+  // Usage tracking
+  usageCount: number                  // How many times used for check-in
+  lastUsedDate?: Date                 // Last time someone checked in here
+  
+  // Management
+  createdBy: string                   // Employee ID who created this location
+  createdByName: string               // Employee name
+  createdAt: Date
+  updatedAt: Date
+  
+  // Permissions - who can use this location
+  allowedEmployees?: string[]         // Empty = all employees can use
+  allowedDepartments?: string[]       // Empty = all departments can use
+  
+  // Settings
+  allowCheckOut: boolean              // Can check-out at this location?
+  requirePhoto: boolean               // Require photo at check-in?
+  notes?: string                      // Additional notes
+}
+
+export const LOCATION_TYPE_CONFIG: Record<LocationType, { 
+  labelVi: string
+  descriptionVi: string
+  icon: string
+  color: string 
+}> = {
+  office: {
+    labelVi: 'Văn phòng',
+    descriptionVi: 'Văn phòng công ty cố định',
+    icon: 'Building2',
+    color: 'bg-blue-500'
+  },
+  project_site: {
+    labelVi: 'Công trường dự án',
+    descriptionVi: 'Địa điểm thi công dự án',
+    icon: 'HardHat',
+    color: 'bg-orange-500'
+  },
+  task_location: {
+    labelVi: 'Địa điểm task',
+    descriptionVi: 'Địa điểm thực hiện công việc cụ thể',
+    icon: 'MapPin',
+    color: 'bg-purple-500'
+  },
+  event: {
+    labelVi: 'Sự kiện',
+    descriptionVi: 'Họp, hội thảo, sự kiện công ty',
+    icon: 'Calendar',
+    color: 'bg-pink-500'
+  },
+  business_trip: {
+    labelVi: 'Công tác',
+    descriptionVi: 'Chuyến công tác, khảo sát',
+    icon: 'Plane',
+    color: 'bg-green-500'
+  },
+  teambuilding: {
+    labelVi: 'Team Building',
+    descriptionVi: 'Hoạt động team building',
+    icon: 'Users',
+    color: 'bg-yellow-500'
+  }
+}
+
+// =============================================================================
+// TASK MANAGEMENT WITH LOCATION
+// =============================================================================
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled'
+
+export interface Task {
+  id: string                          // "task-001"
+  taskCode: string                    // "GES-TASK-001"
+  taskName: string                    // Task title
+  description?: string                // Task description
+  
+  // Association
+  projectId?: string                  // Parent project
+  parentTaskId?: string               // Parent task (for subtasks)
+  
+  // Assignment
+  assignedTo: string[]                // Employee IDs
+  assignedBy: string                  // Manager ID
+  
+  // Status & Priority
+  status: TaskStatus
+  priority: TaskPriority
+  
+  // Timeline
+  startDate: Date
+  dueDate: Date
+  completedDate?: Date
+  
+  // Location requirement
+  requiresLocation: boolean           // Does this task require physical presence?
+  checkInLocationId?: string          // Link to CheckInLocation
+  estimatedTravelTime?: number        // Minutes to travel to location
+  
+  // Progress
+  progress: number                    // 0-100
+  
+  // Metadata
+  createdAt: Date
+  updatedAt: Date
+}
+
+export const TASK_PRIORITY_CONFIG: Record<TaskPriority, {
+  labelVi: string
+  color: string
+  badgeColor: string
+}> = {
+  low: { labelVi: 'Thấp', color: 'bg-gray-500', badgeColor: 'bg-gray-100 text-gray-700' },
+  medium: { labelVi: 'Trung bình', color: 'bg-blue-500', badgeColor: 'bg-blue-100 text-blue-700' },
+  high: { labelVi: 'Cao', color: 'bg-orange-500', badgeColor: 'bg-orange-100 text-orange-700' },
+  urgent: { labelVi: 'Khẩn cấp', color: 'bg-red-500', badgeColor: 'bg-red-100 text-red-700' }
+}
+
+export const TASK_STATUS_CONFIG: Record<TaskStatus, {
+  labelVi: string
+  color: string
+}> = {
+  todo: { labelVi: 'Chưa làm', color: 'bg-gray-500' },
+  in_progress: { labelVi: 'Đang làm', color: 'bg-blue-500' },
+  review: { labelVi: 'Đang review', color: 'bg-yellow-500' },
+  completed: { labelVi: 'Hoàn thành', color: 'bg-green-500' },
+  cancelled: { labelVi: 'Đã hủy', color: 'bg-red-500' }
+}
+
+// =============================================================================
+// AUTO-DETECT TRAVEL MODE
+// =============================================================================
+
+export interface LocationCheckHistory {
+  timestamp: Date
+  latitude: number
+  longitude: number
+  locationId?: string                 // If checked at a known location
+  distanceFromPrevious?: number       // Meters from previous check
+  speed?: number                      // Estimated speed (m/s)
+}
+
+export interface AttendanceWithTravel extends Attendance {
+  locationHistory: LocationCheckHistory[]
+  isTravelMode: boolean               // Auto-detected travel mode
+  travelStartTime?: Date
+  travelEndTime?: Date
+  totalTravelDistance?: number        // Total distance traveled (meters)
+  checkInLocationId?: string          // Location ID where checked in
+  checkOutLocationId?: string         // Location ID where checked out
+}
 
 export default HRMModuleManifest
