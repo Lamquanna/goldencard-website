@@ -277,8 +277,8 @@ export default function RootLayout({
         />
         
         <AnalyticsProvider>
-          <BreadcrumbSchema />
           {children}
+          <BreadcrumbSchema />
         </AnalyticsProvider>
         {/* DevTools disabled - causing infinite loop */}
         {/* <DevTools /> */}

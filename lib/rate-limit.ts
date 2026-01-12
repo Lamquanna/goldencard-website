@@ -5,7 +5,8 @@ interface RateLimitConfig {
   maxRequests: number;
 }
 
-// In-memory store for rate limiting
+// In-memory store for rate limiting (works in serverless with function instance cache)
+// Note: In production with multiple instances, consider using Redis/Upstash for distributed rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 export class RateLimiter {
