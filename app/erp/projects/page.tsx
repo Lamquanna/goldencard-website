@@ -458,11 +458,14 @@ function ProjectListItem({ project }: { project: Project }) {
 }
 
 // =============================================================================
-// =============================================================================
 // CREATE PROJECT DIALOG
 // =============================================================================
 
-function CreateProjectDialog() {
+interface CreateProjectDialogProps {
+  onProjectCreated?: (project: Project) => void
+}
+
+function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -524,6 +527,36 @@ function CreateProjectDialog() {
         throw new Error(error.error || 'Failed to create project');
       }
 
+      const data = await response.json();
+      
+      // Create new project object to add to state
+      const newProject: Project = {
+        id: data.data?.id || `p${Date.now()}`,
+        name: formData.name,
+        key: projectCode,
+        description: formData.description,
+        color: formData.color,
+        status: 'planning',
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // +30 days
+        progress: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        ownerId: 'current-user',
+        owner: { id: 'current-user', name: 'You' },
+        members: [{ userId: 'current-user', role: 'owner', joinedAt: new Date() }],
+        isPublic: true,
+        allowComments: true,
+        workspaceId: 'w1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Add to parent state
+      if (onProjectCreated) {
+        onProjectCreated(newProject);
+      }
+
       alert(`✅ Đã tạo dự án thành công!\nMã dự án: ${projectCode}`);
       setOpen(false);
       
@@ -537,9 +570,6 @@ function CreateProjectDialog() {
         description: '',
       });
       setProjectCode('PRJ-XXXX');
-      
-      // Reload page to show new project
-      window.location.reload();
     } catch (error: any) {
       console.error('Error creating project:', error);
       alert(`❌ Lỗi: ${error.message}`);
@@ -688,9 +718,10 @@ export default function ProjectsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [projects, setProjects] = useState<Project[]>(mockProjects)
 
   // Filter projects
-  const filteredProjects = mockProjects.filter(project => {
+  const filteredProjects = projects.filter(project => {
     const matchesSearch = 
       searchQuery === '' ||
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -703,10 +734,15 @@ export default function ProjectsPage() {
 
   // Stats
   const stats = {
-    total: mockProjects.length,
-    active: mockProjects.filter(p => p.status === 'active').length,
-    completed: mockProjects.filter(p => p.status === 'completed').length,
-    onHold: mockProjects.filter(p => p.status === 'on_hold').length,
+    total: projects.length,
+    active: projects.filter(p => p.status === 'active').length,
+    completed: projects.filter(p => p.status === 'completed').length,
+    onHold: projects.filter(p => p.status === 'on_hold').length,
+  }
+
+  // Callback to add new project
+  const handleProjectCreated = (newProject: Project) => {
+    setProjects(prev => [newProject, ...prev])
   }
 
   return (
@@ -727,7 +763,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl font-bold">Dự án</h1>
           <p className="text-muted-foreground">Quản lý tất cả dự án của bạn</p>
         </div>
-        <CreateProjectDialog />
+        <CreateProjectDialog onProjectCreated={handleProjectCreated} />
       </div>
 
       {/* Stats */}

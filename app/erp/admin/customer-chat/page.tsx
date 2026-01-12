@@ -6,10 +6,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { 
   MessageCircle, Send, Search, Filter, Archive, 
   MoreVertical, Clock, CheckCheck, User, Mail, Phone,
-  X, RefreshCw
+  X, RefreshCw, ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -158,24 +159,35 @@ export default function AdminCustomerChatPage() {
   );
 
   return (
-    <div className="h-screen flex bg-gray-50">
-      {/* Sidebar - Chat Rooms List */}
-      <div className="w-96 bg-white border-r flex flex-col">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <MessageCircle className="h-6 w-6 text-[#D4AF37]" />
-              Chat Khách hàng
-            </h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={loadRooms}
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Back Button Header */}
+      <div className="p-4 bg-white border-b">
+        <Link href="/erp/dashboard">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại Dashboard
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - Chat Rooms List */}
+        <div className="w-96 bg-white border-r flex flex-col">
+          <div className="p-4 border-b">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                <MessageCircle className="h-6 w-6 text-[#D4AF37]" />
+                Chat Khách hàng
+              </h1>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadRooms}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
 
           {/* Search */}
           <div className="relative mb-3">
@@ -344,6 +356,7 @@ export default function AdminCustomerChatPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
