@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { rateLimiters, getClientIdentifier } from '@/lib/rate-limit';
 
-async function handleContactRequest(request: NextRequest) {
+export async function POST(request: NextRequest) {
+  // Rate limiting: 10 requests per minute
+  const identifier = getClientIdentifier(request);
+  const rateCheck = rateLimiters.strict.check(identifier);
+  
+  if (!rateCheck.allowed) {
+    const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': retryAfter.toString(),
+          'X-RateLimit-Limit': '10',
+          'X-RateLimit-Remaining': '0',
+        }
+      }
+    );
+  }
   try {
     const data = await request.formData()
     
@@ -118,6 +136,3 @@ export function GET() {
     authenticated: false 
   })
 }
-
-// Apply rate limiting: 10 requests per minute
-export const POST = withRateLimit(rateLimiters.strict, handleContactRequest);

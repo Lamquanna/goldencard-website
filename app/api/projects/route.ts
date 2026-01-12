@@ -3,11 +3,29 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { rateLimiters, getClientIdentifier } from '@/lib/rate-limit';
 import type { Project } from '@/lib/types/project';
 
-// GET - List all projects (rate limited)
-async function getProjects(request: NextRequest) {
+// GET - List all projects
+export async function GET(request: NextRequest) {
+  // Rate limiting check
+  const identifier = getClientIdentifier(request);
+  const rateCheck = rateLimiters.standard.check(identifier);
+  
+  if (!rateCheck.allowed) {
+    const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
+    return NextResponse.json(
+      { success: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': retryAfter.toString(),
+          'X-RateLimit-Limit': '100',
+          'X-RateLimit-Remaining': '0',
+        }
+      }
+    );
+  }
   try {
     if (!sql) {
       return NextResponse.json(
@@ -106,8 +124,26 @@ async function getProjects(request: NextRequest) {
   }
 }
 
-// POST - Create new project (rate limited)
-async function createProject(request: NextRequest) {
+// POST - Create new project
+export async function POST(request: NextRequest) {
+  // Rate limiting check
+  const identifier = getClientIdentifier(request);
+  const rateCheck = rateLimiters.standard.check(identifier);
+  
+  if (!rateCheck.allowed) {
+    const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
+    return NextResponse.json(
+      { success: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': retryAfter.toString(),
+          'X-RateLimit-Limit': '100',
+          'X-RateLimit-Remaining': '0',
+        }
+      }
+    );
+  }
   try {
     if (!sql) {
       return NextResponse.json(
@@ -181,7 +217,3 @@ async function createProject(request: NextRequest) {
     );
   }
 }
-
-// Apply rate limiting: 100 requests per hour
-export const GET = withRateLimit(rateLimiters.standard, getProjects);
-export const POST = withRateLimit(rateLimiters.standard, createProject);
