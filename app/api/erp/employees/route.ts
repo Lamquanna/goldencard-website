@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { sql } from '@vercel/postgres'
+import { sql } from '@/lib/db'
 
 export async function GET() {
   try {
-    const { rows } = await sql`
+    const rows = await sql`
       SELECT 
         id,
         employee_code as "employeeCode",

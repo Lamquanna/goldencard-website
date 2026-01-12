@@ -37,48 +37,96 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query conditions
-    const conditions = ['page_path = $1'];
-    const params: any[] = [pagePath];
-    let paramIndex = 2;
-
-    if (deviceType !== 'all') {
-      conditions.push(`device_type = $${paramIndex}`);
-      params.push(deviceType);
-      paramIndex++;
+    // Simplified query without dynamic SQL - filter by pagePath only
+    let result;
+    
+    if (deviceType !== 'all' && startDate && endDate) {
+      result = await sql`
+        SELECT 
+          grid_x,
+          grid_y,
+          SUM(click_count) as total_clicks,
+          SUM(hover_count) as total_hovers,
+          SUM(scroll_count) as total_scrolls
+        FROM analytics_heatmap_data
+        WHERE page_path = ${pagePath}
+          AND device_type = ${deviceType}
+          AND date_bucket >= ${startDate}
+          AND date_bucket <= ${endDate}
+        GROUP BY grid_x, grid_y
+        HAVING SUM(click_count) > 0
+        ORDER BY total_clicks DESC
+        LIMIT 10000
+      `;
+    } else if (deviceType !== 'all' && startDate) {
+      result = await sql`
+        SELECT 
+          grid_x,
+          grid_y,
+          SUM(click_count) as total_clicks,
+          SUM(hover_count) as total_hovers,
+          SUM(scroll_count) as total_scrolls
+        FROM analytics_heatmap_data
+        WHERE page_path = ${pagePath}
+          AND device_type = ${deviceType}
+          AND date_bucket >= ${startDate}
+        GROUP BY grid_x, grid_y
+        HAVING SUM(click_count) > 0
+        ORDER BY total_clicks DESC
+        LIMIT 10000
+      `;
+    } else if (deviceType !== 'all') {
+      result = await sql`
+        SELECT 
+          grid_x,
+          grid_y,
+          SUM(click_count) as total_clicks,
+          SUM(hover_count) as total_hovers,
+          SUM(scroll_count) as total_scrolls
+        FROM analytics_heatmap_data
+        WHERE page_path = ${pagePath}
+          AND device_type = ${deviceType}
+        GROUP BY grid_x, grid_y
+        HAVING SUM(click_count) > 0
+        ORDER BY total_clicks DESC
+        LIMIT 10000
+      `;
+    } else if (startDate && endDate) {
+      result = await sql`
+        SELECT 
+          grid_x,
+          grid_y,
+          SUM(click_count) as total_clicks,
+          SUM(hover_count) as total_hovers,
+          SUM(scroll_count) as total_scrolls
+        FROM analytics_heatmap_data
+        WHERE page_path = ${pagePath}
+          AND date_bucket >= ${startDate}
+          AND date_bucket <= ${endDate}
+        GROUP BY grid_x, grid_y
+        HAVING SUM(click_count) > 0
+        ORDER BY total_clicks DESC
+        LIMIT 10000
+      `;
+    } else {
+      result = await sql`
+        SELECT 
+          grid_x,
+          grid_y,
+          SUM(click_count) as total_clicks,
+          SUM(hover_count) as total_hovers,
+          SUM(scroll_count) as total_scrolls
+        FROM analytics_heatmap_data
+        WHERE page_path = ${pagePath}
+        GROUP BY grid_x, grid_y
+        HAVING SUM(click_count) > 0
+        ORDER BY total_clicks DESC
+        LIMIT 10000
+      `;
     }
-
-    if (startDate) {
-      conditions.push(`date_bucket >= $${paramIndex}`);
-      params.push(startDate);
-      paramIndex++;
-    }
-
-    if (endDate) {
-      conditions.push(`date_bucket <= $${paramIndex}`);
-      params.push(endDate);
-      paramIndex++;
-    }
-
-    const whereClause = conditions.join(' AND ');
-
-    // Query aggregated heatmap data
-    const result = await sql.query(`
-      SELECT 
-        grid_x,
-        grid_y,
-        SUM(click_count) as total_clicks,
-        SUM(hover_count) as total_hovers,
-        SUM(scroll_count) as total_scrolls
-      FROM analytics_heatmap_data
-      WHERE ${whereClause}
-      GROUP BY grid_x, grid_y
-      HAVING SUM(click_count) > 0
-      ORDER BY total_clicks DESC
-      LIMIT 10000
-    `, params);
 
     // Transform to HeatmapPoint format
-    const points: HeatmapPoint[] = result.rows.map(row => ({
+    const points: HeatmapPoint[] = result.map((row: any) => ({
       x: row.grid_x,
       y: row.grid_y,
       intensity: row.total_clicks + (row.total_hovers * 0.3) + (row.total_scrolls * 0.1)

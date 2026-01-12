@@ -17,23 +17,24 @@ export async function GET(request: NextRequest) {
     const days = parseInt(range.replace('d', ''));
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+    const startDateStr = startDate.toISOString();
 
-    const result = await sql.query(`
+    const result = await sql`
       SELECT 
         country_code as country,
         city,
         COUNT(DISTINCT id) as visitors
       FROM analytics_sessions
-      WHERE started_at >= $1
+      WHERE started_at >= ${startDateStr}
       GROUP BY country_code, city
       ORDER BY visitors DESC
       LIMIT 20
-    `, [startDate.toISOString()]);
+    `;
 
-    const total = result.rows.reduce((sum, row) => sum + parseInt(row.visitors), 0);
+    const total = result.reduce((sum: number, row: any) => sum + parseInt(row.visitors), 0);
 
     return NextResponse.json({
-      data: result.rows.map(row => ({
+      data: result.map((row: any) => ({
         country: row.country || 'Unknown',
         city: row.city || '',
         visitors: parseInt(row.visitors),

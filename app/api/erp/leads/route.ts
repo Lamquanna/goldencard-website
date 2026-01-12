@@ -7,7 +7,7 @@ import type { CreateLeadInput } from '@/lib/types/crm';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as CreateLeadInput;
+    const body = await request.json() as any;
 
     // Validate required fields
     if (!body.name) {
@@ -25,45 +25,44 @@ export async function POST(request: NextRequest) {
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
+    // Map priority to temperature
+    const temperatureMap: Record<string, string> = {
+      'high': 'hot',
+      'medium': 'warm',
+      'low': 'cold',
+      'hot': 'hot',
+      'warm': 'warm',
+      'cold': 'cold',
+    };
+    const temperature = temperatureMap[body.priority] || temperatureMap[body.rating] || 'warm';
+
     try {
-      // Insert lead into PostgreSQL database
+      // Insert lead into PostgreSQL database - using correct schema columns
       const result = await sql`
         INSERT INTO leads (
-          name,
+          first_name,
           email,
           phone,
-          company,
-          message,
+          company_name,
+          description,
           status,
-          priority,
-          source,
-          source_url,
-          device_type,
-          ip_address,
-          browser,
-          locale,
-          assigned_to,
+          temperature,
+          utm_source,
+          landing_page,
           created_at,
-          updated_at,
-          unread
+          updated_at
         ) VALUES (
           ${body.name},
           ${body.email || null},
           ${body.phone || null},
           ${body.company || null},
-          ${body.message || null},
-          ${body.status || 'new'},
-          ${body.priority || 'medium'},
+          ${body.message || body.notes || null},
+          ${'active'},
+          ${temperature},
           ${body.source || 'manual'},
           ${body.source_url || null},
-          ${body.device_type || deviceType},
-          ${body.ip_address || ipAddress},
-          ${userAgent.slice(0, 200)},
-          ${body.locale || 'vi'},
-          ${body.assigned_to || null},
           NOW(),
-          NOW(),
-          true
+          NOW()
         )
         RETURNING *
       `;

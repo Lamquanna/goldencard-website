@@ -17,8 +17,9 @@ export async function GET(request: NextRequest) {
     const days = parseInt(range.replace('d', ''));
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+    const startDateStr = startDate.toISOString();
 
-    const result = await sql.query(`
+    const result = await sql`
       SELECT 
         page_path,
         page_title,
@@ -27,14 +28,14 @@ export async function GET(request: NextRequest) {
         AVG(duration_seconds) as avg_duration,
         AVG(CASE WHEN bounce THEN 1 ELSE 0 END) as bounce_rate
       FROM analytics_page_views
-      WHERE viewed_at >= $1
+      WHERE viewed_at >= ${startDateStr}
       GROUP BY page_path, page_title
       ORDER BY views DESC
       LIMIT 50
-    `, [startDate.toISOString()]);
+    `;
 
     return NextResponse.json({
-      data: result.rows.map(row => ({
+      data: result.map((row: any) => ({
         page_path: row.page_path,
         page_title: row.page_title,
         views: parseInt(row.views),

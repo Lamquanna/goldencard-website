@@ -24,30 +24,34 @@ export async function GET(request: NextRequest) {
     const prevStartDate = new Date(startDate);
     prevStartDate.setDate(prevStartDate.getDate() - days);
 
+    const startDateStr = startDate.toISOString();
+    const endDateStr = endDate.toISOString();
+    const prevStartDateStr = prevStartDate.toISOString();
+
     // Current period stats
-    const currentResult = await sql.query(`
+    const currentResult = await sql`
       SELECT 
         COUNT(*) as page_views,
         COUNT(DISTINCT session_id) as unique_visitors,
         AVG(duration_seconds) as avg_duration,
         AVG(CASE WHEN bounce THEN 1 ELSE 0 END) as bounce_rate
       FROM analytics_page_views
-      WHERE viewed_at >= $1 AND viewed_at < $2
-    `, [startDate.toISOString(), endDate.toISOString()]);
+      WHERE viewed_at >= ${startDateStr} AND viewed_at < ${endDateStr}
+    `;
 
     // Previous period stats
-    const previousResult = await sql.query(`
+    const previousResult = await sql`
       SELECT 
         COUNT(*) as page_views,
         COUNT(DISTINCT session_id) as unique_visitors,
         AVG(duration_seconds) as avg_duration,
         AVG(CASE WHEN bounce THEN 1 ELSE 0 END) as bounce_rate
       FROM analytics_page_views
-      WHERE viewed_at >= $1 AND viewed_at < $2
-    `, [prevStartDate.toISOString(), startDate.toISOString()]);
+      WHERE viewed_at >= ${prevStartDateStr} AND viewed_at < ${startDateStr}
+    `;
 
-    const current = currentResult.rows[0];
-    const previous = previousResult.rows[0];
+    const current = currentResult[0] || {};
+    const previous = previousResult[0] || {};
 
     // Calculate changes
     function calculateChange(curr: number, prev: number): number {

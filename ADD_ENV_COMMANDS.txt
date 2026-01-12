@@ -1,6 +1,10 @@
 # Copy và paste từng lệnh sau vào PowerShell
 # Nhấn Enter sau mỗi lệnh, nhập giá trị khi được hỏi
 
+# ============================================
+# FIREBASE ENVIRONMENT VARIABLES
+# ============================================
+
 # 1. API Key
 echo "AIzaSyBJQrhYBKPTpomR_FTbh33NglD8THJkiic" | vercel env add NEXT_PUBLIC_FIREBASE_API_KEY production
 
@@ -22,5 +26,17 @@ echo "1:343432638836:web:8502db00136985ce753c21" | vercel env add NEXT_PUBLIC_FI
 # 7. Measurement ID
 echo "G-M4PXZTDFGM" | vercel env add NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID production
 
-# Sau khi add xong, redeploy:
+# ============================================
+# COZE AI ASSISTANT (QUAN TRỌNG!)
+# ============================================
+
+# 8. Coze API Token - Token để gọi Coze API
+echo "pat_9hcgAxjAL932I4cK6rBO1wLxTQhIwIHm2gXqmU1WzCVu0oPfXcaPB5DzhfLqdxbz" | vercel env add COZE_API_TOKEN production
+
+# 9. Coze Bot ID - ID của bot AI Assistant
+echo "7594311757871972405" | vercel env add COZE_BOT_ID production
+
+# ============================================
+# SAU KHI ADD XONG, REDEPLOY:
+# ============================================
 vercel --prod

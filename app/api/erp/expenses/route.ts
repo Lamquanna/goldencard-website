@@ -1,39 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 
+// Ensure table exists
+async function ensureTableExists() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS erp_expenses (
+        id SERIAL PRIMARY KEY,
+        expense_number VARCHAR(50) UNIQUE NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        amount DECIMAL(15, 2) NOT NULL,
+        category VARCHAR(100),
+        status VARCHAR(50) DEFAULT 'draft',
+        expense_date DATE,
+        description TEXT,
+        attachments JSONB,
+        submitted_by INTEGER,
+        approved_by INTEGER,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+  } catch (e) {
+    console.log('Table check/create:', e);
+  }
+}
+
 // GET /api/erp/expenses - Get all expenses
 export async function GET(request: NextRequest) {
   try {
+    await ensureTableExists();
+    
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const category = searchParams.get('category')
     const search = searchParams.get('search')
 
-    let query = 'SELECT * FROM erp_expenses WHERE 1=1'
-    const params: any[] = []
-    let paramIndex = 1
-
-    if (status) {
-      query += ` AND status = $${paramIndex++}`
-      params.push(status)
-    }
-
-    if (category) {
-      query += ` AND category = $${paramIndex++}`
-      params.push(category)
-    }
-
+    let result;
+    
+    // Simplified query handling with tagged template
     if (search) {
-      query += ` AND (title ILIKE $${paramIndex++} OR expense_number ILIKE $${paramIndex++})`
-      params.push(`%${search}%`, `%${search}%`)
+      const searchPattern = `%${search}%`;
+      result = await sql`
+        SELECT * FROM erp_expenses 
+        WHERE title ILIKE ${searchPattern} OR expense_number ILIKE ${searchPattern}
+        ORDER BY expense_date DESC, created_at DESC
+      `;
+    } else if (status && category) {
+      result = await sql`
+        SELECT * FROM erp_expenses 
+        WHERE status = ${status} AND category = ${category}
+        ORDER BY expense_date DESC, created_at DESC
+      `;
+    } else if (status) {
+      result = await sql`
+        SELECT * FROM erp_expenses 
+        WHERE status = ${status}
+        ORDER BY expense_date DESC, created_at DESC
+      `;
+    } else if (category) {
+      result = await sql`
+        SELECT * FROM erp_expenses 
+        WHERE category = ${category}
+        ORDER BY expense_date DESC, created_at DESC
+      `;
+    } else {
+      result = await sql`
+        SELECT * FROM erp_expenses 
+        ORDER BY expense_date DESC, created_at DESC
+      `;
     }
-
-    query += ' ORDER BY expense_date DESC, created_at DESC'
-
-    const result = await sql(query, params)
     
     // Transform snake_case to camelCase
-    const expenses = result.rows.map((row: any) => ({
+    const expenses = result.map((row: any) => ({
       id: row.id,
       expenseNumber: row.expense_number,
       title: row.title,
@@ -62,6 +101,8 @@ export async function GET(request: NextRequest) {
 // POST /api/erp/expenses - Create new expense
 export async function POST(request: NextRequest) {
   try {
+    await ensureTableExists();
+    
     const body = await request.json()
     const { title, amount, category, expenseDate, description } = body
 
@@ -74,28 +115,27 @@ export async function POST(request: NextRequest) {
 
     // Generate expense number
     const expenseNumber = `EXP-${Date.now()}`
+    const parsedAmount = parseFloat(amount);
 
-    const query = `
+    const result = await sql`
       INSERT INTO erp_expenses (
         expense_number, title, amount, category, status, 
         expense_date, description, submitted_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES (
+        ${expenseNumber},
+        ${title},
+        ${parsedAmount},
+        ${category},
+        ${'draft'},
+        ${expenseDate},
+        ${description || null},
+        ${1}
+      )
       RETURNING *
-    `
+    `;
 
-    const result = await sql(query, [
-      expenseNumber,
-      title,
-      parseFloat(amount),
-      category,
-      'draft', // Default status
-      expenseDate,
-      description || null,
-      1, // TODO: Get from session
-    ])
-
-    const expense = result.rows[0]
+    const expense = result[0]
 
     return NextResponse.json(
       {
