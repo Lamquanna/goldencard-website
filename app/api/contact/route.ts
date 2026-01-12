@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server"
-import { mockSupabase } from "@/lib/supabase/mock"
+import { NextRequest, NextResponse } from "next/server"
+import { sql } from "@/lib/db"
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
-export async function POST(request: Request) {
+async function handleContactRequest(request: NextRequest) {
   try {
     const data = await request.formData()
     
@@ -56,71 +57,51 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString()
     });
     
-    // ✅ SAVE TO CRM DATABASE
+    // ✅ SAVE TO REAL DATABASE (PostgreSQL via Neon)
     try {
-      const supabase = mockSupabase as any;
-      
-      // Create lead in CRM
-      const leadData = {
-        name,
-        email,
-        phone,
-        company: company || null,
-        message,
-        source: 'website_contact_form',
-        source_url: request.headers.get('referer') || 'direct',
-        status: 'new',
-        priority: 'medium',
-        locale: locale || 'vi',
-        device_type: deviceType,
-        ip_address: ipAddress,
-        browser: userAgent.slice(0, 200),
-        utm_source: null,
-        utm_medium: null,
-        utm_campaign: null,
-      };
-
-      const { data: lead, error: leadError } = await supabase
-        .from('leads')
-        .insert(leadData)
-        .select()
-        .single();
-
-      if (leadError) {
-        console.error('❌ Error saving lead to CRM:', leadError);
-        throw leadError;
+      if (!sql) {
+        throw new Error('Database not configured');
       }
 
-      console.info('✅ Lead saved to CRM with ID:', lead.id);
+      // Create lead in database
+      const result = await sql`
+        INSERT INTO leads (
+          name, email, phone, company, message,
+          status, assigned_to, created_at, updated_at, unread
+        ) VALUES (
+          ${name},
+          ${email},
+          ${phone},
+          ${company || null},
+          ${message},
+          'new',
+          NULL,
+          NOW(),
+          NOW(),
+          true
+        )
+        RETURNING id
+      `;
 
-      // Create initial event
-      await supabase
-        .from('lead_events')
-        .insert({
-          lead_id: lead.id,
-          event_type: 'created',
-          description: `Lead created from website contact form`,
-          metadata: {
-            device: deviceType,
-            ip: ipAddress,
-            form_type: 'contact',
-          },
-        });
-
-      console.info('✅ Lead event created');
+      const leadId = result[0]?.id;
+      console.info('✅ Lead saved to database with ID:', leadId);
 
       return NextResponse.json({ 
         ok: true,
         message: "Form submitted successfully",
-        leadId: lead.id
+        leadId: leadId
       });
-    } catch (crmError) {
-      console.error('❌ CRM save failed, but form submission recorded:', crmError);
-      // Still return success to user even if CRM fails
-      return NextResponse.json({ 
-        ok: true,
-        message: "Form submitted successfully"
-      });
+    } catch (dbError: any) {
+      console.error('❌ Database save failed:', dbError);
+      
+      // Return error to user if database fails
+      return NextResponse.json(
+        { 
+          error: "Failed to save contact information. Please try again.",
+          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("❌ Error processing contact form:", error)
@@ -137,3 +118,6 @@ export function GET() {
     authenticated: false 
   })
 }
+
+// Apply rate limiting: 10 requests per minute
+export const POST = withRateLimit(rateLimiters.strict, handleContactRequest);

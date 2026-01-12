@@ -16,6 +16,10 @@ import * as XLSX from 'xlsx'
 
 export default function ExpensesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -37,6 +41,77 @@ export default function ExpensesPage() {
       toast.error('Không thể tải danh sách chi phí')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleView = (expense: Expense) => {
+    setSelectedExpense(expense)
+    setIsViewDialogOpen(true)
+  }
+
+  const handleEdit = (expense: Expense) => {
+    setSelectedExpense(expense)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleDelete = (expense: Expense) => {
+    setSelectedExpense(expense)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!selectedExpense) return
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`/api/erp/expenses/${selectedExpense.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete expense')
+
+      toast.success('Đã xóa chi phí thành công!')
+      setIsDeleteDialogOpen(false)
+      await loadExpenses()
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi xóa chi phí')
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdateExpense = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!selectedExpense) return
+    setIsSubmitting(true)
+
+    try {
+      const formData = new FormData(e.currentTarget)
+      const data = {
+        title: formData.get('title') as string,
+        amount: parseFloat(formData.get('amount') as string),
+        category: formData.get('category') as string,
+        expenseDate: formData.get('expenseDate') as string,
+        description: formData.get('description') as string,
+      }
+
+      const response = await fetch(`/api/erp/expenses/${selectedExpense.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) throw new Error('Failed to update expense')
+
+      toast.success('Đã cập nhật chi phí thành công!')
+      setIsEditDialogOpen(false)
+      await loadExpenses()
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi cập nhật chi phí')
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -82,13 +157,13 @@ export default function ExpensesPage() {
     }
 
     const excelData = expenses.map(expense => ({
-      'Mã chi phí': expense.expenseNumber,
-      'Tiêu đề': expense.title,
-      'Số tiền (VNĐ)': expense.amount,
-      'Danh mục': expense.category,
-      'Trạng thái': expense.status,
-      'Ngày chi': new Date(expense.expenseDate).toLocaleDateString('vi-VN'),
-      'Mô tả': expense.description || '',
+      expenseNumber: expense.expenseNumber,
+      title: expense.title,
+      amount: expense.amount,
+      category: expense.category,
+      status: expense.status,
+      expenseDate: new Date(expense.expenseDate).toLocaleDateString('vi-VN'),
+      description: expense.description || '',
     }))
 
     const columns = [
@@ -211,9 +286,15 @@ export default function ExpensesPage() {
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">Đang tải...</div>
       ) : (
-        <ExpenseList expenses={expenses} />
+        <ExpenseList 
+          expenses={expenses}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
+      {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -298,6 +379,157 @@ export default function ExpensesPage() {
                 Hủy
               </Button>
               <Button type="submit" disabled={isSubmitting}>
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chi tiết chi phí</DialogTitle>
+          </DialogHeader>
+          {selectedExpense && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Mã chi phí</Label>
+                <p className="font-medium">{selectedExpense.expenseNumber}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Tiêu đề</Label>
+                <p className="font-medium">{selectedExpense.title}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Số tiền</Label>
+                  <p className="font-medium text-lg">{selectedExpense.amount.toLocaleString('vi-VN')} ₫</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Danh mục</Label>
+                  <p className="font-medium">{selectedExpense.category}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Trạng thái</Label>
+                  <p className="font-medium">{selectedExpense.status}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Ngày chi</Label>
+                  <p className="font-medium">{new Date(selectedExpense.expenseDate).toLocaleDateString('vi-VN')}</p>
+                </div>
+              </div>
+              {selectedExpense.description && (
+                <div>
+                  <Label className="text-muted-foreground">Mô tả</Label>
+                  <p className="font-medium">{selectedExpense.description}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa chi phí</DialogTitle>
+          </DialogHeader>
+          {selectedExpense && (
+            <form onSubmit={handleUpdateExpense} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Tiêu đề *</Label>
+                <Input
+                  id="edit-title"
+                  name="title"
+                  defaultValue={selectedExpense.title}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-amount">Số tiền (VNĐ) *</Label>
+                <Input
+                  id="edit-amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  defaultValue={selectedExpense.amount}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Danh mục *</Label>
+                <Select name="category" defaultValue={selectedExpense.category} required disabled={isSubmitting}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="office">Văn phòng phẩm</SelectItem>
+                    <SelectItem value="travel">Đi lại</SelectItem>
+                    <SelectItem value="meals">Ăn uống</SelectItem>
+                    <SelectItem value="utilities">Điện nước</SelectItem>
+                    <SelectItem value="equipment">Trang thiết bị</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="other">Khác</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-expenseDate">Ngày chi *</Label>
+                <Input
+                  id="edit-expenseDate"
+                  name="expenseDate"
+                  type="date"
+                  defaultValue={String(selectedExpense.expenseDate).split('T')[0]}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Mô tả</Label>
+                <Textarea
+                  id="edit-description"
+                  name="description"
+                  defaultValue={selectedExpense.description || ''}
+                  rows={3}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSubmitting}>
+                  Hủy
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          {selectedExpense && (
+            <div className="space-y-4">
+              <p>Bạn có chắc chắn muốn xóa chi phí <strong>{selectedExpense.title}</strong>?</p>
+              <p className="text-sm text-muted-foreground">Hành động này không thể hoàn tác.</p>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isSubmitting}>
+                  Hủy
+                </Button>
+                <Button onClick={handleConfirmDelete} variant="destructive" disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang xóa...' : 'Xóa'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
                 {isSubmitting ? 'Đang thêm...' : 'Thêm chi phí'}
               </Button>
             </div>

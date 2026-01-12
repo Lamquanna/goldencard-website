@@ -60,6 +60,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Project, ProjectStatus, PROJECT_STATUS_CONFIG } from '@/app/erp/modules/project'
+import { VIETNAM_PROVINCES, generateProjectKey } from '@/lib/vietnam-locations'
 
 // =============================================================================
 // MOCK DATA
@@ -456,62 +457,54 @@ function ProjectListItem({ project }: { project: Project }) {
 }
 
 // =============================================================================
+// =============================================================================
 // CREATE PROJECT DIALOG
 // =============================================================================
-
-// Location codes for auto-generating project code
-const locationCodes: { [key: string]: string } = {
-  'nha-be': 'NB',
-  'binh-chanh': 'BC',
-  'can-gio': 'CG',
-  'cu-chi': 'CC',
-  'hoc-mon': 'HM',
-  'thu-duc': 'TD',
-  'go-vap': 'GV',
-  'tan-binh': 'TB',
-  'tan-phu': 'TP',
-  'binh-tan': 'BT',
-  'quan-1': 'Q1',
-  'quan-2': 'Q2',
-  'quan-3': 'Q3',
-  'quan-7': 'Q7',
-  'quan-9': 'Q9',
-  'phu-nhuan': 'PN',
-  'long-an': 'LA',
-  'dong-nai': 'DN',
-  'binh-duong': 'BD',
-};
-
-// Generate unique project code
-function generateProjectCode(location: string): string {
-  const nextNumber = mockProjects.length + 1;
-  const paddedNumber = String(nextNumber).padStart(3, '0');
-  const locationSuffix = locationCodes[location] || 'XX';
-  return `PRJ${paddedNumber}-${locationSuffix}`;
-}
 
 function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    location: '',
+    province: '',
+    district: '',
+    address: '',
     color: '#3B82F6',
     description: '',
   });
-  const [projectCode, setProjectCode] = useState('PRJ001-XX');
+  const [projectCode, setProjectCode] = useState('PRJ-XXXX');
+
+  // Get districts for selected province
+  const selectedProvince = VIETNAM_PROVINCES.find(p => p.code === formData.province);
+  const districts = selectedProvince?.districts || [];
 
   // Update project code when location changes
-  const handleLocationChange = (value: string) => {
-    setFormData({ ...formData, location: value });
-    setProjectCode(generateProjectCode(value));
+  const handleProvinceChange = (value: string) => {
+    setFormData({ ...formData, province: value, district: '' });
+    setProjectCode('PRJ-XXXX'); // Reset until district selected
+  };
+
+  const handleDistrictChange = (value: string) => {
+    setFormData({ ...formData, district: value });
+    if (formData.province) {
+      const newKey = generateProjectKey(formData.province, value);
+      setProjectCode(newKey);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.province) {
+      alert('⚠️ Vui lòng điền tên dự án và chọn tỉnh/thành phố');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      const location = `${selectedProvince?.name}${formData.district && formData.district !== 'all' ? ' - ' + districts.find(d => d.code === formData.district)?.name : ''}`;
+      
       const response = await fetch('/api/erp/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -520,7 +513,7 @@ function CreateProjectDialog() {
           projectKey: projectCode,
           description: formData.description,
           color: formData.color,
-          location: formData.location,
+          location: location,
           startDate: new Date().toISOString().split('T')[0],
         }),
       });
@@ -536,11 +529,13 @@ function CreateProjectDialog() {
       // Reset form
       setFormData({
         name: '',
-        location: '',
+        province: '',
+        district: '',
+        address: '',
         color: '#3B82F6',
         description: '',
       });
-      setProjectCode('PRJ001-XX');
+      setProjectCode('PRJ-XXXX');
       
       // Reload page to show new project
       window.location.reload();
@@ -580,49 +575,62 @@ function CreateProjectDialog() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Khu vực <span className="text-red-500">*</span></Label>
+                <Label>Tỉnh/Thành phố <span className="text-red-500">*</span></Label>
                 <Select 
-                  value={formData.location}
-                  onValueChange={handleLocationChange}
+                  value={formData.province}
+                  onValueChange={handleProvinceChange}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn khu vực" />
+                    <SelectValue placeholder="Chọn tỉnh/thành phố" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nha-be">Nhà Bè</SelectItem>
-                    <SelectItem value="binh-chanh">Bình Chánh</SelectItem>
-                    <SelectItem value="can-gio">Cần Giờ</SelectItem>
-                    <SelectItem value="cu-chi">Củ Chi</SelectItem>
-                    <SelectItem value="hoc-mon">Hóc Môn</SelectItem>
-                    <SelectItem value="thu-duc">Thủ Đức</SelectItem>
-                    <SelectItem value="go-vap">Gò Vấp</SelectItem>
-                    <SelectItem value="tan-binh">Tân Bình</SelectItem>
-                    <SelectItem value="tan-phu">Tân Phú</SelectItem>
-                    <SelectItem value="binh-tan">Bình Tân</SelectItem>
-                    <SelectItem value="quan-1">Quận 1</SelectItem>
-                    <SelectItem value="quan-2">Quận 2</SelectItem>
-                    <SelectItem value="quan-3">Quận 3</SelectItem>
-                    <SelectItem value="quan-7">Quận 7</SelectItem>
-                    <SelectItem value="quan-9">Quận 9</SelectItem>
-                    <SelectItem value="phu-nhuan">Phú Nhuận</SelectItem>
-                    <SelectItem value="long-an">Long An</SelectItem>
-                    <SelectItem value="dong-nai">Đồng Nai</SelectItem>
-                    <SelectItem value="binh-duong">Bình Dương</SelectItem>
+                  <SelectContent className="max-h-[300px]">
+                    {VIETNAM_PROVINCES.map((province) => (
+                      <SelectItem key={province.code} value={province.code}>
+                        {province.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Mã dự án (Tự động)</Label>
-                <Input 
-                  value={projectCode} 
-                  readOnly 
-                  className="bg-gray-100 font-mono font-bold text-[#D4AF37]"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Mã được tạo tự động theo khu vực
-                </p>
+                <Label>Quận/Huyện</Label>
+                <Select 
+                  value={formData.district}
+                  onValueChange={handleDistrictChange}
+                  disabled={!formData.province}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.province ? "Chọn quận/huyện" : "Chọn tỉnh trước"} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {districts.map((district) => (
+                      <SelectItem key={district.code} value={district.code}>
+                        {district.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Mã dự án (Tự động)</Label>
+              <Input 
+                value={projectCode} 
+                readOnly 
+                className="bg-gray-100 font-mono font-bold text-[#D4AF37]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Mã được tạo tự động theo địa điểm
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Địa chỉ cụ thể (Tùy chọn)</Label>
+              <Input
+                placeholder="VD: 123 Đường ABC, Phường XYZ"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Màu sắc dự án</Label>

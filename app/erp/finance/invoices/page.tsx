@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { InvoiceList } from '../../modules/finance/components/InvoiceList'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { Download, Upload } from 'lucide-react'
 import { exportToExcel } from '@/lib/excel-export'
 import { toast } from 'sonner'
@@ -10,6 +12,10 @@ import { toast } from 'sonner'
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     loadInvoices()
@@ -31,6 +37,42 @@ export default function InvoicesPage() {
     }
   }
 
+  const handleView = (invoice: any) => {
+    setSelectedInvoice(invoice)
+    setShowViewModal(true)
+  }
+
+  const handleEdit = (invoice: any) => {
+    toast.info('Chức năng chỉnh sửa đang phát triển')
+  }
+
+  const handleDelete = (invoice: any) => {
+    setSelectedInvoice(invoice)
+    setShowDeleteModal(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!selectedInvoice) return
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`/api/erp/invoices/${selectedInvoice.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete invoice')
+
+      toast.success('Đã xóa hóa đơn thành công!')
+      setShowDeleteModal(false)
+      await loadInvoices()
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi xóa hóa đơn')
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleExportExcel = () => {
     if (invoices.length === 0) {
       toast.error('Không có dữ liệu để xuất')
@@ -38,14 +80,14 @@ export default function InvoicesPage() {
     }
 
     const excelData = invoices.map(invoice => ({
-      'Số hóa đơn': invoice.invoiceNumber,
-      'Khách hàng': invoice.customerName,
-      'Số tiền (VNĐ)': invoice.amount,
-      'Trạng thái': invoice.status === 'paid' ? 'Đã thanh toán' : 
-                    invoice.status === 'pending' ? 'Chờ thanh toán' : 
-                    invoice.status === 'overdue' ? 'Quá hạn' : 'Nháp',
-      'Ngày phát hành': new Date(invoice.issueDate).toLocaleDateString('vi-VN'),
-      'Ngày đến hạn': new Date(invoice.dueDate).toLocaleDateString('vi-VN'),
+      invoiceNumber: invoice.invoiceNumber,
+      customerName: invoice.customerName,
+      amount: invoice.amount,
+      status: invoice.status === 'paid' ? 'Đã thanh toán' : 
+              invoice.status === 'pending' ? 'Chờ thanh toán' : 
+              invoice.status === 'overdue' ? 'Quá hạn' : 'Nháp',
+      issueDate: new Date(invoice.issueDate).toLocaleDateString('vi-VN'),
+      dueDate: new Date(invoice.dueDate).toLocaleDateString('vi-VN'),
     }))
 
     const columns = [
@@ -77,8 +119,76 @@ export default function InvoicesPage() {
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">Đang tải...</div>
       ) : (
-        <InvoiceList />
+        <InvoiceList 
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
+
+      {/* View Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chi tiết hóa đơn</DialogTitle>
+          </DialogHeader>
+          {selectedInvoice && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Số hóa đơn</Label>
+                <p className="font-medium">{selectedInvoice.invoiceNumber}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Khách hàng</Label>
+                <p className="font-medium">{selectedInvoice.customerName}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Số tiền</Label>
+                  <p className="font-medium text-lg">{selectedInvoice.amount.toLocaleString('vi-VN')} ₫</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Trạng thái</Label>
+                  <p className="font-medium">{selectedInvoice.status}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Ngày phát hành</Label>
+                  <p className="font-medium">{new Date(selectedInvoice.issueDate).toLocaleDateString('vi-VN')}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Ngày đến hạn</Label>
+                  <p className="font-medium">{new Date(selectedInvoice.dueDate).toLocaleDateString('vi-VN')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          {selectedInvoice && (
+            <div className="space-y-4">
+              <p>Bạn có chắc chắn muốn xóa hóa đơn <strong>{selectedInvoice.invoiceNumber}</strong>?</p>
+              <p className="text-sm text-muted-foreground">Hành động này không thể hoàn tác.</p>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowDeleteModal(false)} disabled={isSubmitting}>
+                  Hủy
+                </Button>
+                <Button onClick={handleConfirmDelete} variant="destructive" disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang xóa...' : 'Xóa'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

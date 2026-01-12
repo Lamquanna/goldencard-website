@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -109,6 +109,60 @@ export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('7days');
   const [showHelp, setShowHelp] = useState(false);
 
+  // Filter data based on time range
+  const filteredStats = useMemo(() => {
+    // Mock filtering - in real app, this would fetch from API with time range parameter
+    const multiplier = timeRange === '7days' ? 0.15 : 
+                       timeRange === '30days' ? 1 :
+                       timeRange === 'quarter' ? 2.5 :
+                       3.2; // year
+
+    return overviewStats.map(stat => ({
+      ...stat,
+      value: stat.label === 'Tỷ lệ chuyển đổi' 
+        ? stat.value // Keep percentage as is
+        : stat.label === 'Tổng doanh thu'
+          ? `₫${(2.4 * multiplier).toFixed(1)}B`
+          : stat.label === 'Khách hàng mới'
+            ? Math.round(1234 * multiplier).toLocaleString()
+            : Math.round(5678 * multiplier).toLocaleString(),
+      change: timeRange === '7days' ? '+2.1%' :
+              timeRange === '30days' ? '+8.5%' :
+              timeRange === 'quarter' ? '+18.3%' :
+              '+25.7%',
+    }));
+  }, [timeRange]);
+
+  const filteredRevenue = useMemo(() => {
+    // Filter revenue data based on time range
+    if (timeRange === '7days') {
+      return [
+        { month: 'CN', revenue: 180, target: 200 },
+        { month: 'T2', revenue: 220, target: 200 },
+        { month: 'T3', revenue: 195, target: 200 },
+        { month: 'T4', revenue: 240, target: 200 },
+        { month: 'T5', revenue: 210, target: 200 },
+        { month: 'T6', revenue: 230, target: 200 },
+        { month: 'T7', revenue: 250, target: 200 },
+      ];
+    } else if (timeRange === '30days') {
+      return [
+        { month: 'T1', revenue: 1200, target: 1000 },
+        { month: 'T2', revenue: 1350, target: 1100 },
+        { month: 'T3', revenue: 1100, target: 1200 },
+        { month: 'T4', revenue: 1500, target: 1300 },
+      ];
+    } else if (timeRange === 'quarter') {
+      return [
+        { month: 'Tháng 1', revenue: 2500, target: 2200 },
+        { month: 'Tháng 2', revenue: 2800, target: 2400 },
+        { month: 'Tháng 3', revenue: 3200, target: 2800 },
+      ];
+    } else {
+      return revenueByMonth;
+    }
+  }, [timeRange]);
+
   return (
     <div className="space-y-6">
       {/* Header với nút trợ giúp */}
@@ -192,7 +246,7 @@ export default function AnalyticsPage() {
 
       {/* Thống kê tổng quan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {overviewStats.map((stat, index) => (
+        {filteredStats.map((stat, index) => (
           <Card key={index} className="bg-white border-gray-200">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
@@ -225,7 +279,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-64 flex items-end justify-between gap-2">
-              {revenueByMonth.map((item, index) => (
+              {filteredRevenue.map((item, index) => (
                 <div key={index} className="flex-1 flex flex-col items-center gap-1">
                   <div className="w-full flex gap-0.5 h-48">
                     <div 

@@ -2,6 +2,7 @@
 import { bodyFont, headingFont } from "./fonts";
 import "./globals.css";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
+import { BreadcrumbSchema } from "@/components/BreadcrumbSchema";
 // import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
@@ -231,7 +232,52 @@ export default function RootLayout({
         }} />
       </head>
       <body className={`${bodyFont.variable} ${headingFont.variable} loading`}>
+        {/* JSON-LD Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Golden Energy Vietnam",
+              "alternateName": "Golden Card Vietnam",
+              "url": "https://www.goldencardvietnam.com",
+              "logo": "https://www.goldencardvietnam.com/logo.png",
+              "description": "Công ty cung cấp giải pháp năng lượng mặt trời hàng đầu Việt Nam với hơn 500+ dự án và 50MW+ công suất lắp đặt",
+              "email": "info@goldencardvietnam.com",
+              "telephone": "+84-28-1234-5678",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "123 Đường Điện Biên Phủ",
+                "addressLocality": "Quận Bình Thạnh",
+                "addressRegion": "TP. Hồ Chí Minh",
+                "postalCode": "700000",
+                "addressCountry": "VN"
+              },
+              "sameAs": [
+                "https://www.facebook.com/goldencardvietnam",
+                "https://www.linkedin.com/company/goldencardvietnam",
+                "https://www.youtube.com/@goldencardvietnam"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+84-28-1234-5678",
+                "contactType": "customer service",
+                "areaServed": "VN",
+                "availableLanguage": ["Vietnamese", "English", "Chinese"]
+              },
+              "foundingDate": "2015",
+              "numberOfEmployees": {
+                "@type": "QuantitativeValue",
+                "value": 100
+              },
+              "slogan": "Năng lượng xanh - Tương lai bền vững"
+            })
+          }}
+        />
+        
         <AnalyticsProvider>
+          <BreadcrumbSchema />
           {children}
         </AnalyticsProvider>
         {/* DevTools disabled - causing infinite loop */}

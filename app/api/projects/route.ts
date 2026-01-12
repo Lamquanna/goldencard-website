@@ -2,54 +2,90 @@
 // Handles CRUD operations for projects, tasks, and related entities
 
 import { NextRequest, NextResponse } from 'next/server';
-import { mockDb } from '@/lib/mock-supabase';
+import { sql } from '@/lib/db';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import type { Project } from '@/lib/types/project';
 
-// GET - List all projects
-export async function GET(request: NextRequest) {
+// GET - List all projects (rate limited)
+async function getProjects(request: NextRequest) {
   try {
+    if (!sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const lead_id = searchParams.get('lead_id');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     
-    let projects = mockDb.projects.getAll();
-    
-    // Filter by status
+    // Build query with filters
+    let query = 'SELECT * FROM projects WHERE 1=1';
+    const params: any[] = [];
+    let paramIndex = 1;
+
     if (status) {
-      projects = projects.filter(p => p.status === status);
+      query += ` AND status = $${paramIndex++}`;
+      params.push(status);
     }
-    
-    // Filter by lead
+
     if (lead_id) {
-      projects = projects.filter(p => p.lead_id === lead_id);
+      query += ` AND lead_id = $${paramIndex++}`;
+      params.push(lead_id);
     }
-    
-    // Sort by updated_at desc
-    projects.sort((a, b) => 
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+
+    query += ' ORDER BY updated_at DESC';
+
+    // Get total count
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+    const countResult = await sql(countQuery, params);
+    const total = parseInt(countResult[0]?.total || '0');
+
+    // Add pagination
+    query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    params.push(limit, (page - 1) * limit);
+
+    const result = await sql(query, params);
+    const projects = result.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      status: row.status,
+      priority: row.priority,
+      start_date: row.start_date,
+      end_date: row.end_date,
+      expected_completion: row.expected_completion,
+      budget: row.budget,
+      client_name: row.client_name,
+      client_email: row.client_email,
+      client_phone: row.client_phone,
+      lead_id: row.lead_id,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }));
+
+    // Get task counts for each project
+    const projectsWithCounts = await Promise.all(
+      projects.map(async (project: any) => {
+        const tasksResult = await sql(
+          'SELECT status FROM tasks WHERE project_id = $1',
+          [project.id]
+        );
+        const completedTasks = tasksResult.filter((t: any) => t.status === 'done').length;
+        
+        return {
+          ...project,
+          task_count: tasksResult.length,
+          completed_task_count: completedTasks,
+          progress_percentage: tasksResult.length > 0 
+            ? Math.round((completedTasks / tasksResult.length) * 100) 
+            : 0,
+        };
+      })
     );
-    
-    // Pagination
-    const total = projects.length;
-    const start = (page - 1) * limit;
-    const paginatedProjects = projects.slice(start, start + limit);
-    
-    // Add task counts
-    const projectsWithCounts = paginatedProjects.map(project => {
-      const tasks = mockDb.tasks.findByProjectId(project.id);
-      const completedTasks = tasks.filter(t => t.status === 'done').length;
-      
-      return {
-        ...project,
-        task_count: tasks.length,
-        completed_task_count: completedTasks,
-        progress_percentage: tasks.length > 0 
-          ? Math.round((completedTasks / tasks.length) * 100) 
-          : 0,
-      };
-    });
     
     return NextResponse.json({
       success: true,
@@ -70,9 +106,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create new project
-export async function POST(request: NextRequest) {
+// POST - Create new project (rate limited)
+async function createProject(request: NextRequest) {
   try {
+    if (!sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     
     // Validation
@@ -83,23 +126,51 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const result = await mockDb.projects.insert({
-      name: body.name,
-      description: body.description || '',
-      lead_id: body.lead_id,
-      status: body.status || 'planning',
-      priority: body.priority || 'medium',
-      start_date: body.start_date,
-      end_date: body.expected_completion || body.end_date,
-      budget: body.budget,
-      client_name: body.client_name,
-      client_email: body.client_email,
-      client_phone: body.client_phone,
-    });
+    const result = await sql`
+      INSERT INTO projects (
+        name, description, lead_id, status, priority,
+        start_date, end_date, expected_completion, budget,
+        client_name, client_email, client_phone,
+        created_at, updated_at
+      ) VALUES (
+        ${body.name},
+        ${body.description || ''},
+        ${body.lead_id || null},
+        ${body.status || 'planning'},
+        ${body.priority || 'medium'},
+        ${body.start_date || null},
+        ${body.end_date || null},
+        ${body.expected_completion || body.end_date || null},
+        ${body.budget || null},
+        ${body.client_name || null},
+        ${body.client_email || null},
+        ${body.client_phone || null},
+        NOW(),
+        NOW()
+      )
+      RETURNING *
+    `;
+
+    const project = result[0];
     
     return NextResponse.json({
       success: true,
-      data: result.data,
+      data: {
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        status: project.status,
+        priority: project.priority,
+        start_date: project.start_date,
+        end_date: project.end_date,
+        budget: project.budget,
+        client_name: project.client_name,
+        client_email: project.client_email,
+        client_phone: project.client_phone,
+        lead_id: project.lead_id,
+        created_at: project.created_at,
+        updated_at: project.updated_at,
+      },
       message: 'Tạo dự án thành công',
     });
   } catch (error) {
@@ -110,3 +181,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Apply rate limiting: 100 requests per hour
+export const GET = withRateLimit(rateLimiters.standard, getProjects);
+export const POST = withRateLimit(rateLimiters.standard, createProject);

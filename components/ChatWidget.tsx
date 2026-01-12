@@ -195,48 +195,35 @@ export default function ChatWidget({ locale = "vi" }: ChatWidgetProps) {
     setInputText("");
 
     try {
-      if (!currentLeadId) {
-        // Create anonymous or identified lead
-        const leadRes = await fetch("/api/crm/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: customerName || `Khách ẩn danh ${Date.now()}`,
-            phone: customerPhone || null,
-            message: messageText,
-            source: "website",
-            source_url: window.location.href,
-            locale,
-            is_anonymous: isAnonymous && !customerName && !customerPhone,
-          }),
-        });
+      // Use new customer chat API
+      const response = await fetch("/api/chat/customer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: customerName || null,
+          customerPhone: customerPhone || null,
+          customerEmail: null, // Can be added if collected
+          message: messageText,
+          isAnonymous: isAnonymous && !customerName && !customerPhone,
+        }),
+      });
 
-        if (leadRes.ok) {
-          const { lead } = await leadRes.json();
-          setCurrentLeadId(lead.id);
-
-          await fetch("/api/crm/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              lead_id: lead.id,
-              sender_type: "customer",
-              sender_name: customerName || "Khách ẩn danh",
-              message: messageText
-            }),
-          });
+      if (response.ok) {
+        const data = await response.json();
+        if (!currentLeadId) {
+          setCurrentLeadId(data.roomId);
         }
-      } else {
-        await fetch("/api/crm/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lead_id: currentLeadId,
-            sender_type: "customer",
-            sender_name: customerName || "Khách ẩn danh",
-            message: messageText
-          }),
-        });
+        
+        // Show bot reply after a short delay
+        setTimeout(() => {
+          const botMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            type: 'bot',
+            text: t.defaultReply,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, botMsg]);
+        }, 500);
       }
     } catch (error) {
       console.error("Error sending message:", error);

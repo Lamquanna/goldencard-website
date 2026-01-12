@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { 
   Wallet, TrendingUp, TrendingDown, FileText, Receipt, CreditCard,
   ArrowRight, AlertCircle, CheckCircle, Clock, PiggyBank, BarChart3
@@ -10,27 +11,76 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import Link from 'next/link'
 import { 
-  MOCK_INVOICES, 
-  MOCK_EXPENSES, 
-  MOCK_PAYMENTS,
   formatCurrency,
-  INVOICE_STATUS_CONFIG
+  INVOICE_STATUS_CONFIG,
+  InvoiceStatus
 } from '../modules/finance'
 
+interface Invoice {
+  id: string
+  invoiceNumber: string
+  customerName: string
+  amount: number
+  status: string
+  issueDate: string
+  dueDate: string
+}
+
+interface Expense {
+  id: string
+  expenseNumber: string
+  title: string
+  amount: number
+  category: string
+  status: string
+  expenseDate: string
+}
+
 export default function FinanceDashboard() {
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      const [invoicesRes, expensesRes] = await Promise.all([
+        fetch('/api/erp/invoices'),
+        fetch('/api/erp/expenses')
+      ])
+
+      if (invoicesRes.ok) {
+        const invoicesData = await invoicesRes.json()
+        setInvoices(invoicesData)
+      }
+
+      if (expensesRes.ok) {
+        const expensesData = await expensesRes.json()
+        setExpenses(expensesData)
+      }
+    } catch (error) {
+      console.error('Error loading finance data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Calculate stats
-  const totalRevenue = MOCK_INVOICES.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.total, 0)
-  const totalExpenses = MOCK_EXPENSES.filter(e => e.status === 'approved' || e.status === 'paid')
+  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0)
+  const totalExpenses = expenses.filter(e => e.status === 'approved' || e.status === 'paid')
     .reduce((sum, e) => sum + e.amount, 0)
-  const outstandingInvoices = MOCK_INVOICES.filter(i => ['sent', 'partial', 'overdue'].includes(i.status))
-    .reduce((sum, i) => sum + i.balanceDue, 0)
-  const pendingExpenses = MOCK_EXPENSES.filter(e => e.status === 'pending_approval').length
+  const outstandingInvoices = invoices.filter(i => ['sent', 'partial', 'overdue'].includes(i.status))
+    .reduce((sum, i) => sum + i.amount, 0)
+  const pendingExpenses = expenses.filter(e => e.status === 'pending_approval').length
 
   // Net profit
   const netProfit = totalRevenue - totalExpenses
 
   // Recent invoices
-  const recentInvoices = MOCK_INVOICES.slice(0, 3)
+  const recentInvoices = invoices.slice(0, 3)
 
   // Budget usage (mock)
   const budgetUsed = 75
@@ -146,7 +196,7 @@ export default function FinanceDashboard() {
           <CardContent>
             <div className="space-y-4">
               {recentInvoices.map((invoice) => {
-                const statusConfig = INVOICE_STATUS_CONFIG[invoice.status]
+                const statusConfig = INVOICE_STATUS_CONFIG[invoice.status as InvoiceStatus]
                 return (
                   <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div className="flex items-center gap-3">
@@ -163,9 +213,9 @@ export default function FinanceDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatCurrency(invoice.total)}</p>
-                      <Badge variant="outline" className={`text-xs ${statusConfig.color}`}>
-                        {statusConfig.labelVi}
+                      <p className="font-medium">{formatCurrency(invoice.amount)}</p>
+                      <Badge variant="outline" className={`text-xs ${statusConfig?.color || ''}`}>
+                        {statusConfig?.labelVi || invoice.status}
                       </Badge>
                     </div>
                   </div>
@@ -225,7 +275,7 @@ export default function FinanceDashboard() {
                 </Link>
               )}
 
-              {MOCK_INVOICES.filter(i => i.status === 'overdue').length > 0 && (
+              {invoices.filter(i => i.status === 'overdue').length > 0 && (
                 <Link href="/erp/finance/invoices" className="block">
                   <div className="flex items-center justify-between p-2 rounded bg-red-50 border border-red-200 hover:bg-red-100 transition-colors">
                     <div className="flex items-center gap-2">
@@ -233,7 +283,7 @@ export default function FinanceDashboard() {
                       <span className="text-sm">Hóa đơn quá hạn</span>
                     </div>
                     <Badge variant="outline" className="bg-red-100 text-red-800">
-                      {MOCK_INVOICES.filter(i => i.status === 'overdue').length}
+                      {invoices.filter(i => i.status === 'overdue').length}
                     </Badge>
                   </div>
                 </Link>
@@ -250,7 +300,7 @@ export default function FinanceDashboard() {
             <CardContent className="flex flex-col items-center justify-center py-6">
               <FileText className="h-8 w-8 text-blue-500 mb-2" />
               <span className="font-medium">Hóa đơn</span>
-              <span className="text-sm text-muted-foreground">{MOCK_INVOICES.length} hóa đơn</span>
+              <span className="text-sm text-muted-foreground">{invoices.length} hóa đơn</span>
             </CardContent>
           </Card>
         </Link>
@@ -260,7 +310,7 @@ export default function FinanceDashboard() {
             <CardContent className="flex flex-col items-center justify-center py-6">
               <CreditCard className="h-8 w-8 text-green-500 mb-2" />
               <span className="font-medium">Thanh toán</span>
-              <span className="text-sm text-muted-foreground">{MOCK_PAYMENTS.length} giao dịch</span>
+              <span className="text-sm text-muted-foreground">Quản lý thanh toán</span>
             </CardContent>
           </Card>
         </Link>
@@ -270,7 +320,7 @@ export default function FinanceDashboard() {
             <CardContent className="flex flex-col items-center justify-center py-6">
               <Receipt className="h-8 w-8 text-red-500 mb-2" />
               <span className="font-medium">Chi phí</span>
-              <span className="text-sm text-muted-foreground">{MOCK_EXPENSES.length} khoản chi</span>
+              <span className="text-sm text-muted-foreground">{expenses.length} khoản chi</span>
             </CardContent>
           </Card>
         </Link>

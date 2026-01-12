@@ -29,7 +29,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { UserPlus, Users, Loader2, CheckCircle, Copy, AlertCircle } from 'lucide-react';
+import { UserPlus, Users, Loader2, CheckCircle, Copy, AlertCircle, MoreHorizontal, Eye, Edit, Trash2, KeyRound } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface User {
   id: number;
@@ -52,9 +60,25 @@ export default function UsersManagementPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    role: '',
+    department: '',
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [newUserCredentials, setNewUserCredentials] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -147,6 +171,128 @@ export default function UsersManagementPage() {
   // Copy to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  // View user details
+  const handleView = (user: User) => {
+    setSelectedUser(user);
+    setViewDialogOpen(true);
+  };
+
+  // Edit user
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setEditFormData({
+      full_name: user.full_name,
+      email: user.email || '',
+      phone: user.phone || '',
+      role: user.role,
+      department: user.department || '',
+    });
+    setEditDialogOpen(true);
+  };
+
+  const confirmEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+    setIsUpdating(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('erp_token');
+      const response = await fetch(`/api/erp/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+
+      setSuccess('Đã cập nhật người dùng thành công');
+      setEditDialogOpen(false);
+      await loadUsers();
+    } catch (err: any) {
+      setError(err.message || 'Không thể cập nhật người dùng');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Delete user
+  const handleDelete = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedUser) return;
+    setIsDeleting(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('erp_token');
+      const response = await fetch(`/api/erp/users/${selectedUser.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      setSuccess('Đã xóa người dùng thành công');
+      setDeleteDialogOpen(false);
+      await loadUsers();
+    } catch (err: any) {
+      setError(err.message || 'Không thể xóa người dùng');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Reset password (Admin)
+  const handleResetPassword = (user: User) => {
+    setSelectedUser(user);
+    setNewPassword('');
+    setResetPasswordDialogOpen(true);
+  };
+
+  const confirmResetPassword = async () => {
+    if (!selectedUser) return;
+    setIsResetting(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('erp_token');
+      const response = await fetch(`/api/erp/users/${selectedUser.id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reset password');
+      }
+
+      setSuccess(`Đã đặt lại mật khẩu: ${data.newPassword}`);
+      setResetPasswordDialogOpen(false);
+    } catch (err: any) {
+      setError(err.message || 'Không thể đặt lại mật khẩu');
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   // Close dialog and reset state
@@ -382,6 +528,7 @@ export default function UsersManagementPage() {
                 <TableHead>Điện Thoại</TableHead>
                 <TableHead>Trạng Thái</TableHead>
                 <TableHead>Ngày Tạo</TableHead>
+                <TableHead className="text-right">Hành động</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -412,6 +559,260 @@ export default function UsersManagementPage() {
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
                     {new Date(user.created_at).toLocaleDateString('vi-VN')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleView(user)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(user)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleResetPassword(user)}>
+                          <KeyRound className="h-4 w-4 mr-2" />
+                          Đặt lại mật khẩu
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleDelete(user)} className="text-red-600">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa người dùng
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      {/* View User Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chi tiết người dùng</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Mã nhân viên</Label>
+                  <p className="font-medium font-mono">{selectedUser.employee_code}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Username</Label>
+                  <p className="font-medium">{selectedUser.username}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Họ tên</Label>
+                <p className="font-medium">{selectedUser.full_name}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="font-medium">{selectedUser.email || '-'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Điện thoại</Label>
+                  <p className="font-medium">{selectedUser.phone || '-'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Chức vụ</Label>
+                  <p className="font-medium">{selectedUser.role}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Phòng ban</Label>
+                  <p className="font-medium">{selectedUser.department || '-'}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Trạng thái</Label>
+                <p className="font-medium">{selectedUser.is_active ? '✅ Hoạt động' : '❌ Không hoạt động'}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa người dùng</DialogTitle>
+            <DialogDescription>
+              Cập nhật thông tin người dùng {selectedUser?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={confirmEdit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit_full_name">Họ và Tên *</Label>
+              <Input
+                id="edit_full_name"
+                value={editFormData.full_name}
+                onChange={(e) => setEditFormData({ ...editFormData, full_name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_role">Chức vụ *</Label>
+                <Select
+                  value={editFormData.role}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staff">Nhân viên</SelectItem>
+                    <SelectItem value="manager">Quản lý</SelectItem>
+                    <SelectItem value="director">Giám đốc</SelectItem>
+                    <SelectItem value="accountant">Kế toán</SelectItem>
+                    <SelectItem value="sales">Kinh doanh</SelectItem>
+                    <SelectItem value="technical">Kỹ thuật</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_department">Phòng ban</Label>
+                <Input
+                  id="edit_department"
+                  value={editFormData.department}
+                  onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit_email">Email</Label>
+              <Input
+                id="edit_email"
+                type="email"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit_phone">Số điện thoại</Label>
+              <Input
+                id="edit_phone"
+                value={editFormData.phone}
+                onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isUpdating}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? 'Đang cập nhật...' : 'Cập nhật'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <p>Bạn có chắc chắn muốn xóa người dùng <strong>{selectedUser.full_name}</strong>?</p>
+              <p className="text-sm text-muted-foreground">Hành động này không thể hoàn tác.</p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting}>
+                  Hủy
+                </Button>
+                <Button onClick={confirmDelete} variant="destructive" disabled={isDeleting}>
+                  {isDeleting ? 'Đang xóa...' : 'Xóa'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Đặt lại mật khẩu</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <p>Đặt lại mật khẩu cho người dùng <strong>{selectedUser.full_name}</strong></p>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Mật khẩu mới (tùy chọn)</Label>
+                <Input
+                  id="newPassword"
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Để trống để tạo mật khẩu mặc định"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Nếu để trống, mật khẩu sẽ là: {selectedUser.employee_code}@2025
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setResetPasswordDialogOpen(false)} disabled={isResetting}>
+                  Hủy
+                </Button>
+                <Button onClick={confirmResetPassword} disabled={isResetting}>
+                  {isResetting ? 'Đang đặt lại...' : 'Đặt lại mật khẩu'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/*             <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleView(user)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleResetPassword(user)}>
+                          <KeyRound className="h-4 w-4 mr-2" />
+                          Đặt lại mật khẩu
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleDelete(user)} className="text-red-600">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa người dùng
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>user.created_at).toLocaleDateString('vi-VN')}
                   </TableCell>
                 </TableRow>
               ))}

@@ -521,33 +521,46 @@ function AddLeadDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.name || formData.name.trim() === '') {
+      alert('⚠️ Vui lòng nhập họ tên khách hàng');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
+      console.log('🚀 Submitting lead data:', formData);
+      
       const response = await fetch('/api/erp/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          company: formData.company || null,
-          email: formData.email || null,
-          phone: formData.phone || null,
+          name: formData.name.trim(),
+          company: formData.company?.trim() || null,
+          email: formData.email?.trim() || null,
+          phone: formData.phone?.trim() || null,
           source: formData.source || 'manual',
-          message: formData.notes || null,
-          priority: formData.rating,
+          message: formData.notes?.trim() || null,
+          priority: formData.rating || 'medium',
           status: 'new',
           locale: 'vi',
         }),
       });
 
+      console.log('📡 Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to create lead');
+        const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create lead`);
       }
 
       const result = await response.json();
-      console.log('Lead created successfully:', result);
+      console.log('✅ Lead created successfully:', result);
       
       alert('✅ Đã thêm khách hàng tiềm năng thành công!');
       
@@ -565,9 +578,10 @@ function AddLeadDialog() {
       
       // Reload page to show new lead
       window.location.reload();
-    } catch (error) {
-      console.error('Error creating lead:', error);
-      alert('❌ Có lỗi xảy ra khi thêm khách hàng. Vui lòng thử lại.');
+    } catch (error: any) {
+      console.error('❌ Error creating lead:', error);
+      const errorMessage = error.message || 'Lỗi không xác định';
+      alert(`❌ Có lỗi xảy ra khi thêm khách hàng:\n\n${errorMessage}\n\nVui lòng kiểm tra console để biết thêm chi tiết.`);
     } finally {
       setIsSubmitting(false);
     }

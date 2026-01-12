@@ -97,6 +97,7 @@ model User {
   auditLogs        AuditLog[]
   sentMessages     ChatMessage[]
   chatMemberships  ChatMember[]
+  chatReadReceipts ChatReadReceipt[] @relation("ChatReadReceipts")
   documents        Document[]
   approvals        Approval[]        @relation("Approver")
   requestedApprovals Approval[]      @relation("Requester")
@@ -240,6 +241,7 @@ model Lead {
   @@index([workspaceId, status])
   @@index([workspaceId, assignedToId])
   @@index([workspaceId, createdAt])
+  @@unique([workspaceId, email])
   @@map("leads")
 }
 
@@ -1234,6 +1236,7 @@ enum ChatRoomType {
   DIRECT
   GROUP
   CHANNEL
+  CUSTOMER_SUPPORT
   THREAD
 }
 
@@ -1279,9 +1282,25 @@ model ChatMessage {
   replies ChatMessage[]  @relation("MessageThread")
   attachments Attachment[]
   reactions   ChatReaction[]
+  readReceipts ChatReadReceipt[]
 
   @@index([roomId, createdAt])
   @@map("chat_messages")
+}
+
+model ChatReadReceipt {
+  id        String      @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime    @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation("ChatReadReceipts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@map("chat_read_receipts")
 }
 
 enum MessageType {
