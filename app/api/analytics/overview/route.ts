@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
         AVG(CASE WHEN bounce THEN 1 ELSE 0 END) as bounce_rate
       FROM analytics_page_views
       WHERE viewed_at >= ${startDateStr} AND viewed_at < ${endDateStr}
-    `;
+    ` as any[];
 
     // Previous period stats
     const previousResult = await sql`
@@ -48,7 +47,7 @@ export async function GET(request: NextRequest) {
         AVG(CASE WHEN bounce THEN 1 ELSE 0 END) as bounce_rate
       FROM analytics_page_views
       WHERE viewed_at >= ${prevStartDateStr} AND viewed_at < ${startDateStr}
-    `;
+    ` as any[];
 
     const current = currentResult[0] || {};
     const previous = previousResult[0] || {};

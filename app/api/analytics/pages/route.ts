@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -32,7 +31,7 @@ export async function GET(request: NextRequest) {
       GROUP BY page_path, page_title
       ORDER BY views DESC
       LIMIT 50
-    `;
+    ` as any[];
 
     return NextResponse.json({
       data: result.map((row: any) => ({

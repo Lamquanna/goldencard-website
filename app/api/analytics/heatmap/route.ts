@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 interface HeatmapPoint {
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Build query conditions
     // Simplified query without dynamic SQL - filter by pagePath only
-    let result;
+    let result: any[];
     
     if (deviceType !== 'all' && startDate && endDate) {
       result = await sql`

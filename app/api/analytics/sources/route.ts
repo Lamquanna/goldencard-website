@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
       GROUP BY utm_source
       ORDER BY visitors DESC
       LIMIT 10
-    `;
+    ` as any[];
 
     const total = result.reduce((sum: number, row: any) => sum + parseInt(row.visitors), 0);
 

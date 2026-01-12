@@ -19,7 +19,7 @@ export async function GET() {
     `
 
     // Transform DB data to Employee format expected by component
-    const employees = rows.map(row => {
+    const employees = rows.map((row: any) => {
       const nameParts = row.full_name.split(' ')
       const lastName = nameParts[0]
       const firstName = nameParts.slice(1).join(' ')
