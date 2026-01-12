@@ -22,8 +22,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check environment variables
+    console.log('🔧 Environment check:', {
+      hasToken: !!process.env.COZE_API_TOKEN,
+      hasBotId: !!process.env.COZE_BOT_ID,
+      botIdFromEnv: process.env.COZE_BOT_ID,
+      botIdFromRequest: botId,
+    });
+
     // Get Coze client
     const coze = getCozeClient();
+
+    console.log('📤 Sending to Coze:', { userId, messageLength: message.length, botId: botId || process.env.COZE_BOT_ID });
 
     // Send message to Coze
     const response = await coze.chat({
@@ -33,6 +43,8 @@ export async function POST(request: NextRequest) {
       conversationId,
       stream: false,
     });
+
+    console.log('✅ Coze response:', { conversationId: response.conversation_id, hasContent: !!response.message?.content });
 
     return NextResponse.json({
       success: true,
@@ -45,6 +57,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('❌ Coze API error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
     
     return NextResponse.json(
       {

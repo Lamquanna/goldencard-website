@@ -227,7 +227,7 @@ export default function RootLayout({
             .text-gradient{background:linear-gradient(to right,#EEE,#AAA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
             /* Golden Energy brand colors */
             .golden-text{color:#D4AF37}
-            .energy-text{color:#22C55E}
+            .energy-text{color:#ED683C}
           `
         }} />
       </head>

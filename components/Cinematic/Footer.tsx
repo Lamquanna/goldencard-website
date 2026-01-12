@@ -90,7 +90,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
                 letterSpacing: "0.025em",
               }}
             >
-              <span className="energy-text">Năng</span> lượng sạch, cuộc sống xanh, tương lai vàng
+              Năng lượng sạch, cuộc sống xanh, tương lai vàng
             </p>
           </div>
 
@@ -157,7 +157,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
             className="text-center text-white text-xs tracking-[0.05em] font-bold"
             style={{ fontFamily: "Montserrat, sans-serif" }}
           >
-            © {currentYear} <span className="golden-text" style={{ fontSize: 'inherit', fontWeight: 700 }}>Golden</span> <span className="energy-text" style={{ fontSize: 'inherit', fontWeight: 700 }}>Energy</span> Vietnam. All rights reserved.
+            © {currentYear} <span className="golden-text" style={{ fontSize: 'inherit', fontWeight: 700 }}>Golden Energy</span> Vietnam. All rights reserved.
           </p>
         </div>
       </div>

@@ -209,7 +209,7 @@ export function CozeChatWidget({
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Powered by Coze AI • Nội bộ Golden Energy
+              Nội bộ GoldenEnergy
             </p>
           </div>
         </div>
