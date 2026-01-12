@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowLeft,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -154,6 +155,36 @@ function ActivityLabel({ type, status }: { type: string; status: string }) {
 export default function HRMDashboard() {
   return (
     <div className="space-y-6 p-6">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Link href="/erp/dashboard">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại Dashboard
+          </Button>
+        </Link>
+      </div>
+
+      {/* Leave Approval Alert - Top Priority */}
+      {stats.pendingApprovals > 0 && (
+        <Card className="border-orange-500 border-2 bg-orange-50 shadow-lg">
+          <CardContent className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <AlertCircle className="h-8 w-8 text-orange-600 animate-pulse" />
+              <div>
+                <p className="font-bold text-lg text-orange-900">Có {stats.pendingApprovals} đơn nghỉ phép đang chờ duyệt</p>
+                <p className="text-sm text-orange-700 mt-1">Vui lòng xử lý các đơn chờ duyệt ngay để không ảnh hưởng đến công việc</p>
+              </div>
+            </div>
+            <Button variant="default" size="lg" className="bg-orange-600 hover:bg-orange-700 font-bold" asChild>
+              <Link href="/erp/hrm/leaves?filter=pending">
+                Xem ngay
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -210,9 +241,10 @@ export default function HRMDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="border-2 border-gray-300 shadow-md">
         <CardHeader>
-          <CardTitle className="text-lg">Thao tác nhanh</CardTitle>
+          <CardTitle className="text-xl font-bold">Thao tác nhanh</CardTitle>
+          <CardDescription>Các chức năng chính của hệ thống HRM</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -220,10 +252,10 @@ export default function HRMDashboard() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-muted transition-colors"
+                className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-gray-400 hover:border-blue-600 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 bg-white"
               >
-                <action.icon className={`h-8 w-8 ${action.color}`} />
-                <span className="text-sm font-medium text-center">{action.label}</span>
+                <action.icon className={`h-10 w-10 ${action.color}`} />
+                <span className="text-sm font-bold text-center">{action.label}</span>
               </Link>
             ))}
           </div>
@@ -329,25 +361,6 @@ export default function HRMDashboard() {
         </Card>
       </div>
 
-      {/* Alerts */}
-      {stats.pendingApprovals > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="font-medium">Có {stats.pendingApprovals} đơn nghỉ phép đang chờ duyệt</p>
-                <p className="text-sm text-muted-foreground">Vui lòng xử lý các đơn chờ duyệt</p>
-              </div>
-            </div>
-            <Button variant="outline" asChild>
-              <Link href="/erp/hrm/leaves?filter=pending">
-                Xem ngay
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

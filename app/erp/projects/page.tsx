@@ -24,6 +24,7 @@ import {
   Trash2,
   Bell,
   AlertTriangle,
+  ArrowLeft,
 } from 'lucide-react'
 import { format, differenceInDays, isAfter } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -710,6 +711,16 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Back Button */}
+      <div>
+        <Link href="/erp/dashboard">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại Dashboard
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

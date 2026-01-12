@@ -66,12 +66,18 @@ export function CozeChatWidget({
         body: JSON.stringify({
           message: input,
           userId,
-          botId,
+          botId: botId || process.env.NEXT_PUBLIC_COZE_BOT_ID,
           conversationId,
         }),
       });
 
+      if (!response.ok) {
+        console.error('Response not OK:', response.status, response.statusText);
+        throw new Error(`API error: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Chat response data:', data);
 
       if (data.success) {
         const assistantMessage: Message = {
@@ -84,15 +90,21 @@ export function CozeChatWidget({
         setMessages(prev => [...prev, assistantMessage]);
         setConversationId(data.data.conversationId);
       } else {
+        console.error('API returned success=false:', data);
         throw new Error(data.error || 'Failed to send message');
       }
     } catch (error: any) {
-      console.error('Chat error:', error);
+      console.error('Chat error details:', {
+        message: error.message,
+        error: error,
+        userId,
+        botId: botId || process.env.NEXT_PUBLIC_COZE_BOT_ID,
+      });
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '❌ Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.',
+        content: `❌ Lỗi kết nối: ${error.message || 'Không thể kết nối với AI Assistant'}. Vui lòng kiểm tra kết nối mạng và thử lại.`,
         timestamp: new Date(),
       };
       

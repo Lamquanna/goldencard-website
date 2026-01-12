@@ -295,7 +295,17 @@ export default function ProjectDetailPage() {
   const deadlineAlert = project.startDate && project.endDate ? getDeadlineAlert(project.progress, project.startDate, project.endDate) : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
+      {/* Back Button */}
+      <div>
+        <Link href="/erp/projects">
+          <Button variant="ghost" size="sm" className="gap-2 mb-4">
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại Dự án
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
