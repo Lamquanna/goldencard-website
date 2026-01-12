@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY created_at DESC'
 
-    const result = await sql(query, params)
+    const result = await sql.query(query, params)
     
     const projects = result.rows.map((row: any) => ({
       id: row.id,
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `
 
-    const result = await sql(query, [
+    const result = await sql.query(query, [
       name,
       projectKey,
       description || null,
