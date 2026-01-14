@@ -13,28 +13,37 @@ const DATABASE_URL = cleanDatabaseUrl(process.env.DATABASE_URL);
 // Create raw neon client
 const neonClient = DATABASE_URL ? neon(DATABASE_URL) : null;
 
-// Wrap neon to return {rows: [...]} format compatible with @vercel/postgres
+// Extended array type that has both array methods AND .rows property
+// This provides compatibility with both neon (array) and @vercel/postgres ({rows:[]}) syntax
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type QueryResult<T = any> = { rows: T[] };
+interface CompatibleResult<T = any> extends Array<T> {
+  rows: T[];
+}
 
-// Create a wrapper that converts neon's array result to {rows: []} format
+// Create a wrapper that returns an array with .rows property for dual compatibility
 function createWrappedSql(client: NeonQueryFunction<false, false> | null) {
   if (!client) return null as any;
   
-  // Return a tagged template function that wraps results
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wrappedSql = async <T = any>(
     strings: TemplateStringsArray,
     ...values: unknown[]
-  ): Promise<QueryResult<T>> => {
-    const result = await client(strings, ...values);
-    return { rows: result as T[] };
+  ): Promise<CompatibleResult<T>> => {
+    const result = await client(strings, ...values) as T[];
+    // Create array and add .rows property pointing to itself
+    const compatibleResult = [...result] as CompatibleResult<T>;
+    compatibleResult.rows = compatibleResult;
+    return compatibleResult;
   };
   
   return wrappedSql;
 }
 
-// Export wrapped sql for @vercel/postgres compatibility
+// Export wrapped sql - works with BOTH syntaxes:
+// - result[0] (neon style)
+// - result.rows[0] (@vercel/postgres style)
+// - result.length (neon style)
+// - result.rows.length (@vercel/postgres style)
 export const sql = createWrappedSql(neonClient);
 
 // Also export raw neon client for direct access if needed
