@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Minimize2, Maximize2 } from 'lucide-react';
+import { Send, Bot, Minimize2, Maximize2, GripVertical } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -36,6 +36,11 @@ export function CozeChatWidget({
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Draggable state
+  const [widgetPosition, setWidgetPosition] = useState({ x: 24, y: 24 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +49,58 @@ export function CozeChatWidget({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle drag start
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    dragRef.current = {
+      startX: clientX,
+      startY: clientY,
+      startPosX: widgetPosition.x,
+      startPosY: widgetPosition.y,
+    };
+    setIsDragging(true);
+  };
+
+  // Handle drag move
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging || !dragRef.current) return;
+      
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      
+      const deltaX = dragRef.current.startX - clientX;
+      const deltaY = dragRef.current.startY - clientY;
+      
+      const newX = Math.max(10, Math.min(window.innerWidth - 420, dragRef.current.startPosX + deltaX));
+      const newY = Math.max(10, Math.min(window.innerHeight - 650, dragRef.current.startPosY + deltaY));
+      
+      setWidgetPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragRef.current = null;
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove);
+      window.addEventListener('touchend', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -134,12 +191,14 @@ export function CozeChatWidget({
     }
   };
 
-  const positionClasses = position === 'bottom-right' 
-    ? 'right-6 bottom-6' 
-    : 'left-6 bottom-6';
+  // Dynamic positioning based on drag
+  const positionStyle = {
+    right: `${widgetPosition.x}px`,
+    bottom: `${widgetPosition.y}px`,
+  };
 
   return (
-    <div className={`fixed ${positionClasses} z-50`}>
+    <div className="fixed z-50" style={positionStyle}>
       {/* Chat Button */}
       {!isOpen && (
         <button
@@ -154,13 +213,18 @@ export function CozeChatWidget({
       {/* Chat Window */}
       {isOpen && (
         <div className="bg-white rounded-lg shadow-2xl w-96 h-[600px] flex flex-col">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+          {/* Header - Draggable */}
+          <div 
+            className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={handleDragStart}
+            onTouchStart={handleDragStart}
+          >
             <div className="flex items-center gap-3">
+              <GripVertical className="w-4 h-4 opacity-50" />
               <Bot className="w-6 h-6" />
               <div>
                 <h3 className="font-semibold">AI Assistant</h3>
-                <p className="text-xs opacity-90">Golden Energy Internal</p>
+                <p className="text-xs opacity-90">Kéo để di chuyển</p>
               </div>
             </div>
             <button

@@ -62,9 +62,9 @@ const mockChannels = [
 ];
 
 const mockDirectMessages = [
-  { id: '1', name: 'Huy Phạm', avatar: 'HP', status: 'online', unread: 2 },
-  { id: '2', name: 'Lan Nguyễn', avatar: 'LN', status: 'offline', unread: 0 },
-  { id: '3', name: 'Minh Trần', avatar: 'MT', status: 'away', unread: 0 },
+  { id: 'dm1', name: 'Huy Phạm', avatar: 'HP', status: 'online', unread: 2 },
+  { id: 'dm2', name: 'Lan Nguyễn', avatar: 'LN', status: 'offline', unread: 0 },
+  { id: 'dm3', name: 'Minh Trần', avatar: 'MT', status: 'away', unread: 0 },
 ];
 
 const mockMessages: Message[] = [
@@ -76,6 +76,8 @@ const mockMessages: Message[] = [
 
 export default function ChatPage() {
   const [selectedChannel, setSelectedChannel] = useState('1');
+  const [selectedDM, setSelectedDM] = useState<string | null>(null);
+  const [chatType, setChatType] = useState<'channel' | 'dm'>('channel');
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [newMessage, setNewMessage] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
@@ -84,6 +86,20 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // DM mock messages
+  const dmMessages: Record<string, Message[]> = {
+    dm1: [
+      { id: '1', user: 'Huy Phạm', avatar: 'HP', content: 'Chào bạn! Dự án đến đâu rồi?', time: '10:00', isMe: false },
+      { id: '2', user: 'Bạn', avatar: 'ME', content: 'Đang làm phần thiết kế, chiều nay xong', time: '10:05', isMe: true },
+    ],
+    dm2: [
+      { id: '1', user: 'Lan Nguyễn', avatar: 'LN', content: 'Báo cáo đã gửi chưa?', time: '09:00', isMe: false },
+    ],
+    dm3: [
+      { id: '1', user: 'Minh Trần', avatar: 'MT', content: 'Meeting lúc 3h nhé!', time: '08:30', isMe: false },
+    ],
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -91,6 +107,30 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle selecting a channel
+  const handleSelectChannel = (channelId: string) => {
+    setSelectedChannel(channelId);
+    setSelectedDM(null);
+    setChatType('channel');
+    setMessages(mockMessages); // Load channel messages
+  };
+
+  // Handle selecting a DM
+  const handleSelectDM = (dmId: string) => {
+    setSelectedDM(dmId);
+    setChatType('dm');
+    setMessages(dmMessages[dmId] || []);
+  };
+
+  const getCurrentChatName = () => {
+    if (chatType === 'dm' && selectedDM) {
+      const dm = mockDirectMessages.find(d => d.id === selectedDM);
+      return dm?.name || 'Tin nhắn';
+    }
+    const channel = mockChannels.find(c => c.id === selectedChannel);
+    return `# ${channel?.name || 'general'}`;
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + ' B';
@@ -198,9 +238,9 @@ export default function ChatPage() {
                   {mockChannels.map(channel => (
                     <button
                       key={channel.id}
-                      onClick={() => setSelectedChannel(channel.id)}
+                      onClick={() => handleSelectChannel(channel.id)}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        selectedChannel === channel.id
+                        chatType === 'channel' && selectedChannel === channel.id
                           ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-medium'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
@@ -224,7 +264,12 @@ export default function ChatPage() {
                   {mockDirectMessages.map(dm => (
                     <button
                       key={dm.id}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => handleSelectDM(dm.id)}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        chatType === 'dm' && selectedDM === dm.id
+                          ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-medium'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     >
                       <div className="relative">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium">
@@ -264,8 +309,10 @@ export default function ChatPage() {
               </svg>
             </button>
             <div>
-              <h2 className="font-semibold text-gray-900"># general</h2>
-              <p className="text-xs text-gray-500">12 thành viên</p>
+              <h2 className="font-semibold text-gray-900">{getCurrentChatName()}</h2>
+              <p className="text-xs text-gray-500">
+                {chatType === 'dm' ? 'Tin nhắn riêng' : '12 thành viên'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">

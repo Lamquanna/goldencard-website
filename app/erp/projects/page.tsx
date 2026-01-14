@@ -254,66 +254,122 @@ function StatusIcon({ status }: { status: ProjectStatus }) {
 // PROJECT CARD
 // =============================================================================
 
-function ProjectCard({ project }: { project: Project }) {
+interface ProjectCardProps {
+  project: Project;
+  onEdit?: (project: Project) => void;
+  onDelete?: (projectId: string) => void;
+  onToggleStar?: (projectId: string) => void;
+}
+
+function ProjectCard({ project, onEdit, onDelete, onToggleStar }: ProjectCardProps) {
   const statusConfig = PROJECT_STATUS_CONFIG[project.status]
   const daysLeft = project.endDate ? differenceInDays(project.endDate, new Date()) : 0
   const progressColor = getProgressColor(project.progress, daysLeft, project.endDate)
   const showAlert = shouldShowAlert(project.progress, daysLeft, project.endDate)
+  const [starred, setStarred] = useState(false)
+
+  const handleViewDetail = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.location.href = `/erp/projects/${project.id}`
+  }
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onEdit) {
+      onEdit(project)
+    } else {
+      // Fallback - open edit in same page
+      window.location.href = `/erp/projects/${project.id}?edit=true`
+    }
+  }
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!confirm(`Bạn có chắc muốn xóa dự án "${project.name}"?\n\nHành động này không thể hoàn tác!`)) return
+    
+    try {
+      const response = await authFetch(`/api/erp/projects/${project.id}`, {
+        method: 'DELETE',
+      })
+      
+      if (response.ok) {
+        alert(`Đã xóa dự án: ${project.name}`)
+        if (onDelete) onDelete(project.id)
+        window.location.reload()
+      } else {
+        const data = await response.json()
+        alert(`Lỗi: ${data.error || 'Không thể xóa dự án'}`)
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      alert('Có lỗi xảy ra khi xóa dự án')
+    }
+  }
+
+  const handleToggleStar = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setStarred(!starred)
+    if (onToggleStar) onToggleStar(project.id)
+  }
 
   return (
-    <Link href={`/erp/projects/${project.id}`}>
-      <Card className={`hover:shadow-md transition-all cursor-pointer group h-full ${showAlert ? 'border-red-300 border-2' : ''}`}>
-        <CardContent className="p-4">
-          {/* Alert Badge */}
-          {showAlert && (
-            <div className="mb-3 flex items-center gap-2 text-xs bg-red-50 text-red-700 p-2 rounded-md">
-              <AlertTriangle className="h-3 w-3" />
-              <span className="font-medium">Cảnh báo: Gần deadline, tiến độ chậm!</span>
-            </div>
-          )}
-
-          {/* Header */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: project.color }}
-              >
-                {project.key.substring(0, 2)}
-              </div>
-              <div>
-                <h3 className="font-semibold group-hover:text-primary transition-colors">
-                  {project.name}
-                </h3>
-                <p className="text-xs text-muted-foreground">{project.key}</p>
-              </div>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => { e.preventDefault(); window.location.href = `/erp/projects/${project.id}`; }}>
-                  <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.preventDefault(); alert('Chức năng chỉnh sửa dự án: ' + project.name); }}>
-                  <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.preventDefault(); }}>
-                  <Star className="h-4 w-4 mr-2" /> Đánh dấu
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.preventDefault(); }}>
-                  <Settings className="h-4 w-4 mr-2" /> Cài đặt
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={(e) => { e.preventDefault(); if(confirm('Bạn có chắc muốn xóa dự án này?')) { alert('Đã xóa dự án: ' + project.name); } }}>
-                  <Trash2 className="h-4 w-4 mr-2" /> Xóa dự án
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <Card className={`hover:shadow-md transition-all cursor-pointer group h-full ${showAlert ? 'border-red-300 border-2' : ''}`}>
+      <CardContent className="p-4">
+        {/* Alert Badge */}
+        {showAlert && (
+          <div className="mb-3 flex items-center gap-2 text-xs bg-red-50 text-red-700 p-2 rounded-md">
+            <AlertTriangle className="h-3 w-3" />
+            <span className="font-medium">Cảnh báo: Gần deadline, tiến độ chậm!</span>
           </div>
+        )}
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <Link href={`/erp/projects/${project.id}`} className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: project.color }}
+            >
+              {project.key.substring(0, 2)}
+            </div>
+            <div>
+              <h3 className="font-semibold group-hover:text-primary transition-colors">
+                {project.name}
+              </h3>
+              <p className="text-xs text-muted-foreground">{project.key}</p>
+            </div>
+          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleViewDetail}>
+                <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleEdit}>
+                <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleToggleStar}>
+                <Star className={`h-4 w-4 mr-2 ${starred ? 'fill-yellow-400 text-yellow-400' : ''}`} /> 
+                {starred ? 'Bỏ đánh dấu' : 'Đánh dấu'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/erp/projects/${project.id}/settings` }}>
+                <Settings className="h-4 w-4 mr-2" /> Cài đặt
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" /> Xóa dự án
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
           {/* Description */}
           {project.description && (
@@ -375,7 +431,6 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         </CardContent>
       </Card>
-    </Link>
   )
 }
 
