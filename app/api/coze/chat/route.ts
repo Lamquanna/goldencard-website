@@ -78,7 +78,8 @@ export async function POST(request: NextRequest) {
     }
 
     const apiStartTime = Date.now();
-    const cozeResponse = await fetch('https://api.coze.com/v1/chat', {
+    // Coze API v3 endpoint
+    const cozeResponse = await fetch('https://api.coze.com/v3/chat', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${COZE_API_TOKEN}`,
@@ -102,15 +103,73 @@ export async function POST(request: NextRequest) {
     if (!cozeResponse.ok) {
       const errorData = await cozeResponse.json().catch(() => ({}));
       logger.error('Coze API returned error', null, { status: cozeResponse.status, errorData });
-      throw new Error(errorData.message || `Coze API error: ${cozeResponse.status}`);
+      throw new Error(errorData.msg || errorData.message || `Coze API error: ${cozeResponse.status}`);
     }
 
-    const response = await cozeResponse.json();
+    const chatResult = await cozeResponse.json();
+    
+    // API v3 returns in_progress status, need to poll for completion
+    if (chatResult.code !== 0) {
+      throw new Error(chatResult.msg || 'Coze API error');
+    }
+
+    const chatId = chatResult.data?.id;
+    const convId = chatResult.data?.conversation_id;
+    
+    // Poll for chat completion (max 30 seconds)
+    let chatStatus = chatResult.data?.status;
+    let pollAttempts = 0;
+    const maxPollAttempts = 30;
+    
+    while (chatStatus === 'in_progress' && pollAttempts < maxPollAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const statusResponse = await fetch(
+        `https://api.coze.com/v3/chat/retrieve?conversation_id=${convId}&chat_id=${chatId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${COZE_API_TOKEN}`,
+          },
+        }
+      );
+      
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        chatStatus = statusData.data?.status;
+      }
+      pollAttempts++;
+    }
+
+    // Get messages from completed chat
+    const messagesResponse = await fetch(
+      `https://api.coze.com/v3/chat/message/list?conversation_id=${convId}&chat_id=${chatId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${COZE_API_TOKEN}`,
+        },
+      }
+    );
+
+    let assistantMessage = 'Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.';
+    
+    if (messagesResponse.ok) {
+      const messagesData = await messagesResponse.json();
+      // Find the assistant's answer message
+      const answerMsg = messagesData.data?.find(
+        (msg: any) => msg.role === 'assistant' && msg.type === 'answer'
+      );
+      if (answerMsg?.content) {
+        assistantMessage = answerMsg.content;
+      }
+    }
+
     const apiDuration = Date.now() - apiStartTime;
 
     logger.externalApi({
       service: 'Coze',
-      endpoint: '/chat',
+      endpoint: '/v3/chat',
       method: 'POST',
       statusCode: 200,
       duration: apiDuration,
@@ -128,10 +187,11 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(
       {
-        conversationId: response.conversation_id,
-        message: response.message.content,
-        role: response.message.role,
-        contentType: response.message.content_type,
+        conversationId: convId,
+        chatId: chatId,
+        message: assistantMessage,
+        role: 'assistant',
+        contentType: 'text',
       },
       requestId
     );
