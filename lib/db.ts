@@ -1,7 +1,14 @@
 import { neon } from '@neondatabase/serverless';
 
+// Clean DATABASE_URL - remove any trailing whitespace or quotes
+function cleanDatabaseUrl(url: string | undefined): string {
+  if (!url) return '';
+  // Remove quotes and whitespace
+  return url.replace(/^["']|["']$/g, '').trim();
+}
+
 // Allow building without DATABASE_URL (will use fallback in API routes)
-const DATABASE_URL = process.env.DATABASE_URL || '';
+const DATABASE_URL = cleanDatabaseUrl(process.env.DATABASE_URL);
 
 export const sql = DATABASE_URL ? neon(DATABASE_URL) : null as any;
 

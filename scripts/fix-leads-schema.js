@@ -1,8 +1,18 @@
 import { neon } from '@neondatabase/serverless';
-import dotenv from 'dotenv';
+import fs from 'fs';
 
-dotenv.config({ path: '.env.local' });
-const sql = neon(process.env.DATABASE_URL);
+// Read .env.local manually to avoid dotenv line-wrap issues
+const envContent = fs.readFileSync('.env.local', 'utf8');
+const dbMatch = envContent.match(/DATABASE_URL=(.+)/);
+const DATABASE_URL = dbMatch ? dbMatch[1].trim() : null;
+
+if (!DATABASE_URL) {
+  console.error('❌ DATABASE_URL not found in .env.local');
+  process.exit(1);
+}
+
+console.log('📊 DB URL length:', DATABASE_URL.length);
+const sql = neon(DATABASE_URL);
 
 async function runMigration() {
   console.log('🚀 Running leads table migration...\n');
