@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 import { requireAuth } from '@/lib/auth/middleware';
 import { logger } from '@/lib/logger';
 import {
@@ -227,17 +227,17 @@ export async function GET(request: NextRequest) {
         stockInQty: parseInt(movementStats.rows.find((r: any) => r.transaction_type === 'stock-in')?.total_quantity || '0'),
         stockOutQty: parseInt(movementStats.rows.find((r: any) => r.transaction_type === 'stock-out')?.total_quantity || '0')
       },
-      byCategory: categoryStats.rows.map(row => ({
+      byCategory: categoryStats.rows.map((row: any) => ({
         category: row.category,
         itemCount: parseInt(row.item_count),
         totalQuantity: parseInt(row.total_quantity)
       })),
-      byLocation: locationStats.rows.map(row => ({
+      byLocation: locationStats.rows.map((row: any) => ({
         location: row.location,
         itemCount: parseInt(row.item_count),
         totalQuantity: parseInt(row.total_quantity)
       })),
-      lowStockAlerts: lowStock.rows.map(row => ({
+      lowStockAlerts: lowStock.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         sku: row.sku,
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
         unit: row.unit,
         location: row.location
       })),
-      topItems: topItems.rows.map(row => ({
+      topItems: topItems.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         sku: row.sku,
@@ -256,14 +256,14 @@ export async function GET(request: NextRequest) {
         quantity: parseInt(row.quantity),
         unit: row.unit
       })),
-      stockTrends: trends.rows.map(row => ({
+      stockTrends: trends.rows.map((row: any) => ({
         date: row.date,
         stockInCount: parseInt(row.stock_in_count || '0'),
         stockOutCount: parseInt(row.stock_out_count || '0'),
         stockInQty: parseInt(row.stock_in_qty || '0'),
         stockOutQty: parseInt(row.stock_out_qty || '0')
       })),
-      recentTransactions: recentTransactions.rows.map(row => ({
+      recentTransactions: recentTransactions.rows.map((row: any) => ({
         id: row.id,
         itemId: row.item_id,
         itemName: row.item_name,
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest) {
         notes: row.notes,
         createdAt: row.created_at
       })),
-      valueDistribution: valueStats.rows.map(row => ({
+      valueDistribution: valueStats.rows.map((row: any) => ({
         category: row.category,
         items: parseInt(row.items),
         totalQuantity: parseInt(row.total_quantity)

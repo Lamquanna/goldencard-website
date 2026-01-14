@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 import { requireAuth } from '@/lib/auth/middleware';
 import { logger } from '@/lib/logger';
 import { 
@@ -194,7 +194,7 @@ export async function GET(
       ORDER BY ip.payment_date DESC, ip.created_at DESC
     `;
 
-    const payments = result.rows.map(row => ({
+    const payments = result.rows.map((row: any) => ({
       id: row.id,
       amount: parseFloat(row.payment_amount),
       date: row.payment_date,

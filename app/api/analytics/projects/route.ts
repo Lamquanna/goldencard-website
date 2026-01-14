@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 import { requireAuth } from '@/lib/auth/middleware';
 import { logger } from '@/lib/logger';
 import {
@@ -261,23 +261,23 @@ export async function GET(request: NextRequest) {
         totalMembers: parseInt(memberStats.rows[0]?.total_members || '0'),
         avgProjectsPerMember: parseFloat(memberStats.rows[0]?.avg_projects_per_member || '0').toFixed(2)
       },
-      byStatus: statusDist.rows.map(row => ({
+      byStatus: statusDist.rows.map((row: any) => ({
         status: row.status,
         count: parseInt(row.count)
       })),
-      byPriority: priorityDist.rows.map(row => ({
+      byPriority: priorityDist.rows.map((row: any) => ({
         priority: row.priority,
         count: parseInt(row.count)
       })),
-      byProgress: progressDist.rows.map(row => ({
+      byProgress: progressDist.rows.map((row: any) => ({
         range: row.progress_range,
         count: parseInt(row.count)
       })),
-      completionTrend: completionTrend.rows.map(row => ({
+      completionTrend: completionTrend.rows.map((row: any) => ({
         month: row.month,
         completed: parseInt(row.completed_count)
       })),
-      recentProjects: recentProjects.rows.map(row => ({
+      recentProjects: recentProjects.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         status: row.status,
@@ -287,7 +287,7 @@ export async function GET(request: NextRequest) {
         progress: parseInt(row.progress || '0'),
         budget: parseFloat(row.budget || '0')
       })),
-      upcomingDeadlines: upcomingDeadlines.rows.map(row => ({
+      upcomingDeadlines: upcomingDeadlines.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         status: row.status,

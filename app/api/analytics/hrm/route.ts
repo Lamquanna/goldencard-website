@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 import { requireAuth } from '@/lib/auth/middleware';
 import { logger } from '@/lib/logger';
 import {
@@ -189,21 +189,21 @@ export async function GET(request: NextRequest) {
         rejected: parseInt(leaveStats.rows[0]?.rejected_requests || '0'),
         totalDaysTaken: parseFloat(leaveStats.rows[0]?.total_days_taken || '0')
       },
-      leavesByType: leaveTypes.rows.map(row => ({
+      leavesByType: leaveTypes.rows.map((row: any) => ({
         type: row.leave_type,
         count: parseInt(row.count),
         totalDays: parseFloat(row.total_days || '0')
       })),
-      departmentDistribution: departmentStats.rows.map(row => ({
+      departmentDistribution: departmentStats.rows.map((row: any) => ({
         department: row.department,
         employeeCount: parseInt(row.employee_count)
       })),
-      attendanceTrends: attendanceTrends.rows.map(row => ({
+      attendanceTrends: attendanceTrends.rows.map((row: any) => ({
         date: row.date,
         present: parseInt(row.employees_present),
         avgHours: parseFloat(row.avg_hours || '0').toFixed(2)
       })),
-      recentLeaveRequests: recentLeaves.rows.map(row => ({
+      recentLeaveRequests: recentLeaves.rows.map((row: any) => ({
         id: row.id,
         employeeId: row.employee_id,
         type: row.leave_type,

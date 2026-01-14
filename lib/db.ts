@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 
 // Clean DATABASE_URL - remove any trailing whitespace or quotes
 function cleanDatabaseUrl(url: string | undefined): string {
@@ -10,7 +10,35 @@ function cleanDatabaseUrl(url: string | undefined): string {
 // Allow building without DATABASE_URL (will use fallback in API routes)
 const DATABASE_URL = cleanDatabaseUrl(process.env.DATABASE_URL);
 
-export const sql = DATABASE_URL ? neon(DATABASE_URL) : null as any;
+// Create raw neon client
+const neonClient = DATABASE_URL ? neon(DATABASE_URL) : null;
+
+// Wrap neon to return {rows: [...]} format compatible with @vercel/postgres
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type QueryResult<T = any> = { rows: T[] };
+
+// Create a wrapper that converts neon's array result to {rows: []} format
+function createWrappedSql(client: NeonQueryFunction<false, false> | null) {
+  if (!client) return null as any;
+  
+  // Return a tagged template function that wraps results
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const wrappedSql = async <T = any>(
+    strings: TemplateStringsArray,
+    ...values: unknown[]
+  ): Promise<QueryResult<T>> => {
+    const result = await client(strings, ...values);
+    return { rows: result as T[] };
+  };
+  
+  return wrappedSql;
+}
+
+// Export wrapped sql for @vercel/postgres compatibility
+export const sql = createWrappedSql(neonClient);
+
+// Also export raw neon client for direct access if needed
+export const rawSql = neonClient;
 
 // Database initialization
 export async function initDatabase() {

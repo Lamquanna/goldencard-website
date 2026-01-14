@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { sql } from '@/lib/db';
 import { requireAuth } from '@/lib/auth/middleware';
 import { logger } from '@/lib/logger';
 import {
@@ -181,23 +181,23 @@ export async function GET(request: NextRequest) {
         paidAmount: parseFloat(invoiceStats.rows[0]?.paid_amount || '0'),
         outstandingAmount: parseFloat(invoiceStats.rows[0]?.outstanding_amount || '0')
       },
-      revenueByCategory: categoryResult.rows.map(row => ({
+      revenueByCategory: categoryResult.rows.map((row: any) => ({
         category: row.category,
         total: parseFloat(row.total),
         count: parseInt(row.count)
       })),
-      expensesByCategory: expenseResult.rows.map(row => ({
+      expensesByCategory: expenseResult.rows.map((row: any) => ({
         category: row.category,
         total: parseFloat(row.total),
         count: parseInt(row.count)
       })),
-      dailyTrends: trends.rows.map(row => ({
+      dailyTrends: trends.rows.map((row: any) => ({
         date: row.date,
         revenue: parseFloat(row.revenue || '0'),
         expenses: parseFloat(row.expenses || '0'),
         profit: parseFloat(row.revenue || '0') - parseFloat(row.expenses || '0')
       })),
-      recentTransactions: recent.rows.map(row => ({
+      recentTransactions: recent.rows.map((row: any) => ({
         id: row.id,
         type: row.type,
         category: row.category,
