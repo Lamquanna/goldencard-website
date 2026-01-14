@@ -1,47 +1,47 @@
 # 📋 DANH SÁCH TÀI KHOẢN HỆ THỐNG
 
-**Cập nhật:** 8 tháng 1, 2026
+**Cập nhật:** 16 tháng 1, 2026
 
 ---
 
 ## 🔑 Tài khoản Admin
 
-| Username | Password Mặc định | Vai trò | Email |
-|----------|-------------------|---------|-------|
+| Username | Password | Vai trò | Email |
+|----------|----------|---------|-------|
 | `admin` | `1` | Administrator | admin@goldenenergy.vn |
-
-**⚠️ Lưu ý:** Bắt buộc đổi mật khẩu lần đầu đăng nhập
 
 ---
 
-## 👥 Danh sách 12 Nhân viên (Team Data THẬT)
+## 👥 Danh sách 12 Nhân viên (ĐÃ IMPORT VÀO DATABASE)
+
+✅ **TẤT CẢ TÀI KHOẢN ĐÃ CÓ TRONG DATABASE - SẴN SÀNG ĐĂNG NHẬP**
 
 ### Leadership Team (Ban Lãnh đạo)
 
-| Mã NV | Tên | Chức vụ | Email | Password | Phòng ban |
-|-------|-----|---------|-------|----------|-----------|
-| **GES001** | Hà Hoàng Hà (Jimmy Ha) | Founder & CEO | jimmy.ha@goldenenergy.vn | `1` | Ban Giám đốc |
-| **GES002** | Trương Kim Anh (Rita Kim Anh) | CFO & Vice-CEO | rita.anh@goldenenergy.vn | `1` | Ban Giám đốc |
+| Username | Mã NV | Tên | Password | Email | Phòng ban |
+|----------|-------|-----|----------|-------|-----------|
+| **ges001** | GES001 | Hà Hoàng Hà (Jimmy Ha) | `1` | jimmy.ha@goldenenergy.vn | Ban Giám đốc |
+| **ges002** | GES002 | Trương Kim Anh (Rita Kim Anh) | `1` | rita.anh@goldenenergy.vn | Ban Giám đốc |
 
 ### Management Team (Ban Quản lý)
 
-| Mã NV | Tên | Chức vụ | Email | Password | Phòng ban |
-|-------|-----|---------|-------|----------|-----------|
-| **GES003** | Hà Huy Tuấn (Tuan Ha) | Trưởng phòng Giám sát Dự án | tuan.ha@goldenenergy.vn | `1` | Phòng Dự án |
-| **GES004** | Hồ Minh Tân (Tan Ho) | Trưởng phòng Kỹ thuật & Kỹ sư trưởng | tan.ho@goldenenergy.vn | `1` | Phòng Kỹ thuật |
-| **GES005** | Lê Quang Anh (Anh Le) | CTO & Trưởng phòng Phát triển Dự án | anh.le@goldenenergy.vn | `1` | Phòng Phát triển Dự án |
-| **GES006** | Nguyễn Thị Thu (Thu Nguyen) | Trưởng phòng Kế toán | thu.nguyen@goldenenergy.vn | `1` | Phòng Kế toán |
-| **GES007** | Phạm Tấn Lễ (Le Pham) | Trưởng bộ phận Vận chuyển | le.pham@goldenenergy.vn | `1` | Bộ phận Vận chuyển |
-| **GES008** | Nguyễn Minh Nguyệt (Nguyet Nguyen) | Trưởng phòng Kinh doanh | nguyet.nguyen@goldenenergy.vn | `1` | Phòng Kinh doanh |
-| **GES009** | Lưu Thị Duyên (Cristina Lu) | Trưởng bộ phận Marketing | cristina.lu@goldenenergy.vn | `1` | Bộ phận Marketing |
+| Username | Mã NV | Tên | Password | Email | Phòng ban |
+|----------|-------|-----|----------|-------|-----------|
+| **ges003** | GES003 | Hà Huy Tuấn (Tuan Ha) | `1` | tuan.ha@goldenenergy.vn | Phòng Dự án |
+| **ges004** | GES004 | Hồ Minh Tân (Tan Ho) | `1` | tan.ho@goldenenergy.vn | Phòng Kỹ thuật |
+| **ges005** | GES005 | Lê Quang Anh (Anh Le) | `1` | anh.le@goldenenergy.vn | Phòng Phát triển Dự án |
+| **ges006** | GES006 | Nguyễn Thị Thu (Thu Nguyen) | `1` | thu.nguyen@goldenenergy.vn | Phòng Kế toán |
+| **ges007** | GES007 | Phạm Tấn Lễ (Le Pham) | `1` | le.pham@goldenenergy.vn | Bộ phận Vận chuyển |
+| **ges008** | GES008 | Nguyễn Minh Nguyệt (Nguyet Nguyen) | `1` | nguyet.nguyen@goldenenergy.vn | Phòng Kinh doanh |
+| **ges009** | GES009 | Lưu Thị Duyên (Cristina Lu) | `1` | cristina.lu@goldenenergy.vn | Bộ phận Marketing |
 
 ### Engineering Team (Đội Kỹ thuật)
 
-| Mã NV | Tên | Chức vụ | Email | Password | Phòng ban |
-|-------|-----|---------|-------|----------|-----------|
-| **GES010** | Đào Hữu Giàu (Giau Dao) | Kỹ sư | giau.dao@goldenenergy.vn | `1` | Phòng Kỹ thuật |
-| **GES011** | Trần Văn Son (Son Tran) | Kỹ sư | son.tran@goldenenergy.vn | `1` | Phòng Kỹ thuật |
-| **GES012** | Nguyễn Minh Duy (Duy Nguyen) | Kỹ sư | duy.nguyen@goldenenergy.vn | `1` | Phòng Kỹ thuật |
+| Username | Mã NV | Tên | Password | Email | Phòng ban |
+|----------|-------|-----|----------|-------|-----------|
+| **ges010** | GES010 | Đào Hữu Giàu (Giau Dao) | `1` | giau.dao@goldenenergy.vn | Phòng Kỹ thuật |
+| **ges011** | GES011 | Trần Văn Son (Son Tran) | `1` | son.tran@goldenenergy.vn | Phòng Kỹ thuật |
+| **ges012** | GES012 | Nguyễn Minh Duy (Duy Nguyen) | `1` | duy.nguyen@goldenenergy.vn | Phòng Kỹ thuật |
 
 ---
 

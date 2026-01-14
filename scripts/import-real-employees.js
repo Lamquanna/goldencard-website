@@ -31,6 +31,16 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
+// Clean DATABASE_URL - remove quotes if wrapped by dotenv
+const cleanDatabaseUrl = (url) => {
+  if (!url) return '';
+  return url.replace(/^["']|["']$/g, '').trim();
+};
+
+const connectionString = cleanDatabaseUrl(DATABASE_URL);
+
+console.log('🔗 Connecting to:', connectionString.substring(0, 40) + '...');
+
 // Real employee data from team-data.ts
 const realEmployees = [
   {
@@ -145,7 +155,7 @@ const realEmployees = [
 
 async function importRealEmployees() {
   const pool = new Pool({
-    connectionString: DATABASE_URL,
+    connectionString: connectionString,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : true
   });
 
