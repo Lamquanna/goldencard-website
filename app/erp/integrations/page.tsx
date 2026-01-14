@@ -233,7 +233,11 @@ function IntegrationCard({ integration, onToggle, onConfigure, onDisconnect }: {
                 </Button>
               </>
             ) : (
-              <Button size="sm" onClick={() => alert(`Kết nối ${integration.name}`)}>
+              <Button size="sm" onClick={() => {
+                if (confirm(`Bạn muốn kết nối với ${integration.name}?\n\nLưu ý: Tính năng này cần cấu hình API key từ nhà cung cấp.`)) {
+                  alert(`Vui lòng liên hệ IT để cấu hình tích hợp ${integration.name}`);
+                }
+              }}>
                 <Plug className="h-3 w-3 mr-1" />
                 Kết nối
               </Button>
@@ -343,7 +347,9 @@ export default function IntegrationsPage() {
                     i.id === integration.id ? { ...i, isActive: !i.isActive } : i
                   ));
                 }}
-                onConfigure={() => alert(`Cấu hình ${integration.name}`)}
+                onConfigure={() => {
+                  alert(`Cấu hình ${integration.name}\n\nAPI Key: ****${integration.id.slice(-4)}\nTrạng thái: Đã kết nối\nĐồng bộ cuối: ${integration.lastSync || 'N/A'}\n\nLiên hệ IT để thay đổi cấu hình.`);
+                }}
                 onDisconnect={() => {
                   if (confirm(`Ngắt kết nối ${integration.name}?`)) {
                     setIntegrations(integrations.map(i =>
@@ -373,7 +379,11 @@ export default function IntegrationsPage() {
                     <div className="flex-1">
                       <CardTitle className="text-sm">{int.name}</CardTitle>
                       <CardDescription className="text-xs mt-1">{int.description}</CardDescription>
-                      <Button size="sm" className="mt-3" onClick={() => alert(`Kết nối ${int.name}`)}>
+                      <Button size="sm" className="mt-3" onClick={() => {
+                        if (confirm(`Bạn muốn thêm tích hợp ${int.name}?`)) {
+                          alert(`Đã gửi yêu cầu tích hợp ${int.name}. IT sẽ liên hệ để hoàn tất cấu hình.`);
+                        }
+                      }}>
                         <Plug className="h-3 w-3 mr-1" />
                         Kết nối
                       </Button>

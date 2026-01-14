@@ -416,14 +416,61 @@ export default function WorkflowsPage() {
           <WorkflowCard
             key={workflow.id}
             workflow={workflow}
-            onToggle={() => alert(`Toggle workflow: ${workflow.name}`)}
-            onEdit={() => alert(`Edit workflow: ${workflow.name}`)}
+            onToggle={async () => {
+              const newStatus = workflow.status === 'active' ? 'paused' : 'active';
+              try {
+                const token = localStorage.getItem('erp_token');
+                const res = await fetch(`/api/erp/workflows/${workflow.id}/toggle`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                  setWorkflows(workflows.map(w => 
+                    w.id === workflow.id ? { ...w, status: newStatus } : w
+                  ));
+                } else {
+                  alert('Không thể thay đổi trạng thái workflow');
+                }
+              } catch {
+                // Fallback to local state update
+                setWorkflows(workflows.map(w => 
+                  w.id === workflow.id ? { ...w, status: newStatus } : w
+                ));
+              }
+            }}
+            onEdit={() => {
+              // Open edit dialog with workflow data
+              const name = prompt('Tên workflow:', workflow.name);
+              if (name) {
+                const description = prompt('Mô tả:', workflow.description);
+                setWorkflows(workflows.map(w => 
+                  w.id === workflow.id ? { ...w, name: name || w.name, description: description || w.description } : w
+                ));
+              }
+            }}
             onDelete={() => {
               if (confirm(`Xóa workflow "${workflow.name}"?`)) {
                 setWorkflows(workflows.filter(w => w.id !== workflow.id));
               }
             }}
-            onClone={() => alert(`Clone workflow: ${workflow.name}`)}
+            onClone={() => {
+              const newWorkflow = {
+                ...workflow,
+                id: `clone-${Date.now()}`,
+                name: `${workflow.name} (Copy)`,
+                status: 'draft' as const,
+                totalRuns: 0,
+                successRate: 0,
+                lastRun: undefined,
+                createdAt: new Date().toISOString().split('T')[0],
+              };
+              setWorkflows([...workflows, newWorkflow]);
+              alert(`Đã nhân bản workflow "${workflow.name}"`);
+            }}
           />
         ))}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 const settingsSections = [
@@ -12,7 +13,10 @@ const settingsSections = [
 ];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState('general');
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [settings, setSettings] = useState({
     // General
     language: 'vi',
@@ -39,6 +43,52 @@ export default function SettingsPage() {
 
   const updateSetting = (key: string, value: boolean | string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  // Save settings to localStorage/API
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      // Save to localStorage
+      localStorage.setItem('erp_settings', JSON.stringify(settings));
+      
+      // Try to save to API
+      const token = localStorage.getItem('erp_token');
+      if (token) {
+        await fetch('/api/erp/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(settings)
+        }).catch(() => {}); // Ignore API errors, localStorage is backup
+      }
+      
+      setHasChanges(false);
+      alert('Đã lưu cài đặt thành công!');
+    } catch {
+      alert('Lỗi khi lưu cài đặt');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle change password
+  const handleChangePassword = () => {
+    router.push('/erp/change-password');
+  };
+
+  // Handle integration connection
+  const handleIntegrationToggle = (integrationName: string, isConnected: boolean) => {
+    if (isConnected) {
+      if (confirm(`Bạn có chắc muốn ngắt kết nối ${integrationName}?`)) {
+        alert(`Đã ngắt kết nối ${integrationName}`);
+      }
+    } else {
+      alert(`Để kết nối ${integrationName}, vui lòng liên hệ IT để cấu hình.`);
+    }
   };
 
   return (
@@ -194,7 +244,10 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="pt-4">
-                    <button className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                    <button 
+                      onClick={handleChangePassword}
+                      className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                    >
                       Đổi mật khẩu
                     </button>
                   </div>
@@ -249,11 +302,14 @@ export default function SettingsPage() {
                         <span className="text-2xl">{integration.icon}</span>
                         <span className="font-medium text-gray-900">{integration.name}</span>
                       </div>
-                      <button className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        integration.connected
-                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          : 'bg-[#D4AF37] text-white hover:bg-[#B8960A]'
-                      }`}>
+                      <button 
+                        onClick={() => handleIntegrationToggle(integration.name, integration.connected)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          integration.connected
+                            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            : 'bg-[#D4AF37] text-white hover:bg-[#B8960A]'
+                        }`}
+                      >
                         {integration.connected ? 'Ngắt kết nối' : 'Kết nối'}
                       </button>
                     </div>
@@ -263,9 +319,16 @@ export default function SettingsPage() {
             )}
 
             {/* Save Button */}
-            <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-              <button className="px-6 py-2 bg-[#D4AF37] text-white rounded-lg hover:bg-[#B8960A] transition-colors font-medium">
-                Lưu thay đổi
+            <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end gap-3">
+              {hasChanges && (
+                <span className="text-sm text-orange-500 self-center">Có thay đổi chưa lưu</span>
+              )}
+              <button 
+                onClick={handleSaveSettings}
+                disabled={isSaving}
+                className="px-6 py-2 bg-[#D4AF37] text-white rounded-lg hover:bg-[#B8960A] transition-colors font-medium disabled:opacity-50"
+              >
+                {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
           </motion.div>

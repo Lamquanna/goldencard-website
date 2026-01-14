@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   FileText,
   Folder,
@@ -19,11 +19,28 @@ import {
   HelpCircle,
   X,
   Info,
+  Download,
+  Share2,
+  Trash2,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // Hướng dẫn sử dụng
 const helpGuide = {
@@ -144,9 +161,109 @@ const typeColors = {
 export default function DocumentsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showHelp, setShowHelp] = useState(false);
+  const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [folders, setFolders] = useState(mockFolders);
+  const [documents, setDocuments] = useState(mockDocuments);
+  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file upload
+  const handleUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const newDoc = {
+        id: `doc-${Date.now()}`,
+        name: file.name,
+        type: getFileType(file.name),
+        size: formatFileSize(file.size),
+        modified: new Date().toISOString().split('T')[0],
+        owner: { name: 'Bạn', initials: 'ME' },
+        starred: false,
+      };
+      setDocuments([newDoc, ...documents]);
+      alert(`Đã tải lên: ${file.name}`);
+    }
+  };
+
+  const getFileType = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (['xlsx', 'xls', 'csv'].includes(ext || '')) return 'spreadsheet';
+    if (['pptx', 'ppt'].includes(ext || '')) return 'presentation';
+    if (['pdf'].includes(ext || '')) return 'pdf';
+    if (['zip', 'rar', '7z'].includes(ext || '')) return 'archive';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return 'image';
+    return 'default';
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  // Handle create new folder
+  const handleCreateFolder = () => {
+    if (newFolderName.trim()) {
+      const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-pink-500', 'bg-orange-500'];
+      const newFolder = {
+        id: `folder-${Date.now()}`,
+        name: newFolderName.trim(),
+        count: 0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      };
+      setFolders([...folders, newFolder]);
+      setNewFolderName('');
+      setShowNewFolderDialog(false);
+      alert(`Đã tạo thư mục: ${newFolder.name}`);
+    }
+  };
+
+  // Toggle star
+  const handleToggleStar = (docId: string) => {
+    setDocuments(documents.map(d => 
+      d.id === docId ? { ...d, starred: !d.starred } : d
+    ));
+  };
+
+  // Delete document
+  const handleDeleteDoc = (docId: string) => {
+    if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+      setDocuments(documents.filter(d => d.id !== docId));
+    }
+  };
+
+  // Download document (mock)
+  const handleDownload = (docName: string) => {
+    alert(`Đang tải xuống: ${docName}`);
+  };
+
+  // Share document (mock)
+  const handleShare = (docName: string) => {
+    alert(`Đã copy link chia sẻ: ${docName}`);
+  };
+
+  // Filter documents by search
+  const filteredDocuments = documents.filter(d => 
+    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="p-6 space-y-6 bg-white min-h-screen">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.jpg,.jpeg,.png,.gif"
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -165,16 +282,36 @@ export default function DocumentsPage() {
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="border-gray-200">
+          <Button variant="outline" className="border-gray-200" onClick={handleUpload}>
             <Upload className="w-4 h-4 mr-2" />
             Tải lên
           </Button>
-          <Button className="bg-[#D4AF37] hover:bg-[#B8960A] text-white">
+          <Button className="bg-[#D4AF37] hover:bg-[#B8960A] text-white" onClick={() => setShowNewFolderDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Thư mục mới
           </Button>
         </div>
       </div>
+
+      {/* New Folder Dialog */}
+      <Dialog open={showNewFolderDialog} onOpenChange={setShowNewFolderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tạo thư mục mới</DialogTitle>
+            <DialogDescription>Nhập tên cho thư mục mới</DialogDescription>
+          </DialogHeader>
+          <Input
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            placeholder="Tên thư mục..."
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewFolderDialog(false)}>Hủy</Button>
+            <Button onClick={handleCreateFolder}>Tạo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Help Guide */}
       {showHelp && (
@@ -233,6 +370,8 @@ export default function DocumentsPage() {
           <Input 
             placeholder="Tìm kiếm tài liệu..." 
             className="pl-10 bg-white border-gray-200"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
@@ -259,8 +398,15 @@ export default function DocumentsPage() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Thư mục</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {mockFolders.map((folder) => (
-            <Card key={folder.id} className="bg-white border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+          {folders.map((folder) => (
+            <Card 
+              key={folder.id} 
+              className="bg-white border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => {
+                setCurrentFolder(folder.id);
+                alert(`Mở thư mục: ${folder.name}`);
+              }}
+            >
               <CardContent className="p-4">
                 <div className={`w-12 h-12 rounded-lg ${folder.color} bg-opacity-20 flex items-center justify-center mb-3`}>
                   <Folder className={`w-6 h-6 ${folder.color.replace('bg-', 'text-')}`} />
@@ -279,7 +425,7 @@ export default function DocumentsPage() {
         
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockDocuments.map((doc) => {
+            {filteredDocuments.map((doc) => {
               const IconComponent = typeIcons[doc.type as keyof typeof typeIcons] || typeIcons.default;
               const iconColor = typeColors[doc.type as keyof typeof typeColors] || typeColors.default;
               
@@ -291,12 +437,35 @@ export default function DocumentsPage() {
                         <IconComponent className={`w-6 h-6 ${iconColor}`} />
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); handleToggleStar(doc.id); }}
+                        >
                           <Star className={`w-4 h-4 ${doc.starred ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleDownload(doc.name)}>
+                              <Download className="w-4 h-4 mr-2" />
+                              Tải xuống
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShare(doc.name)}>
+                              <Share2 className="w-4 h-4 mr-2" />
+                              Chia sẻ
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteDoc(doc.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                     <h3 className="font-medium text-gray-900 truncate mb-1">{doc.name}</h3>
@@ -332,7 +501,7 @@ export default function DocumentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockDocuments.map((doc) => {
+                  {filteredDocuments.map((doc) => {
                     const IconComponent = typeIcons[doc.type as keyof typeof typeIcons] || typeIcons.default;
                     const iconColor = typeColors[doc.type as keyof typeof typeColors] || typeColors.default;
                     
@@ -358,9 +527,31 @@ export default function DocumentsPage() {
                         <td className="py-3 px-4 text-gray-600">{doc.modified}</td>
                         <td className="py-3 px-4 text-gray-600">{doc.size}</td>
                         <td className="py-3 px-4 text-right">
-                          <Button variant="ghost" size="icon" className="text-gray-400">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-gray-400">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleDownload(doc.name)}>
+                                <Download className="w-4 h-4 mr-2" />
+                                Tải xuống
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleShare(doc.name)}>
+                                <Share2 className="w-4 h-4 mr-2" />
+                                Chia sẻ
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleStar(doc.id)}>
+                                <Star className="w-4 h-4 mr-2" />
+                                {doc.starred ? 'Bỏ đánh dấu' : 'Đánh dấu'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteDoc(doc.id)} className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Xóa
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </td>
                       </tr>
                     );
