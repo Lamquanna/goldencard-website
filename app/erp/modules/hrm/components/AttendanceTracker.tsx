@@ -599,7 +599,10 @@ export function AttendanceTracker({
       alert('✅ Check-in thành công!')
     } catch (error: any) {
       console.error('Check-in error:', error)
-      alert('❌ Check-in thất bại: ' + error.message)
+      const errorMessage = typeof error === 'string' 
+        ? error 
+        : error?.message || error?.error || JSON.stringify(error) || 'Lỗi không xác định'
+      alert('❌ Check-in thất bại: ' + errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -649,7 +652,10 @@ export function AttendanceTracker({
       alert('✅ Check-out thành công!')
     } catch (error: any) {
       console.error('Check-out error:', error)
-      alert('❌ Check-out thất bại: ' + error.message)
+      const errorMessage = typeof error === 'string' 
+        ? error 
+        : error?.message || error?.error || JSON.stringify(error) || 'Lỗi không xác định'
+      alert('❌ Check-out thất bại: ' + errorMessage)
     } finally {
       setIsLoading(false)
     }
