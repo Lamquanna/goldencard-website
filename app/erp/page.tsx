@@ -2,13 +2,28 @@
 
 // =============================================================================
 // HOME PLATFORM - Dashboard Page
-// Main dashboard with module overview - Using real data from API
+// Main dashboard with module overview - Using real data from API + Analytics Charts
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAppShell } from './components/AppShell';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// Chart colors
+const CHART_COLORS = {
+  revenue: '#10b981',
+  expenses: '#ef4444',
+  profit: '#D4AF37',
+  primary: '#D4AF37',
+  secondary: '#3b82f6',
+  success: '#10b981',
+  warning: '#f59e0b',
+  danger: '#ef4444',
+};
+
+const PIE_COLORS = ['#D4AF37', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 // Icons
 const Icons = {
@@ -174,6 +189,13 @@ export default function HomePage() {
   const { user, activeModules } = useAppShell();
   const [greeting, setGreeting] = useState('');
   const [totalEmployees, setTotalEmployees] = useState(0);
+  
+  // Analytics state
+  const [financeData, setFinanceData] = useState<any>(null);
+  const [hrmData, setHrmData] = useState<any>(null);
+  const [inventoryData, setInventoryData] = useState<any>(null);
+  const [projectsData, setProjectsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   // Fetch real employee count from API
   useEffect(() => {
@@ -185,6 +207,31 @@ export default function HomePage() {
       .catch(() => setTotalEmployees(0));
   }, []);
 
+  // Fetch analytics data
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const [finance, hrm, inventory, projects] = await Promise.all([
+          fetch('/api/analytics/finance?period=month').then(r => r.json()),
+          fetch('/api/analytics/hrm?period=month').then(r => r.json()),
+          fetch('/api/analytics/inventory').then(r => r.json()),
+          fetch('/api/analytics/projects').then(r => r.json()),
+        ]);
+
+        setFinanceData(finance.data);
+        setHrmData(hrm.data);
+        setInventoryData(inventory.data);
+        setProjectsData(projects.data);
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Chào buổi sáng');
@@ -192,47 +239,49 @@ export default function HomePage() {
     else setGreeting('Chào buổi tối');
   }, []);
 
-  // KPI data - based on real company metrics
+  // KPI data - Real-time analytics from API
   const kpiData = [
     {
       title: 'Tổng Doanh thu',
-      value: '₫12.5 tỷ',
-      change: 15.7,
-      changeLabel: 'so với tháng trước',
+      value: financeData?.summary?.totalRevenue 
+        ? `₫${(financeData.summary.totalRevenue / 1000000000).toFixed(1)} tỷ`
+        : '₫0',
+      change: financeData?.summary?.profitMargin || 0,
+      changeLabel: 'lợi nhuận ròng',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
       link: '/erp/finance',
     },
     {
-      title: 'Leads mới',
-      value: '156',
-      change: 23.4,
-      changeLabel: 'tuần này',
+      title: 'Nhân viên',
+      value: hrmData?.employees?.total?.toString() || totalEmployees.toString(),
+      change: hrmData?.attendance?.attendanceRate || 0,
+      changeLabel: 'tỷ lệ check-in hôm nay',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      link: '/erp/crm/leads',
+      link: '/erp/hrm',
     },
     {
       title: 'Dự án hoạt động',
-      value: '12',
-      change: 8.2,
-      changeLabel: 'so với quý trước',
+      value: projectsData?.summary?.activeProjects?.toString() || '0',
+      change: projectsData?.tasks?.completionRate || 0,
+      changeLabel: 'tasks hoàn thành',
       icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       link: '/erp/projects',
     },
     {
-      title: 'Tasks hoàn thành',
-      value: '89%',
-      change: 5.3,
-      changeLabel: 'tháng này',
-      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+      title: 'Kho hàng',
+      value: inventoryData?.summary?.totalItems?.toString() || '0',
+      change: inventoryData?.lowStockAlerts?.length || 0,
+      changeLabel: 'sản phẩm sắp hết',
+      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
-      link: '/erp/tasks',
+      link: '/erp/inventory',
     },
   ];
 
@@ -383,6 +432,137 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Analytics Charts */}
+      {!loading && (financeData || hrmData || inventoryData || projectsData) && (
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold text-gray-900">Phân tích dữ liệu</h2>
+
+          {/* Finance Charts */}
+          {financeData && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Doanh thu & Chi phí (30 ngày)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={financeData.dailyTrends || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip formatter={(value: any) => `₫${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="revenue" stroke={CHART_COLORS.revenue} name="Doanh thu" strokeWidth={2} />
+                    <Line type="monotone" dataKey="expenses" stroke={CHART_COLORS.expenses} name="Chi phí" strokeWidth={2} />
+                    <Line type="monotone" dataKey="profit" stroke={CHART_COLORS.profit} name="Lợi nhuận" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Doanh thu theo danh mục</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={financeData.revenueByCategory || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry: any) => `${entry.category}: ${(entry.percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="total"
+                    >
+                      {(financeData.revenueByCategory || []).map((_: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: any) => `₫${value.toLocaleString()}`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* HRM & Inventory Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {hrmData && (
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Chấm công (30 ngày)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={hrmData.attendanceTrends || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="present" stroke={CHART_COLORS.success} name="Có mặt" strokeWidth={2} />
+                    <Line type="monotone" dataKey="avgHours" stroke={CHART_COLORS.primary} name="Giờ TB" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {inventoryData && (
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Nhập xuất kho (30 ngày)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={inventoryData.stockTrends || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="stockInQty" fill={CHART_COLORS.success} name="Nhập kho" />
+                    <Bar dataKey="stockOutQty" fill={CHART_COLORS.danger} name="Xuất kho" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+
+          {/* Projects Chart */}
+          {projectsData && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Trạng thái dự án</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={projectsData.byStatus || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry: any) => `${entry.status}: ${(entry.percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                      nameKey="status"
+                    >
+                      {(projectsData.byStatus || []).map((_: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-semibold text-gray-900 mb-4">Dự án hoàn thành (6 tháng)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={projectsData.completionTrend || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="completed" fill={CHART_COLORS.primary} name="Hoàn thành" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Quick Access */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
