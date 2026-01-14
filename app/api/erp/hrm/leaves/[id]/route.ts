@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { requireAuth } from '@/lib/auth/middleware';
+import { createErrorResponse, createSuccessResponse, generateRequestId, ErrorCodes } from '@/lib/api/error-handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,15 +10,27 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  
+  // Verify authentication
+  const authResult = requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  const { user } = authResult;
+  
   try {
     const { id } = await params;
     const body = await request.json();
-    const { action, approverId, rejectReason } = body;
+    const { action, rejectReason } = body;
 
     if (!action || !['approve', 'reject', 'cancel'].includes(action)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid action' },
-        { status: 400 }
+      return createErrorResponse(
+        'Invalid action',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        { validActions: ['approve', 'reject', 'cancel'] },
+        requestId
       );
     }
 
@@ -59,10 +73,14 @@ export async function PUT(
     }
 
     if (action === 'approve') {
-      if (!approverId) {
-        return NextResponse.json(
-          { success: false, error: 'Approver ID required' },
-          { status: 400 }
+      // ✅ Verify user has manager or director role
+      if (!user.role || !['manager', 'director', 'admin'].includes(user.role.toLowerCase())) {
+        return createErrorResponse(
+          'Only managers, directors, or admins can approve leave requests',
+          ErrorCodes.FORBIDDEN,
+          403,
+          { userRole: user.role },
+          requestId
         );
       }
 
@@ -83,73 +101,102 @@ export async function PUT(
           )
       `;
 
-      // Update leave request
-      await sql`
-        UPDATE leave_requests
-        SET 
-          status = 'approved',
-          approved_by = ${approverId},
-          approved_at = NOW(),
-          updated_at = NOW()
-        WHERE id = ${id}
-      `;
-
-      // Update leave balance if annual leave
-      if (request_data.leave_type === 'annual') {
-        await sql`
-          UPDATE leave_balances
+      // ✅ Use transaction to ensure atomic update of request + balance
+      await sql.begin(async (transaction: any) => {
+        // Update leave request
+        await transaction`
+          UPDATE leave_requests
           SET 
-            annual_used = annual_used + ${request_data.total_days},
-            annual_remaining = annual_remaining - ${request_data.total_days},
+            status = 'approved',
+            approved_by = ${user.userId},
+            approved_at = NOW(),
             updated_at = NOW()
-          WHERE employee_id = ${request_data.employee_id}
-            AND year = EXTRACT(YEAR FROM ${request_data.start_date}::date)
+          WHERE id = ${id}
         `;
-      } else if (request_data.leave_type === 'sick') {
-        await sql`
-          UPDATE leave_balances
-          SET 
-            sick_used = sick_used + ${request_data.total_days},
-            sick_remaining = sick_remaining - ${request_data.total_days},
-            updated_at = NOW()
-          WHERE employee_id = ${request_data.employee_id}
-            AND year = EXTRACT(YEAR FROM ${request_data.start_date}::date)
-        `;
-      }
 
-      return NextResponse.json({
-        success: true,
-        message: 'Leave request approved',
-        warnings: projectConflicts.length > 0 ? {
-          hasProjectConflict: true,
-          projects: projectConflicts
-        } : null
+        // ✅ Deduct leave balance if annual or sick leave
+        if (request_data.leave_type === 'annual') {
+          const balanceResult = await transaction`
+            UPDATE leave_balances
+            SET 
+              annual_used = annual_used + ${request_data.total_days},
+              annual_remaining = annual_remaining - ${request_data.total_days},
+              updated_at = NOW()
+            WHERE employee_id = ${request_data.employee_id}
+              AND year = EXTRACT(YEAR FROM ${request_data.start_date}::date)
+              AND annual_remaining >= ${request_data.total_days}
+            RETURNING *
+          `;
+          
+          if (balanceResult.length === 0) {
+            throw new Error('Insufficient annual leave balance');
+          }
+        } else if (request_data.leave_type === 'sick') {
+          const balanceResult = await transaction`
+            UPDATE leave_balances
+            SET 
+              sick_used = sick_used + ${request_data.total_days},
+              sick_remaining = sick_remaining - ${request_data.total_days},
+              updated_at = NOW()
+            WHERE employee_id = ${request_data.employee_id}
+              AND year = EXTRACT(YEAR FROM ${request_data.start_date}::date)
+              AND sick_remaining >= ${request_data.total_days}
+            RETURNING *
+          `;
+          
+          if (balanceResult.length === 0) {
+            throw new Error('Insufficient sick leave balance');
+          }
+        }
       });
+
+      return createSuccessResponse(
+        {
+          message: 'Leave request approved successfully',
+          leaveId: id,
+          approvedBy: user.email,
+          warnings: projectConflicts.length > 0 ? {
+            hasProjectConflict: true,
+            projects: projectConflicts
+          } : null
+        },
+        requestId
+      );
     }
 
     if (action === 'reject') {
-      if (!approverId) {
-        return NextResponse.json(
-          { success: false, error: 'Approver ID required' },
-          { status: 400 }
+      // ✅ Verify user has manager or director role
+      if (!user.role || !['manager', 'director', 'admin'].includes(user.role.toLowerCase())) {
+        return createErrorResponse(
+          'Only managers, directors, or admins can reject leave requests',
+          ErrorCodes.FORBIDDEN,
+          403,
+          { userRole: user.role },
+          requestId
         );
       }
 
+      // ✅ Just update status - no balance deduction for rejected requests
       await sql`
         UPDATE leave_requests
         SET 
           status = 'rejected',
-          approved_by = ${approverId},
+          approved_by = ${user.userId},
           approved_at = NOW(),
-          reject_reason = ${rejectReason || ''},
+          reject_reason = ${rejectReason || 'No reason provided'},
           updated_at = NOW()
         WHERE id = ${id}
       `;
 
-      return NextResponse.json({
-        success: true,
-        message: 'Leave request rejected'
-      });
+      return createSuccessResponse(
+        {
+          message: 'Leave request rejected successfully',
+          leaveId: id,
+          rejectedBy: user.email,
+          reason: rejectReason || 'No reason provided'
+        },
+        requestId
+      );
     }
 
   } catch (error: any) {

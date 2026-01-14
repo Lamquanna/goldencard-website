@@ -5,8 +5,21 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { createClient } from '@/lib/supabase/server';
 import { mockSupabase } from '@/lib/supabase/mock';
 import type { CreateLeadEventInput } from '@/lib/types/crm';
+import { logger } from '@/lib/logger';
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  generateRequestId,
+  ErrorCodes,
+} from '@/lib/api/error-handler';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     // Use mock data for local testing
     const supabase = mockSupabase as any;
@@ -15,7 +28,20 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/events',
+        statusCode: 401,
+        duration: Date.now() - startTime,
+        requestId,
+      });
+      return createErrorResponse(
+        'Unauthorized',
+        ErrorCodes.UNAUTHORIZED,
+        401,
+        undefined,
+        requestId
+      );
     }
 
     // Check role
@@ -26,14 +52,37 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!userData || !['admin', 'sales'].includes(userData.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/events',
+        statusCode: 403,
+        duration: Date.now() - startTime,
+        requestId,
+      });
+      return createErrorResponse(
+        'Forbidden',
+        ErrorCodes.FORBIDDEN,
+        403,
+        undefined,
+        requestId
+      );
     }
 
     // Validate
     if (!body.lead_id || !body.event_type || !body.description) {
-      return NextResponse.json(
-        { error: 'lead_id, event_type, and description are required' },
-        { status: 400 }
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/events',
+        statusCode: 400,
+        duration: Date.now() - startTime,
+        requestId,
+      });
+      return createErrorResponse(
+        'lead_id, event_type, and description are required',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        undefined,
+        requestId
       );
     }
 
@@ -51,13 +100,47 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (eventError) {
-      console.error('Error creating event:', eventError);
-      return NextResponse.json({ error: 'Failed to create event' }, { status: 500 });
+      logger.error('Error creating event', { error: eventError, requestId });
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/events',
+        statusCode: 500,
+        duration: Date.now() - startTime,
+        requestId,
+      });
+      return createErrorResponse(
+        'Failed to create event',
+        ErrorCodes.DATABASE_ERROR,
+        500,
+        undefined,
+        requestId
+      );
     }
 
-    return NextResponse.json({ success: true, event }, { status: 201 });
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/crm/events',
+      statusCode: 201,
+      duration: Date.now() - startTime,
+      requestId,
+    });
+    return createSuccessResponse({ event }, requestId);
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    logger.error('API error', { error, requestId });
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/crm/events',
+      statusCode: 500,
+      duration: Date.now() - startTime,
+      requestId,
+    });
+    return createErrorResponse(
+      'Internal server error',
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
+    );
   }
 }
+

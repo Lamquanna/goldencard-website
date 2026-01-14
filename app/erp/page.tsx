@@ -2,14 +2,13 @@
 
 // =============================================================================
 // HOME PLATFORM - Dashboard Page
-// Main dashboard with module overview - Using real company data
+// Main dashboard with module overview - Using real data from API
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAppShell } from './components/AppShell';
-import { teamData } from '@/lib/team-data';
 
 // Icons
 const Icons = {
@@ -174,9 +173,17 @@ function ActivityItem({ type, title, description, time, user }: ActivityItemProp
 export default function HomePage() {
   const { user, activeModules } = useAppShell();
   const [greeting, setGreeting] = useState('');
+  const [totalEmployees, setTotalEmployees] = useState(0);
 
-  // Get total employees from real data
-  const totalEmployees = teamData.length;
+  // Fetch real employee count from API
+  useEffect(() => {
+    fetch('/api/erp/employees')
+      .then(res => res.json())
+      .then(data => {
+        setTotalEmployees(data.employees?.length || 0);
+      })
+      .catch(() => setTotalEmployees(0));
+  }, []);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -229,12 +236,12 @@ export default function HomePage() {
     },
   ];
 
-  // Activity data - using real employee names from team-data
+  // Activity data - hardcoded for demo (will connect to real API later)
   const activities = [
     { type: 'lead', title: 'Lead mới từ website', description: 'Công ty ABC Solar đã gửi form liên hệ', time: '5 phút trước', user: 'Hệ thống' },
-    { type: 'task', title: 'Task hoàn thành', description: 'Khảo sát mái nhà xưởng XYZ hoàn tất', time: '15 phút trước', user: teamData[2]?.nameVi || 'Hà Huy Tuấn' },
-    { type: 'project', title: 'Milestone đạt được', description: 'Solar Farm Bình Thuận - Lắp đặt 50%', time: '1 giờ trước', user: teamData[3]?.nameVi || 'Hồ Minh Tân' },
-    { type: 'inventory', title: 'Nhập kho mới', description: '500 tấm pin JA Solar 550W', time: '2 giờ trước', user: teamData[6]?.nameVi || 'Phạm Tấn Lễ' },
+    { type: 'task', title: 'Task hoàn thành', description: 'Khảo sát mái nhà xưởng XYZ hoàn tất', time: '15 phút trước', user: 'Nhân viên' },
+    { type: 'project', title: 'Milestone đạt được', description: 'Solar Farm Bình Thuận - Lắp đặt 50%', time: '1 giờ trước', user: 'Quản lý' },
+    { type: 'inventory', title: 'Nhập kho mới', description: '500 tấm pin JA Solar 550W', time: '2 giờ trước', user: 'Kho' },
   ];
 
   // Featured modules with real employee count

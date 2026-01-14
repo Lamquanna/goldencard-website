@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
+import { logger } from '@/lib/logger'
+import { createSuccessResponse, createErrorResponse, generateRequestId, ErrorCodes } from '@/lib/api/error-handler'
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Ensure table exists
 async function ensureTableExists() {
@@ -21,13 +26,16 @@ async function ensureTableExists() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `;
-  } catch (e) {
-    console.log('Table check/create:', e);
+  } catch (e: any) {
+    logger.debug('Table check/create:', { error: e });
   }
 }
 
 // GET /api/erp/expenses - Get all expenses
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     await ensureTableExists();
     
@@ -88,18 +96,45 @@ export async function GET(request: NextRequest) {
       updatedAt: row.updated_at,
     }))
 
-    return NextResponse.json(expenses)
-  } catch (error) {
-    console.error('Error fetching expenses:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch expenses' },
-      { status: 500 }
-    )
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/erp/expenses',
+      statusCode: 200,
+      duration,
+      requestId,
+      userId: undefined,
+    });
+
+    return createSuccessResponse(expenses);
+  } catch (error: any) {
+    logger.error('Error fetching expenses:', error);
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/erp/expenses',
+      statusCode: 500,
+      duration,
+      requestId,
+      userId: undefined,
+      error: error instanceof Error ? error : undefined,
+    });
+
+    return createErrorResponse(
+      'Failed to fetch expenses',
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
+    );
   }
 }
 
 // POST /api/erp/expenses - Create new expense
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     await ensureTableExists();
     
@@ -107,10 +142,23 @@ export async function POST(request: NextRequest) {
     const { title, amount, category, expenseDate, description } = body
 
     if (!title || !amount || !category || !expenseDate) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+      const duration = Date.now() - startTime;
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/erp/expenses',
+        statusCode: 400,
+        duration,
+        requestId,
+        userId: undefined,
+      });
+
+      return createErrorResponse(
+        'Missing required fields',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        undefined,
+        requestId
+      );
     }
 
     // Generate expense number
@@ -137,26 +185,49 @@ export async function POST(request: NextRequest) {
 
     const expense = result[0]
 
-    return NextResponse.json(
-      {
-        id: expense.id,
-        expenseNumber: expense.expense_number,
-        title: expense.title,
-        amount: parseFloat(expense.amount),
-        category: expense.category,
-        status: expense.status,
-        expenseDate: expense.expense_date,
-        description: expense.description,
-        submittedBy: expense.submitted_by,
-        createdAt: expense.created_at,
-      },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('Error creating expense:', error)
-    return NextResponse.json(
-      { error: 'Failed to create expense' },
-      { status: 500 }
-    )
+    const responseData = {
+      id: expense.id,
+      expenseNumber: expense.expense_number,
+      title: expense.title,
+      amount: parseFloat(expense.amount),
+      category: expense.category,
+      status: expense.status,
+      expenseDate: expense.expense_date,
+      description: expense.description,
+      submittedBy: expense.submitted_by,
+      createdAt: expense.created_at,
+    };
+
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/erp/expenses',
+      statusCode: 201,
+      duration,
+      requestId,
+      userId: undefined,
+    });
+
+    return createSuccessResponse(responseData, requestId);
+  } catch (error: any) {
+    logger.error('Error creating expense:', error);
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/erp/expenses',
+      statusCode: 500,
+      duration,
+      requestId,
+      userId: undefined,
+      error: error instanceof Error ? error : undefined,
+    });
+
+    return createErrorResponse(
+      'Failed to create expense',
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
+    );
   }
 }

@@ -4,12 +4,25 @@
 import { NextResponse } from 'next/server';
 // import { createClient } from '@/lib/supabase/server';
 import { mockSupabase } from '@/lib/supabase/mock';
+import { logger } from '@/lib/logger';
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  generateRequestId,
+  ErrorCodes,
+} from '@/lib/api/error-handler';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     // Use mock data for local testing
     const supabase = mockSupabase as any;
-    console.log('GET /api/crm/stats - Using mock data');
+    logger.debug('GET /api/crm/stats - Using mock data', { requestId });
 
     // Get stats from view
     const { data: stats, error: statsError } = await supabase
@@ -18,8 +31,23 @@ export async function GET() {
       .single();
 
     if (statsError) {
-      console.error('Error fetching stats:', statsError);
-      return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
+      logger.error('Error fetching stats:', { error: statsError, requestId });
+      const duration = Date.now() - startTime;
+      logger.apiRequest({
+        method: 'GET',
+        url: '/api/crm/stats',
+        statusCode: 500,
+        duration,
+        requestId,
+        error: statsError,
+      });
+      return createErrorResponse(
+        'Failed to fetch stats',
+        ErrorCodes.INTERNAL_ERROR,
+        500,
+        undefined,
+        requestId
+      );
     }
 
     // Get source breakdown
@@ -34,12 +62,38 @@ export async function GET() {
       return acc;
     }, {} as Record<string, number>);
 
-    return NextResponse.json({
+    const responseData = {
       ...stats,
       source_breakdown: sourceBreakdown,
+    };
+
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/crm/stats',
+      statusCode: 200,
+      duration,
+      requestId,
     });
-  } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+
+    return createSuccessResponse(responseData, requestId);
+  } catch (error: any) {
+    logger.error('API error:', { error, requestId });
+    const duration = Date.now() - startTime;
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/crm/stats',
+      statusCode: 500,
+      duration,
+      requestId,
+      error: error instanceof Error ? error : undefined,
+    });
+    return createErrorResponse(
+      'Internal server error',
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
+    );
   }
 }

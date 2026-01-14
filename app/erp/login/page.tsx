@@ -38,8 +38,9 @@ export default function ERPLoginPage() {
         throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
-      // Save token and user info to localStorage
-      localStorage.setItem('erp_token', data.token);
+      // Save JWT token to localStorage (API client will use 'auth_token')
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('erp_token', data.token); // Keep for backward compatibility
       localStorage.setItem('erp_user', JSON.stringify(data.user));
 
       console.log('Login successful:', data.user);

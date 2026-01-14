@@ -1,16 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { logger } from "@/lib/logger";
+import { generateToken } from "@/lib/auth/jwt";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  generateRequestId,
+  ErrorCodes,
+} from "@/lib/api/error-handler";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Simple authentication endpoint - Database only
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     const { username, password } = await request.json();
 
     // Validate inputs
     if (!username || !password) {
-      return NextResponse.json(
-        { error: "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu" },
-        { status: 400 }
+      const duration = Date.now() - startTime;
+      logger.apiRequest({ method: 'POST', url: '/api/crm/auth/login', statusCode: 400, duration, requestId });
+      
+      return createErrorResponse(
+        "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu",
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        undefined,
+        requestId
       );
     }
 
@@ -22,42 +42,91 @@ export async function POST(request: NextRequest) {
       `;
 
       if (userResult.length === 0) {
-        return NextResponse.json(
-          { error: "Tên đăng nhập hoặc mật khẩu không đúng" },
-          { status: 401 }
+        logger.warn("Failed CRM login attempt", {
+          username,
+          requestId,
+          reason: "Invalid credentials",
+        });
+        
+        logger.auth("failed_login", username, {
+          reason: "Invalid credentials",
+        });
+
+        const duration = Date.now() - startTime;
+        logger.apiRequest({ method: 'POST', url: '/api/crm/auth/login', statusCode: 401, duration, requestId });
+        
+        return createErrorResponse(
+          "Tên đăng nhập hoặc mật khẩu không đúng",
+          ErrorCodes.UNAUTHORIZED,
+          401,
+          undefined,
+          requestId
         );
       }
 
       const user = userResult[0];
       
-      console.log(`CRM login successful: ${user.username}`);
-
-      // Generate a simple token (in production, use JWT)
-      const token = Buffer.from(
-        `${user.username}:${user.role}:${Date.now()}`
-      ).toString("base64");
-
-      return NextResponse.json({
-        success: true,
-        token,
-        user: {
-          username: user.username,
-          role: user.role,
-        },
+      logger.auth("login", user.username, {
+        role: user.role,
       });
 
+      // Generate JWT token with user_id, email, role
+      const token = generateToken({
+        userId: user.id.toString(),
+        email: user.email,
+        username: user.username,
+        role: user.role
+      });
+
+      const duration = Date.now() - startTime;
+      logger.apiRequest({ method: 'POST', url: '/api/crm/auth/login', statusCode: 200, duration, requestId });
+
+      return createSuccessResponse(
+        {
+          token,
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+          },
+        },
+        requestId
+      );
+
     } catch (dbError) {
-      console.error("Database error during CRM login:", dbError);
-      return NextResponse.json(
-        { error: "Không thể kết nối cơ sở dữ liệu. Vui lòng liên hệ quản trị viên." },
-        { status: 503 }
+      logger.error("Database error during CRM login", {
+        error: dbError,
+        username,
+        requestId,
+      });
+
+      const duration = Date.now() - startTime;
+      logger.apiRequest({ method: 'POST', url: '/api/crm/auth/login', statusCode: 503, duration, requestId });
+      
+      return createErrorResponse(
+        "Không thể kết nối cơ sở dữ liệu. Vui lòng liên hệ quản trị viên.",
+        ErrorCodes.DATABASE_ERROR,
+        503,
+        undefined,
+        requestId
       );
     }
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "Có lỗi xảy ra khi đăng nhập" },
-      { status: 500 }
+    logger.error("CRM login error", {
+      error,
+      requestId,
+    });
+
+    const duration = Date.now() - startTime;
+    logger.apiRequest({ method: 'POST', url: '/api/crm/auth/login', statusCode: 500, duration, requestId });
+    
+    return createErrorResponse(
+      "Có lỗi xảy ra khi đăng nhập",
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
     );
   }
 }

@@ -5,15 +5,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { rateLimiters, getClientIdentifier } from '@/lib/rate-limit';
 import type { Project } from '@/lib/types/project';
+import { logger } from '@/lib/logger';
+import { createSuccessResponse, createErrorResponse, generateRequestId, ErrorCodes } from '@/lib/api/error-handler';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // GET - List all projects
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+  
   // Rate limiting check
   const identifier = getClientIdentifier(request);
   const rateCheck = rateLimiters.standard.check(identifier);
   
   if (!rateCheck.allowed) {
     const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
+    const duration = Date.now() - startTime;
+    
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 429,
+    });
+    
     return NextResponse.json(
       { success: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
       { 
@@ -105,8 +123,17 @@ export async function GET(request: NextRequest) {
       })
     );
     
-    return NextResponse.json({
-      success: true,
+    const duration = Date.now() - startTime;
+    
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 200,
+    });
+    
+    return createSuccessResponse({
       data: projectsWithCounts,
       pagination: {
         page,
@@ -116,22 +143,49 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching projects:', error);
-    return NextResponse.json(
-      { success: false, error: 'Không thể tải danh sách dự án' },
-      { status: 500 }
+    const duration = Date.now() - startTime;
+    
+    logger.error('Error fetching projects:', error);
+    logger.apiRequest({
+      method: 'GET',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 500,
+      error: error instanceof Error ? error : undefined,
+    });
+    
+    return createErrorResponse(
+      'Không thể tải danh sách dự án',
+      ErrorCodes.DATABASE_ERROR,
+      500,
+      undefined,
+      requestId
     );
   }
 }
 
 // POST - Create new project
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+  
   // Rate limiting check
   const identifier = getClientIdentifier(request);
   const rateCheck = rateLimiters.standard.check(identifier);
   
   if (!rateCheck.allowed) {
     const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
+    const duration = Date.now() - startTime;
+    
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 429,
+    });
+    
     return NextResponse.json(
       { success: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
       { 
@@ -189,8 +243,17 @@ export async function POST(request: NextRequest) {
 
     const project = result[0];
     
-    return NextResponse.json({
-      success: true,
+    const duration = Date.now() - startTime;
+    
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 200,
+    });
+    
+    return createSuccessResponse({
       data: {
         id: project.id,
         name: project.name,
@@ -210,10 +273,24 @@ export async function POST(request: NextRequest) {
       message: 'Tạo dự án thành công',
     });
   } catch (error) {
-    console.error('Error creating project:', error);
-    return NextResponse.json(
-      { success: false, error: 'Không thể tạo dự án' },
-      { status: 500 }
+    const duration = Date.now() - startTime;
+    
+    logger.error('Error creating project:', error);
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/projects',
+      requestId,
+      duration,
+      statusCode: 500,
+      error: error instanceof Error ? error : undefined,
+    });
+    
+    return createErrorResponse(
+      'Không thể tạo dự án',
+      ErrorCodes.DATABASE_ERROR,
+      500,
+      undefined,
+      requestId
     );
   }
 }

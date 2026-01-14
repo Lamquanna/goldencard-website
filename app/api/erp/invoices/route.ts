@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
+import { requireAuth } from '@/lib/auth/middleware'
+import { logger } from '@/lib/logger'
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  generateRequestId,
+  ErrorCodes 
+} from '@/lib/api/error-handler'
 
 // Ensure table exists
 async function ensureTableExists() {
@@ -14,6 +22,8 @@ async function ensureTableExists() {
         issue_date DATE,
         due_date DATE,
         items JSONB,
+        project_id INTEGER,
+        created_by VARCHAR(255),
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )
@@ -25,6 +35,16 @@ async function ensureTableExists() {
 
 // GET /api/erp/invoices - Get all invoices
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+  
+  // Authenticate user
+  const authResult = await requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  
+  const { user } = authResult;
+  
   try {
     await ensureTableExists();
     
@@ -87,17 +107,29 @@ export async function GET(request: NextRequest) {
 
 // POST /api/erp/invoices - Create new invoice
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  
+  // Authenticate user
+  const authResult = await requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  
+  const { user } = authResult;
+  
   try {
     await ensureTableExists();
     
     const body = await request.json()
-    const { customerName, amount, issueDate, dueDate, items } = body
+    const { customerName, amount, issueDate, dueDate, items, projectId } = body
 
     if (!customerName || !amount) {
-      return NextResponse.json(
-        { error: 'Customer name and amount are required' },
-        { status: 400 }
-      )
+      return createErrorResponse(
+        'Customer name and amount are required',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        requestId
+      );
     }
 
     // Generate invoice number
@@ -105,10 +137,18 @@ export async function POST(request: NextRequest) {
     const parsedAmount = parseFloat(amount);
     const itemsJson = JSON.stringify(items || []);
 
+    logger.info('Creating invoice', { 
+      invoiceNumber, 
+      customerName, 
+      amount: parsedAmount, 
+      userId: user.userId,
+      requestId 
+    });
+
     const result = await sql`
       INSERT INTO erp_invoices (
         invoice_number, customer_name, amount, status,
-        issue_date, due_date, items
+        issue_date, due_date, items, project_id, created_by
       )
       VALUES (
         ${invoiceNumber},
@@ -117,14 +157,16 @@ export async function POST(request: NextRequest) {
         ${'draft'},
         ${issueDate || new Date().toISOString().split('T')[0]},
         ${dueDate || null},
-        ${itemsJson}
+        ${itemsJson},
+        ${projectId || null},
+        ${user.userId}
       )
       RETURNING *
     `;
 
     const invoice = result[0]
 
-    return NextResponse.json(
+    return createSuccessResponse(
       {
         id: invoice.id,
         invoiceNumber: invoice.invoice_number,
@@ -134,15 +176,19 @@ export async function POST(request: NextRequest) {
         issueDate: invoice.issue_date,
         dueDate: invoice.due_date,
         items: invoice.items,
+        projectId: invoice.project_id,
+        createdBy: invoice.created_by,
         createdAt: invoice.created_at,
       },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('Error creating invoice:', error)
-    return NextResponse.json(
-      { error: 'Failed to create invoice' },
-      { status: 500 }
-    )
+      requestId
+    );
+  } catch (error: any) {
+    logger.error('Error creating invoice', error, { requestId });
+    return createErrorResponse(
+      'Failed to create invoice',
+      ErrorCodes.DATABASE_ERROR,
+      500,
+      requestId
+    );
   }
 }

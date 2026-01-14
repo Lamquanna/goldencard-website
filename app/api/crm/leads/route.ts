@@ -4,17 +4,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mockSupabase } from '@/lib/supabase/mock';
 import type { CreateLeadInput } from '@/lib/types/crm';
+import { logger } from '@/lib/logger';
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  generateRequestId,
+  ErrorCodes,
+} from '@/lib/api/error-handler';
+import { createAuditLog } from '@/lib/audit-log';
+import { requireAuth } from '@/lib/auth/middleware';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+  
+  // Require authentication
+  const authResult = requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  const { user } = authResult;
+
   try {
     const supabase = mockSupabase as unknown as any;
     const body = await request.json() as CreateLeadInput;
 
     // Validate required fields
     if (!body.name || !body.source) {
-      return NextResponse.json(
-        { error: 'Name and source are required' },
-        { status: 400 }
+      const duration = Date.now() - startTime;
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/leads',
+        statusCode: 400,
+        duration,
+        requestId,
+      });
+      return createErrorResponse(
+        'Name and source are required',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        undefined,
+        requestId
       );
     }
 
@@ -40,10 +73,22 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (leadError) {
-      console.error('Error creating lead:', leadError);
-      return NextResponse.json(
-        { error: 'Failed to create lead' },
-        { status: 500 }
+      const duration = Date.now() - startTime;
+      logger.error('Failed to create lead', leadError, { requestId });
+      logger.apiRequest({
+        method: 'POST',
+        url: '/api/crm/leads',
+        statusCode: 500,
+        duration,
+        requestId,
+        error: leadError,
+      });
+      return createErrorResponse(
+        'Failed to create lead',
+        ErrorCodes.DATABASE_ERROR,
+        500,
+        undefined,
+        requestId
       );
     }
 
@@ -60,22 +105,57 @@ export async function POST(request: NextRequest) {
         },
       });
 
-    return NextResponse.json({ success: true, lead }, { status: 201 });
-  } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    // Audit log with authenticated user
+    await createAuditLog({
+      user_id: user.userId,
+      action: 'CREATE',
+      entity_type: 'lead',
+      entity_id: lead.id,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      metadata: { source: body.source, created_by_email: user.email }
+    });
+
+    const duration = Date.now() - startTime;
+    logger.info('Lead created successfully', { leadId: lead.id, requestId });
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/crm/leads',
+      statusCode: 201,
+      duration,
+      requestId,
+    });
+    return createSuccessResponse({ lead }, requestId);
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    logger.error('API error', error, { requestId });
+    logger.apiRequest({
+      method: 'POST',
+      url: '/api/crm/leads',
+      statusCode: 500,
+      duration,
+      requestId,
+      error,
+    });
+    return createErrorResponse(
+      'Internal server error',
+      ErrorCodes.INTERNAL_ERROR,
+      500,
+      undefined,
+      requestId
     );
   }
 }
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+
   try {
     // Use mock data for local testing
     const supabase = mockSupabase as unknown as any;
     
-    console.log('🔍 GET /api/crm/leads - Starting');
+    logger.debug('Fetching CRM leads', { requestId });
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams;
@@ -86,7 +166,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    console.log('📋 Query params:', { status, assigned_to, source, search, limit, offset });
+    logger.debug('Query params', { status, assigned_to, source, search, limit, offset, requestId });
 
     // Build query
     let query = supabase
@@ -99,18 +179,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    console.log('🔨 Query built, applying filters...');
-
     if (status) {
-      console.log('  → Filtering by status:', status);
       query = query.eq('status', status);
     }
     if (assigned_to) {
-      console.log('  → Filtering by assigned_to:', assigned_to);
       query = query.eq('assigned_to', assigned_to);
     }
     if (source) {
-      console.log('  → Filtering by source:', source);
       query = query.eq('source', source);
     }
     if (search) {

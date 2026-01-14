@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { generateToken } from "@/lib/auth/jwt";
 
 // Simple authentication endpoint - All users stored in database
 export async function POST(request: NextRequest) {
@@ -42,10 +43,13 @@ export async function POST(request: NextRequest) {
         WHERE username = ${username}
       `;
 
-      // Generate a simple token (in production, use JWT)
-      const token = Buffer.from(
-        `${user.username}:${user.role}:${Date.now()}`
-      ).toString("base64");
+      // Generate JWT token with user_id, email, role
+      const token = generateToken({
+        userId: user.id.toString(),
+        email: user.email,
+        username: user.username,
+        role: user.role
+      });
 
       return NextResponse.json({
         success: true,

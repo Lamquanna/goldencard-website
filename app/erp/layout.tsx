@@ -7,7 +7,7 @@
 
 import { AppShellProvider } from './components/AppShell';
 import { AuthWrapper } from './components/AuthWrapper';
-import { CozeChatWidget } from '@/components/CozeChatWidget';
+import { CozeChat } from '@/components/CozeChat';
 import { useEffect, useState } from 'react';
 
 export default function HomeLayout({
@@ -33,9 +33,17 @@ export default function HomeLayout({
     <AuthWrapper>
       <AppShellProvider>
         {children}
-        {/* Coze AI Assistant for internal use */}
-        {userId && <CozeChatWidget userId={userId} position="bottom-right" />}
       </AppShellProvider>
+      {/* Coze AI Assistant - Positioned outside AppShell to avoid z-index conflicts */}
+      {userId && (
+        <CozeChat 
+          botId="7594311757871972405"
+          userId={userId}
+          title="Golden Energy AI Assistant"
+          position="bottom-right"
+          zIndex={9999}
+        />
+      )}
     </AuthWrapper>
   );
 }

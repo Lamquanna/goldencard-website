@@ -3,10 +3,36 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import type { CreateLeadInput } from '@/lib/types/crm';
+
+// Ensure leads table exists with correct schema
+async function ensureLeadsTable() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS leads (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
+        phone VARCHAR(50),
+        company_name VARCHAR(255),
+        description TEXT,
+        status VARCHAR(50) DEFAULT 'new',
+        temperature VARCHAR(20) DEFAULT 'warm',
+        utm_source VARCHAR(100),
+        landing_page TEXT,
+        assigned_to VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+  } catch (e: any) {
+    console.log('Leads table check:', e.message);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureLeadsTable();
+    
     const body = await request.json() as any;
 
     // Validate required fields
@@ -16,14 +42,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Auto-capture device & UTM from headers/URL
-    const userAgent = request.headers.get('user-agent') || '';
-    const deviceType = userAgent.includes('Mobile') ? 'mobile' : 
-                       userAgent.includes('Tablet') ? 'tablet' : 'desktop';
-    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
 
     // Map priority to temperature
     const temperatureMap: Record<string, string> = {
@@ -37,10 +55,10 @@ export async function POST(request: NextRequest) {
     const temperature = temperatureMap[body.priority] || temperatureMap[body.rating] || 'warm';
 
     try {
-      // Insert lead into PostgreSQL database - using correct schema columns
+      // Insert lead into PostgreSQL database
       const result = await sql`
         INSERT INTO leads (
-          first_name,
+          name,
           email,
           phone,
           company_name,
@@ -57,7 +75,7 @@ export async function POST(request: NextRequest) {
           ${body.phone || null},
           ${body.company || null},
           ${body.message || body.notes || null},
-          ${'active'},
+          ${'new'},
           ${temperature},
           ${body.source || 'manual'},
           ${body.source_url || null},
@@ -65,7 +83,7 @@ export async function POST(request: NextRequest) {
           NOW()
         )
         RETURNING *
-      `;
+      ` as any[];
 
       const lead = result[0];
       console.log('✅ Lead created in PostgreSQL:', lead.id);
