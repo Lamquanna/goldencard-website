@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { InvoiceList } from '../../modules/finance/components/InvoiceList'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -24,7 +25,7 @@ export default function InvoicesPage() {
   const loadInvoices = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/erp/invoices')
+      const response = await authFetch('/api/erp/invoices')
       if (!response.ok) throw new Error('Failed to fetch invoices')
       const data = await response.json()
       setInvoices(data.invoices || [])

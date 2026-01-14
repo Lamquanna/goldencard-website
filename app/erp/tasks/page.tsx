@@ -16,6 +16,7 @@ import {
   X,
   Info,
 } from 'lucide-react';
+import { authFetch } from '@/lib/hooks/useAuthFetch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -170,7 +171,7 @@ export default function TasksPage() {
   const loadTasks = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/erp/tasks');
+      const response = await authFetch('/api/erp/tasks');
       if (response.ok) {
         const data = await response.json();
         // Transform API data to match UI format
@@ -592,7 +593,7 @@ export default function TasksPage() {
 
                     setIsSubmitting(true);
                     try {
-                      const response = await fetch('/api/erp/tasks', {
+                      const response = await authFetch('/api/erp/tasks', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

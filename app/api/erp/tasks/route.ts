@@ -23,33 +23,20 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const assignee = searchParams.get('assignee')
 
-    // Build safe parameterized query
-    let query = sql`SELECT * FROM erp_tasks WHERE 1=1`
-
-    if (status && status !== 'all') {
-      query = sql`${query} AND status = ${status}`
-    }
-
-    if (priority) {
-      query = sql`${query} AND priority = ${priority}`
-    }
-
-    if (assignee) {
-      const assigneeId = parseInt(assignee, 10)
-      if (!isNaN(assigneeId)) {
-        query = sql`${query} AND assignee_id = ${assigneeId}`
-      }
-    }
-
-    if (search) {
-      const searchPattern = `%${search}%`
-      query = sql`${query} AND (title ILIKE ${searchPattern} OR description ILIKE ${searchPattern})`
-    }
-
-    query = sql`${query} ORDER BY created_at DESC`
-
-    const result = await query
+    // Simple query - get all tasks first
+    let result;
     
+    if (status && status !== 'all') {
+      result = await sql`SELECT * FROM erp_tasks WHERE status = ${status} ORDER BY created_at DESC`;
+    } else if (priority) {
+      result = await sql`SELECT * FROM erp_tasks WHERE priority = ${priority} ORDER BY created_at DESC`;
+    } else if (search) {
+      const searchPattern = `%${search}%`;
+      result = await sql`SELECT * FROM erp_tasks WHERE title ILIKE ${searchPattern} OR description ILIKE ${searchPattern} ORDER BY created_at DESC`;
+    } else {
+      result = await sql`SELECT * FROM erp_tasks ORDER BY created_at DESC`;
+    }
+
     const tasks = result.map((row: any) => ({
       id: row.id,
       title: row.title,

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { ExpenseList } from '../../modules/finance/components/ExpenseList'
 import { Expense } from '../../modules/finance/index'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -31,7 +32,7 @@ export default function ExpensesPage() {
 
   const loadExpenses = async () => {
     try {
-      const response = await fetch('/api/erp/expenses')
+      const response = await authFetch('/api/erp/expenses')
       if (response.ok) {
         const data = await response.json()
         setExpenses(data)
@@ -129,7 +130,7 @@ export default function ExpensesPage() {
         description: formData.get('description') as string,
       }
 
-      const response = await fetch('/api/erp/expenses', {
+      const response = await authFetch('/api/erp/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -216,7 +217,7 @@ export default function ExpensesPage() {
             continue
           }
 
-          const response = await fetch('/api/erp/expenses', {
+          const response = await authFetch('/api/erp/expenses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(expense),

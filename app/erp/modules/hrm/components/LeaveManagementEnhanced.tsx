@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { format, differenceInDays, isWeekend, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'framer-motion'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import {
   Calendar,
   ChevronLeft,
@@ -215,7 +216,7 @@ function NewLeaveRequestDialog({ balance, employeeId, onSubmit }: NewLeaveReques
       // Initial submission - check for conflicts
       setLoading(true)
       try {
-        const response = await fetch('/api/erp/hrm/leaves', {
+        const response = await authFetch('/api/erp/hrm/leaves', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -504,7 +505,7 @@ function PendingApprovals({ requests, onApprove, onReject }: PendingApprovalsPro
     if (!request) return
 
     // Check for project conflicts
-    const response = await fetch(`/api/erp/hrm/leaves?employeeId=${request.employeeId}&status=pending`)
+    const response = await authFetch(`/api/erp/hrm/leaves?employeeId=${request.employeeId}&status=pending`)
     const data = await response.json()
     
     // For now, just call onApprove
@@ -814,14 +815,14 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
     setLoading(true)
     try {
       // Load my balance
-      const balanceRes = await fetch(`/api/erp/hrm/leaves/balance?employeeId=${employeeId}`)
+      const balanceRes = await authFetch(`/api/erp/hrm/leaves/balance?employeeId=${employeeId}`)
       const balanceData = await balanceRes.json()
       if (balanceData.success) {
         setMyBalance(balanceData.data)
       }
 
       // Load my requests
-      const requestsRes = await fetch(`/api/erp/hrm/leaves?employeeId=${employeeId}`)
+      const requestsRes = await authFetch(`/api/erp/hrm/leaves?employeeId=${employeeId}`)
       const requestsData = await requestsRes.json()
       if (requestsData.success) {
         setMyRequests(requestsData.data)
@@ -829,14 +830,14 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
 
       // Load pending approvals (if manager)
       if (isManager) {
-        const pendingRes = await fetch('/api/erp/hrm/leaves?status=pending')
+        const pendingRes = await authFetch('/api/erp/hrm/leaves?status=pending')
         const pendingData = await pendingRes.json()
         if (pendingData.success) {
           setPendingRequests(pendingData.data)
         }
 
         // Load all employees' balances
-        const allBalancesRes = await fetch('/api/erp/hrm/leaves/balance')
+        const allBalancesRes = await authFetch('/api/erp/hrm/leaves/balance')
         const allBalancesData = await allBalancesRes.json()
         if (allBalancesData.success) {
           setAllBalances(allBalancesData.data)
@@ -851,7 +852,7 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
 
   const handleSubmitRequest = async (request: Partial<LeaveRequest>) => {
     try {
-      const response = await fetch('/api/erp/hrm/leaves', {
+      const response = await authFetch('/api/erp/hrm/leaves', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -881,7 +882,7 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
     if (!confirm('Bạn có chắc muốn hủy đơn này?')) return
 
     try {
-      const response = await fetch(`/api/erp/hrm/leaves/${id}`, {
+      const response = await authFetch(`/api/erp/hrm/leaves/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'cancel' }),
@@ -899,7 +900,7 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
 
   const handleApprove = async (id: string, hasConflict: boolean, projects?: ProjectConflict[]) => {
     try {
-      const response = await fetch(`/api/erp/hrm/leaves/${id}`, {
+      const response = await authFetch(`/api/erp/hrm/leaves/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -912,9 +913,12 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
       if (data.success) {
         alert('Đã duyệt đơn nghỉ phép')
         loadData()
+      } else {
+        alert('Lỗi: ' + (data.error || 'Không thể duyệt đơn'))
       }
     } catch (error) {
       console.error('Error approving request:', error)
+      alert('Có lỗi xảy ra khi duyệt đơn')
     }
   }
 
@@ -922,7 +926,7 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
     const reason = prompt('Lý do từ chối (tùy chọn):')
     
     try {
-      const response = await fetch(`/api/erp/hrm/leaves/${id}`, {
+      const response = await authFetch(`/api/erp/hrm/leaves/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -936,17 +940,20 @@ export function LeaveManagementEnhanced({ employeeId, isManager = false }: Leave
       if (data.success) {
         alert('Đã từ chối đơn nghỉ phép')
         loadData()
+      } else {
+        alert('Lỗi: ' + (data.error || 'Không thể từ chối đơn'))
       }
     } catch (error) {
       console.error('Error rejecting request:', error)
+      alert('Có lỗi xảy ra khi từ chối đơn')
     }
   }
 
   const handleSelectEmployee = async (empId: string) => {
     try {
       const [balanceRes, requestsRes] = await Promise.all([
-        fetch(`/api/erp/hrm/leaves/balance?employeeId=${empId}`),
-        fetch(`/api/erp/hrm/leaves?employeeId=${empId}`)
+        authFetch(`/api/erp/hrm/leaves/balance?employeeId=${empId}`),
+        authFetch(`/api/erp/hrm/leaves?employeeId=${empId}`)
       ])
 
       const balanceData = await balanceRes.json()

@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'framer-motion'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { 
   MapPin, 
   Wifi, 
@@ -507,59 +508,151 @@ export function AttendanceTracker({
   const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(() => {
     return initialHistory.find(a => isSameDay(new Date(a.date), new Date())) || null
   })
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Load attendance from API on mount
+  useEffect(() => {
+    loadAttendanceFromAPI()
+  }, [])
+
+  const loadAttendanceFromAPI = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0]
+      const response = await authFetch(`/api/erp/hrm/attendance?start_date=${today}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.records && data.records.length > 0) {
+          const record = data.records[0]
+          const existingRecord: AttendanceRecord = {
+            id: record.id,
+            employeeId: record.user_id,
+            employeeName: currentUser?.name || 'User',
+            date: new Date(record.check_in),
+            checkInTime: record.check_in ? new Date(record.check_in) : undefined,
+            checkOutTime: record.check_out ? new Date(record.check_out) : undefined,
+            checkInMethod: 'gps',
+            status: record.status === 'completed' ? 'present' : 'present',
+            workMode: 'office',
+            workingHours: 0,
+            overtimeHours: 0,
+            createdAt: new Date(record.created_at),
+            updatedAt: new Date(record.updated_at || record.created_at),
+          }
+          setTodayRecord(existingRecord)
+          setAttendanceHistory(prev => [existingRecord, ...prev.filter(a => !isSameDay(new Date(a.date), new Date()))])
+        }
+      }
+    } catch (error) {
+      console.error('Error loading attendance:', error)
+    }
+  }
 
   // Check if user has checked in today
   const isCheckedIn = !!todayRecord?.checkInTime && !todayRecord?.checkOutTime
   const isCheckedOut = !!todayRecord?.checkInTime && !!todayRecord?.checkOutTime
 
-  const handleCheckIn = (method: CheckInMethod) => {
-    const now = new Date()
-    const newRecord: AttendanceRecord = {
-      id: `att-${Date.now()}`,
-      employeeId: currentUser?.id || 'emp-1',
-      employeeName: currentUser?.name || 'Nguyen Van Admin',
-      employeeCode: currentUser?.employeeCode || 'GES001',
-      department: currentUser?.department || 'Ban Giam Doc',
-      date: now,
-      checkInTime: now,
-      checkInMethod: method,
-      workMode: 'office', // Default to office mode
-      status: now.getHours() >= 9 ? 'late' : 'present',
-      workingHours: 0,
-      overtimeHours: 0,
-      createdAt: now,
-      updatedAt: now,
+  const handleCheckIn = async (method: CheckInMethod) => {
+    setIsLoading(true)
+    try {
+      // Call API to persist check-in
+      const response = await authFetch('/api/erp/hrm/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'check-in',
+          location: null,
+          notes: `Check-in via ${method}`,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Check-in failed')
+      }
+
+      const data = await response.json()
+      const now = new Date()
+      
+      const newRecord: AttendanceRecord = {
+        id: data.record?.id || `att-${Date.now()}`,
+        employeeId: currentUser?.id || 'emp-1',
+        employeeName: currentUser?.name || 'Nguyen Van Admin',
+        employeeCode: currentUser?.employeeCode || 'GES001',
+        department: currentUser?.department || 'Ban Giam Doc',
+        date: now,
+        checkInTime: now,
+        checkInMethod: method,
+        workMode: 'office',
+        status: now.getHours() >= 9 ? 'late' : 'present',
+        workingHours: 0,
+        overtimeHours: 0,
+        createdAt: now,
+        updatedAt: now,
+      }
+      
+      setTodayRecord(newRecord)
+      setAttendanceHistory(prev => [newRecord, ...prev.filter(a => !isSameDay(new Date(a.date), now))])
+      
+      // Call external callback if provided
+      externalCheckIn?.(method)
+
+      alert('✅ Check-in thành công!')
+    } catch (error: any) {
+      console.error('Check-in error:', error)
+      alert('❌ Check-in thất bại: ' + error.message)
+    } finally {
+      setIsLoading(false)
     }
-    
-    setTodayRecord(newRecord)
-    setAttendanceHistory(prev => [newRecord, ...prev.filter(a => !isSameDay(new Date(a.date), now))])
-    
-    // Call external callback if provided
-    externalCheckIn?.(method)
   }
 
-  const handleCheckOut = (method: CheckInMethod) => {
+  const handleCheckOut = async (method: CheckInMethod) => {
     if (!todayRecord) return
     
-    const now = new Date()
-    const checkInTime = new Date(todayRecord.checkInTime!)
-    const workingHours = (now.getTime() - checkInTime.getTime()) / (1000 * 60 * 60)
-    const overtimeHours = Math.max(0, workingHours - 8)
-    
-    const updatedRecord: AttendanceRecord = {
-      ...todayRecord,
-      checkOutTime: now,
-      checkOutMethod: method,
-      workingHours: Math.round(workingHours * 100) / 100,
-      overtimeHours: Math.round(overtimeHours * 100) / 100,
-      updatedAt: now,
+    setIsLoading(true)
+    try {
+      // Call API to persist check-out
+      const response = await authFetch('/api/erp/hrm/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'check-out',
+          location: null,
+          notes: `Check-out via ${method}`,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Check-out failed')
+      }
+
+      const now = new Date()
+      const checkInTime = new Date(todayRecord.checkInTime!)
+      const workingHours = (now.getTime() - checkInTime.getTime()) / (1000 * 60 * 60)
+      const overtimeHours = Math.max(0, workingHours - 8)
+      
+      const updatedRecord: AttendanceRecord = {
+        ...todayRecord,
+        checkOutTime: now,
+        checkOutMethod: method,
+        workingHours: Math.round(workingHours * 100) / 100,
+        overtimeHours: Math.round(overtimeHours * 100) / 100,
+        updatedAt: now,
+      }
+      
+      setTodayRecord(updatedRecord)
+      setAttendanceHistory(prev => [updatedRecord, ...prev.filter(a => a.id !== todayRecord.id)])
+      
+      // Call external callback if provided
+      externalCheckOut?.(method)
+
+      alert('✅ Check-out thành công!')
+    } catch (error: any) {
+      console.error('Check-out error:', error)
+      alert('❌ Check-out thất bại: ' + error.message)
+    } finally {
+      setIsLoading(false)
     }
-    
-    setTodayRecord(updatedRecord)
-    setAttendanceHistory(prev => [updatedRecord, ...prev.filter(a => a.id !== todayRecord.id)])
-    
-    // Call external callback if provided
-    externalCheckOut?.(method)
   }
 
   const handleWeekChange = (direction: 'prev' | 'next') => {

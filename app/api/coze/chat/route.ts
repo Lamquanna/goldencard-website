@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getCozeClient } from '@/lib/coze-client';
 import { logger } from '@/lib/logger';
 import {
   createSuccessResponse,
@@ -15,10 +14,26 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+// Check if Coze is configured
+const COZE_API_TOKEN = process.env.COZE_API_TOKEN;
+const COZE_BOT_ID = process.env.COZE_BOT_ID || process.env.NEXT_PUBLIC_COZE_BOT_ID;
+
 // POST - Send message to Coze AI Assistant
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
   const startTime = Date.now();
+
+  // Check if Coze is configured
+  if (!COZE_API_TOKEN) {
+    logger.warn('Coze API not configured - COZE_API_TOKEN missing');
+    return createErrorResponse(
+      'AI Chat đang được bảo trì. Vui lòng thử lại sau.',
+      ErrorCodes.INTERNAL_ERROR,
+      503,
+      'COZE_API_TOKEN not configured',
+      requestId
+    );
+  }
 
   try {
     const body = await request.json();
@@ -46,22 +61,51 @@ export async function POST(request: NextRequest) {
     logger.debug('Coze API request', {
       userId,
       messageLength: message.length,
-      botId: botId || process.env.COZE_BOT_ID,
+      botId: botId || COZE_BOT_ID,
       hasConversationId: !!conversationId,
     });
 
-    // Get Coze client
-    const coze = getCozeClient();
+    // Call Coze API directly
+    const targetBotId = botId || COZE_BOT_ID;
+    if (!targetBotId) {
+      return createErrorResponse(
+        'Bot ID không được cấu hình',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        undefined,
+        requestId
+      );
+    }
 
-    // Send message to Coze
     const apiStartTime = Date.now();
-    const response = await coze.chat({
-      botId,
-      userId,
-      message,
-      conversationId,
-      stream: false,
+    const cozeResponse = await fetch('https://api.coze.com/v1/chat', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${COZE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        bot_id: targetBotId,
+        user_id: userId,
+        stream: false,
+        auto_save_history: true,
+        additional_messages: [
+          {
+            role: 'user',
+            content: message,
+            content_type: 'text',
+          },
+        ],
+      }),
     });
+
+    if (!cozeResponse.ok) {
+      const errorData = await cozeResponse.json().catch(() => ({}));
+      logger.error('Coze API returned error', null, { status: cozeResponse.status, errorData });
+      throw new Error(errorData.message || `Coze API error: ${cozeResponse.status}`);
+    }
+
+    const response = await cozeResponse.json();
     const apiDuration = Date.now() - apiStartTime;
 
     logger.externalApi({
@@ -123,6 +167,17 @@ export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const startTime = Date.now();
 
+  // Check if Coze is configured
+  if (!COZE_API_TOKEN) {
+    return createErrorResponse(
+      'AI Chat đang được bảo trì. Vui lòng thử lại sau.',
+      ErrorCodes.INTERNAL_ERROR,
+      503,
+      'COZE_API_TOKEN not configured',
+      requestId
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -146,17 +201,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const coze = getCozeClient();
-
     if (action === 'list') {
       // List all available bots
       const page = parseInt(searchParams.get('page') || '1');
       const pageSize = parseInt(searchParams.get('pageSize') || '20');
       
-      const bots = await coze.listBots({
-        page_index: page,
-        page_size: pageSize,
+      const cozeResponse = await fetch(`https://api.coze.com/v1/bots?page_index=${page}&page_size=${pageSize}`, {
+        headers: { 'Authorization': `Bearer ${COZE_API_TOKEN}` },
       });
+
+      if (!cozeResponse.ok) {
+        throw new Error(`Failed to list bots: ${cozeResponse.status}`);
+      }
+
+      const bots = await cozeResponse.json();
 
       const duration = Date.now() - startTime;
       logger.apiRequest({
@@ -170,7 +228,15 @@ export async function GET(request: NextRequest) {
       return createSuccessResponse(bots, requestId);
     } else if (action === 'info' && botId) {
       // Get specific bot info
-      const botInfo = await coze.getBotInfo(botId);
+      const cozeResponse = await fetch(`https://api.coze.com/v1/bot/get_online_info?bot_id=${botId}`, {
+        headers: { 'Authorization': `Bearer ${COZE_API_TOKEN}` },
+      });
+
+      if (!cozeResponse.ok) {
+        throw new Error(`Failed to get bot info: ${cozeResponse.status}`);
+      }
+
+      const botInfo = await cozeResponse.json();
 
       const duration = Date.now() - startTime;
       logger.apiRequest({

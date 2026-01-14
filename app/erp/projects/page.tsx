@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { 
   FolderKanban, 
   Plus, 
@@ -509,7 +510,7 @@ function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogProps) {
     try {
       const location = `${selectedProvince?.name}${formData.district && formData.district !== 'all' ? ' - ' + districts.find(d => d.code === formData.district)?.name : ''}`;
       
-      const response = await fetch('/api/erp/projects', {
+      const response = await authFetch('/api/erp/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -719,6 +720,52 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [projects, setProjects] = useState<Project[]>(mockProjects)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load projects from database
+  useEffect(() => {
+    loadProjects()
+  }, [])
+
+  const loadProjects = async () => {
+    setIsLoading(true)
+    try {
+      const response = await authFetch('/api/erp/projects')
+      if (response.ok) {
+        const data = await response.json()
+        // Merge API projects with mock projects for now
+        const apiProjects: Project[] = data.map((p: any) => ({
+          id: p.id?.toString() || `api-${Date.now()}`,
+          name: p.name,
+          key: p.projectKey || p.project_key || 'PRJ',
+          description: p.description || '',
+          color: p.color || '#3B82F6',
+          status: p.status || 'planning',
+          startDate: p.startDate ? new Date(p.startDate) : new Date(),
+          endDate: p.endDate ? new Date(p.endDate) : undefined,
+          progress: p.progress || 0,
+          totalTasks: p.totalTasks || 0,
+          completedTasks: p.completedTasks || 0,
+          ownerId: p.ownerId || 'current-user',
+          owner: { id: p.ownerId || 'current-user', name: 'Owner' },
+          members: [],
+          isPublic: true,
+          allowComments: true,
+          workspaceId: 'w1',
+          createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
+          updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date(),
+        }))
+        // Set projects from API (or combine with mock if needed)
+        if (apiProjects.length > 0) {
+          setProjects([...apiProjects, ...mockProjects])
+        }
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Filter projects
   const filteredProjects = projects.filter(project => {
@@ -743,6 +790,8 @@ export default function ProjectsPage() {
   // Callback to add new project
   const handleProjectCreated = (newProject: Project) => {
     setProjects(prev => [newProject, ...prev])
+    // Also reload from API to ensure persistence
+    loadProjects()
   }
 
   return (

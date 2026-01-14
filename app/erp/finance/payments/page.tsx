@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -63,7 +64,7 @@ export default function PaymentsPage() {
   const loadPayments = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/erp/payments')
+      const response = await authFetch('/api/erp/payments')
       if (!response.ok) throw new Error('Failed to fetch payments')
       const data = await response.json()
       setPayments(data.payments || [])
@@ -167,7 +168,7 @@ export default function PaymentsPage() {
         method: formData.get('method') as string || null,
       }
 
-      const response = await fetch('/api/erp/payments', {
+      const response = await authFetch('/api/erp/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

@@ -71,12 +71,25 @@ export function CozeChatWidget({
         }),
       });
 
-      if (!response.ok) {
-        console.error('Response not OK:', response.status, response.statusText);
-        throw new Error(`API error: ${response.status}`);
+      const data = await response.json();
+
+      // Handle service unavailable (AI not configured)
+      if (response.status === 503) {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '🔧 ' + (data.error || 'AI Chat đang được bảo trì. Vui lòng thử lại sau hoặc liên hệ qua hotline: 0901 234 567'),
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        return;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        console.error('Response not OK:', response.status, response.statusText);
+        throw new Error(data.error || `API error: ${response.status}`);
+      }
+
       console.log('Chat response data:', data);
 
       if (data.success) {

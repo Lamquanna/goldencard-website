@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAppShell } from './components/AppShell';
+import { authFetch } from '@/lib/hooks/useAuthFetch';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Chart colors
@@ -199,7 +200,7 @@ export default function HomePage() {
 
   // Fetch real employee count from API
   useEffect(() => {
-    fetch('/api/erp/employees')
+    authFetch('/api/erp/employees')
       .then(res => res.json())
       .then(data => {
         setTotalEmployees(data.employees?.length || 0);
@@ -212,10 +213,10 @@ export default function HomePage() {
     const fetchAnalytics = async () => {
       try {
         const [finance, hrm, inventory, projects] = await Promise.all([
-          fetch('/api/analytics/finance?period=month').then(r => r.json()),
-          fetch('/api/analytics/hrm?period=month').then(r => r.json()),
-          fetch('/api/analytics/inventory').then(r => r.json()),
-          fetch('/api/analytics/projects').then(r => r.json()),
+          authFetch('/api/analytics/finance?period=month').then(r => r.json()),
+          authFetch('/api/analytics/hrm?period=month').then(r => r.json()),
+          authFetch('/api/analytics/inventory').then(r => r.json()),
+          authFetch('/api/analytics/projects').then(r => r.json()),
         ]);
 
         setFinanceData(finance.data);

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import {
   Search,
   Plus,
@@ -530,6 +531,20 @@ export function EmployeeDirectory({ employees, onRefresh, loading }: EmployeeDir
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  
+  // Edit modal state
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    department: '',
+    position: '',
+    status: 'active',
+    salary: 0,
+  })
 
   // Get unique departments from employees
   const departments = useMemo(() => {
@@ -575,7 +590,7 @@ export function EmployeeDirectory({ employees, onRefresh, loading }: EmployeeDir
 
   // CRUD handlers
   const handleAddEmployee = async (data: any) => {
-    const response = await fetch('/api/erp/employees', {
+    const response = await authFetch('/api/erp/employees', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -599,8 +614,54 @@ export function EmployeeDirectory({ employees, onRefresh, loading }: EmployeeDir
   }
 
   const handleEditEmployee = (emp: Employee) => {
-    // TODO: Open edit dialog
-    toast.info('Tính năng chỉnh sửa đang phát triển')
+    setEditingEmployee(emp)
+    setEditForm({
+      firstName: emp.firstName || '',
+      lastName: emp.lastName || '',
+      email: emp.email || '',
+      phone: emp.phone || '',
+      department: emp.department || '',
+      position: emp.position || '',
+      status: emp.status || 'active',
+      salary: emp.salary || emp.baseSalary || 0,
+    })
+    setEditDialogOpen(true)
+  }
+
+  const handleSaveEmployee = async () => {
+    if (!editingEmployee) return
+    
+    setSaving(true)
+    try {
+      const response = await authFetch(`/api/erp/employees/${editingEmployee.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          email: editForm.email,
+          phone: editForm.phone,
+          department: editForm.department,
+          position: editForm.position,
+          status: editForm.status,
+          salary: editForm.salary,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update employee')
+      }
+
+      toast.success('Đã cập nhật thông tin nhân viên')
+      setEditDialogOpen(false)
+      setEditingEmployee(null)
+      onRefresh()
+    } catch (error: any) {
+      toast.error(error.message || 'Không thể cập nhật nhân viên')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDeleteEmployee = async (emp: Employee) => {
@@ -608,7 +669,7 @@ export function EmployeeDirectory({ employees, onRefresh, loading }: EmployeeDir
     if (!confirm(`Bạn có chắc muốn xóa nhân viên ${fullName}?`)) return
     
     try {
-      const response = await fetch(`/api/erp/employees/${emp.id}`, {
+      const response = await authFetch(`/api/erp/employees/${emp.id}`, {
         method: 'DELETE',
       })
       
@@ -801,6 +862,144 @@ export function EmployeeDirectory({ employees, onRefresh, loading }: EmployeeDir
           <p className="text-muted-foreground">Không tìm thấy nhân viên nào phù hợp</p>
         </div>
       )}
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Chỉnh sửa nhân viên</DialogTitle>
+            <DialogDescription>
+              Cập nhật thông tin nhân viên {editingEmployee?.employeeCode}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-lastName">Họ</Label>
+                <Input
+                  id="edit-lastName"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                  placeholder="Nguyễn"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-firstName">Tên</Label>
+                <Input
+                  id="edit-firstName"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                  placeholder="Văn A"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                  placeholder="email@company.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Số điện thoại</Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                  placeholder="0901234567"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-department">Phòng ban</Label>
+                <Select 
+                  value={editForm.department} 
+                  onValueChange={(v) => setEditForm({...editForm, department: v})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn phòng ban" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ban Giám đốc">Ban Giám đốc</SelectItem>
+                    <SelectItem value="Phòng Kỹ thuật">Phòng Kỹ thuật</SelectItem>
+                    <SelectItem value="Phòng Kinh doanh">Phòng Kinh doanh</SelectItem>
+                    <SelectItem value="Phòng Nhân sự">Phòng Nhân sự</SelectItem>
+                    <SelectItem value="Phòng Kế toán">Phòng Kế toán</SelectItem>
+                    <SelectItem value="Phòng Marketing">Phòng Marketing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-position">Chức vụ</Label>
+                <Input
+                  id="edit-position"
+                  value={editForm.position}
+                  onChange={(e) => setEditForm({...editForm, position: e.target.value})}
+                  placeholder="Nhân viên"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-status">Trạng thái</Label>
+                <Select 
+                  value={editForm.status} 
+                  onValueChange={(v) => setEditForm({...editForm, status: v})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Đang làm việc</SelectItem>
+                    <SelectItem value="probation">Thử việc</SelectItem>
+                    <SelectItem value="on_leave">Nghỉ phép</SelectItem>
+                    <SelectItem value="resigned">Đã nghỉ việc</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-salary">Lương cơ bản (VNĐ)</Label>
+                <Input
+                  id="edit-salary"
+                  type="number"
+                  value={editForm.salary}
+                  onChange={(e) => setEditForm({...editForm, salary: Number(e.target.value)})}
+                  placeholder="10000000"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={saving}>
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleSaveEmployee} 
+              disabled={saving}
+              className="bg-[#D4AF37] hover:bg-[#B8960A] text-white"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                'Lưu thay đổi'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

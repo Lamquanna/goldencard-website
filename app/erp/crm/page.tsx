@@ -533,10 +533,14 @@ function AddLeadDialog() {
     try {
       console.log('🚀 Submitting lead data:', formData);
       
+      // Get auth token from localStorage
+      const token = localStorage.getItem('erp_token') || localStorage.getItem('auth_token');
+      
       const response = await fetch('/api/erp/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           name: formData.name.trim(),

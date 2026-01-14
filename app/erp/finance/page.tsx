@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import Link from 'next/link'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { 
   formatCurrency,
   INVOICE_STATUS_CONFIG,
@@ -48,8 +49,8 @@ export default function FinanceDashboard() {
   const loadData = async () => {
     try {
       const [invoicesRes, expensesRes] = await Promise.all([
-        fetch('/api/erp/invoices'),
-        fetch('/api/erp/expenses')
+        authFetch('/api/erp/invoices'),
+        authFetch('/api/erp/expenses')
       ])
 
       if (invoicesRes.ok) {

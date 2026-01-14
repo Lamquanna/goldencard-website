@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { authFetch } from '@/lib/hooks/useAuthFetch'
 import { 
   Users, 
   Clock, 
@@ -96,7 +97,7 @@ export default function HRMDashboard() {
   const loadStats = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/erp/employees')
+      const response = await authFetch('/api/erp/employees')
       if (!response.ok) throw new Error('Failed to fetch')
       
       const data = await response.json()
