@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { verifyToken } from "@/lib/auth/jwt";
 
 // Verify token endpoint - Check against PostgreSQL database
 export async function GET(request: NextRequest) {
@@ -17,16 +18,18 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Decode base64 token: format is "username:role:timestamp"
-      const decoded = Buffer.from(token, "base64").toString("utf-8");
-      const parts = decoded.split(":");
+      // Verify JWT token
+      const decoded = verifyToken(token);
       
-      if (parts.length < 2) {
-        return NextResponse.json({ error: "Invalid token format" }, { status: 401 });
+      if (!decoded) {
+        return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
       }
 
-      const username = parts[0];
-      const role = parts[1];
+      const username = decoded.username;
+
+      if (!username) {
+        return NextResponse.json({ error: "Invalid token payload" }, { status: 401 });
+      }
 
       // Verify user exists in database and is active
       const userResult = await sql`
