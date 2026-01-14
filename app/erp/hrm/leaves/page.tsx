@@ -5,10 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { LeaveManagement } from '@/app/erp/modules/hrm/components/LeaveManagement'
-import { useToast } from '@/components/ui/use-toast'
 
 export default function LeavesPage() {
-  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   // Submit new leave request
@@ -26,13 +24,13 @@ export default function LeavesPage() {
       })
       
       if (res.ok) {
-        toast({ title: 'Thành công', description: 'Đã gửi đơn nghỉ phép' })
+        alert('✅ Đã gửi đơn nghỉ phép')
         window.location.reload()
       } else {
-        toast({ title: 'Lỗi', description: 'Không thể gửi đơn', variant: 'destructive' })
+        alert('❌ Không thể gửi đơn')
       }
     } catch {
-      toast({ title: 'Lỗi', description: 'Không thể gửi đơn', variant: 'destructive' })
+      alert('❌ Không thể gửi đơn')
     } finally {
       setIsLoading(false)
     }
@@ -50,13 +48,13 @@ export default function LeavesPage() {
       })
       
       if (res.ok) {
-        toast({ title: 'Thành công', description: 'Đã hủy đơn nghỉ phép' })
+        alert('✅ Đã hủy đơn nghỉ phép')
         window.location.reload()
       } else {
-        toast({ title: 'Lỗi', description: 'Không thể hủy đơn', variant: 'destructive' })
+        alert('❌ Không thể hủy đơn')
       }
     } catch {
-      toast({ title: 'Lỗi', description: 'Không thể hủy đơn', variant: 'destructive' })
+      alert('❌ Không thể hủy đơn')
     }
   }
 
@@ -70,13 +68,13 @@ export default function LeavesPage() {
       })
       
       if (res.ok) {
-        toast({ title: 'Thành công', description: 'Đã duyệt đơn nghỉ phép' })
+        alert('✅ Đã duyệt đơn nghỉ phép')
         window.location.reload()
       } else {
-        toast({ title: 'Lỗi', description: 'Không thể duyệt đơn', variant: 'destructive' })
+        alert('❌ Không thể duyệt đơn')
       }
     } catch {
-      toast({ title: 'Lỗi', description: 'Không thể duyệt đơn', variant: 'destructive' })
+      alert('❌ Không thể duyệt đơn')
     }
   }
 
@@ -97,13 +95,13 @@ export default function LeavesPage() {
       })
       
       if (res.ok) {
-        toast({ title: 'Thành công', description: 'Đã từ chối đơn nghỉ phép' })
+        alert('✅ Đã từ chối đơn nghỉ phép')
         window.location.reload()
       } else {
-        toast({ title: 'Lỗi', description: 'Không thể từ chối đơn', variant: 'destructive' })
+        alert('❌ Không thể từ chối đơn')
       }
     } catch {
-      toast({ title: 'Lỗi', description: 'Không thể từ chối đơn', variant: 'destructive' })
+      alert('❌ Không thể từ chối đơn')
     }
   }
 
