@@ -3,42 +3,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-
-// Ensure leads table exists with correct schema
-async function ensureLeadsTable() {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS leads (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255),
-        phone VARCHAR(50),
-        company_name VARCHAR(255),
-        description TEXT,
-        status VARCHAR(50) DEFAULT 'new',
-        temperature VARCHAR(20) DEFAULT 'warm',
-        utm_source VARCHAR(100),
-        landing_page TEXT,
-        assigned_to VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
-  } catch (e: any) {
-    console.log('Leads table check:', e.message);
-  }
-}
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function POST(request: NextRequest) {
+  // Require authentication
+  const authResult = requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  const { user } = authResult;
+
   try {
-    await ensureLeadsTable();
     
     const body = await request.json() as any;
 
     // Validate required fields
-    if (!body.name) {
+    if (!body.name && !body.first_name && !body.last_name) {
       return NextResponse.json(
-        { error: 'Name is required' },
+        { error: 'Name (or first_name/last_name) is required' },
         { status: 400 }
       );
     }
@@ -55,30 +37,38 @@ export async function POST(request: NextRequest) {
     const temperature = temperatureMap[body.priority] || temperatureMap[body.rating] || 'warm';
 
     try {
-      // Insert lead into PostgreSQL database
+      // Insert lead into PostgreSQL database with correct schema
       const result = await sql`
         INSERT INTO leads (
-          name,
+          first_name,
+          last_name,
           email,
           phone,
           company_name,
           description,
+          notes,
           status,
           temperature,
-          utm_source,
-          landing_page,
+          source,
+          source_detail,
+          assigned_to,
+          created_by,
           created_at,
           updated_at
         ) VALUES (
-          ${body.name},
+          ${body.first_name || body.name || null},
+          ${body.last_name || null},
           ${body.email || null},
           ${body.phone || null},
-          ${body.company || null},
-          ${body.message || body.notes || null},
+          ${body.company || body.company_name || null},
+          ${body.message || null},
+          ${body.notes || null},
           ${'new'},
           ${temperature},
           ${body.source || 'manual'},
           ${body.source_url || null},
+          ${user.username || null},
+          ${user.username || null},
           NOW(),
           NOW()
         )

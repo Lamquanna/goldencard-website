@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   // Check authentication
-  const authResult = await requireAuth(request);
+  const authResult = requireAuth(request);
   if (authResult instanceof NextResponse) {
     return authResult;
   }
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   // Check authentication
-  const authResult = await requireAuth(request);
+  const authResult = requireAuth(request);
   if (authResult instanceof NextResponse) {
     return authResult;
   }

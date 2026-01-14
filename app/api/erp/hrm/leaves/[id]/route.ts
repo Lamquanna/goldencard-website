@@ -101,10 +101,9 @@ export async function PUT(
           )
       `;
 
-      // ✅ Use transaction to ensure atomic update of request + balance
-      await sql.begin(async (transaction: any) => {
-        // Update leave request
-        await transaction`
+      // ✅ Update leave request with approval
+      try {
+        await sql`
           UPDATE leave_requests
           SET 
             status = 'approved',
@@ -116,7 +115,7 @@ export async function PUT(
 
         // ✅ Deduct leave balance if annual or sick leave
         if (request_data.leave_type === 'annual') {
-          const balanceResult = await transaction`
+          const balanceResult = await sql`
             UPDATE leave_balances
             SET 
               annual_used = annual_used + ${request_data.total_days},
@@ -129,10 +128,22 @@ export async function PUT(
           `;
           
           if (balanceResult.length === 0) {
-            throw new Error('Insufficient annual leave balance');
+            // Rollback the approval if balance update fails
+            await sql`
+              UPDATE leave_requests
+              SET status = 'pending', approved_by = NULL, approved_at = NULL
+              WHERE id = ${id}
+            `;
+            return createErrorResponse(
+              'Insufficient annual leave balance',
+              ErrorCodes.VALIDATION_ERROR,
+              400,
+              { required: request_data.total_days },
+              requestId
+            );
           }
         } else if (request_data.leave_type === 'sick') {
-          const balanceResult = await transaction`
+          const balanceResult = await sql`
             UPDATE leave_balances
             SET 
               sick_used = sick_used + ${request_data.total_days},
@@ -145,10 +156,31 @@ export async function PUT(
           `;
           
           if (balanceResult.length === 0) {
-            throw new Error('Insufficient sick leave balance');
+            // Rollback the approval if balance update fails
+            await sql`
+              UPDATE leave_requests
+              SET status = 'pending', approved_by = NULL, approved_at = NULL
+              WHERE id = ${id}
+            `;
+            return createErrorResponse(
+              'Insufficient sick leave balance',
+              ErrorCodes.VALIDATION_ERROR,
+              400,
+              { required: request_data.total_days },
+              requestId
+            );
           }
         }
-      });
+      } catch (dbError: any) {
+        console.error('Database error during leave approval:', dbError);
+        return createErrorResponse(
+          'Database error during approval',
+          ErrorCodes.DATABASE_ERROR,
+          500,
+          dbError.message,
+          requestId
+        );
+      }
 
       return createSuccessResponse(
         {
