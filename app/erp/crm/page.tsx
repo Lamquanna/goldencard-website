@@ -388,15 +388,36 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
   };
 
   const handleViewLead = (lead: any) => {
-    alert(`📋 Xem chi tiết lead: ${lead.name}\n\nEmail: ${lead.email}\nPhone: ${lead.phone}\nCompany: ${lead.company}\nStatus: ${lead.status}`);
+    const details = [
+      `📋 Xem chi tiết lead: ${lead.name}`,
+      '',
+      `Email: ${lead.email || 'Chưa có'}`,
+      `Phone: ${lead.phone || 'Chưa có'}`,
+      `Company: ${lead.company || lead.company_name || 'Chưa có'}`,
+      `Status: ${lead.status || 'new'}`,
+      `Rating: ${lead.rating || lead.temperature || 'N/A'}`,
+      `Source: ${lead.source || 'N/A'}`,
+      `Created: ${lead.createdAt || lead.created_at || 'N/A'}`,
+    ].join('\n');
+    alert(details);
   };
 
   const handleEditLead = (lead: any) => {
     setEditingLead(lead);
     setShowEditDialog(true);
+    // TODO: Implement edit dialog
+    alert('⚠️ Chức năng chỉnh sửa đang được phát triển');
   };
 
   const handleDeleteLead = async (lead: any) => {
+    // Check if this is mock data (string ID)
+    const isMockData = typeof lead.id === 'string' && isNaN(parseInt(lead.id));
+    
+    if (isMockData) {
+      alert('⚠️ Không thể xóa dữ liệu mẫu.\n\nĐây là lead demo. Chỉ có thể xóa lead thật từ database.');
+      return;
+    }
+    
     if (!confirm(`Bạn có chắc muốn xóa lead "${lead.name}"?\n\nHành động này không thể hoàn tác!`)) return;
     
     try {
@@ -421,6 +442,11 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
     }
   };
 
+  const handleViewAll = () => {
+    // TODO: Navigate to full leads page or open modal with all leads
+    alert('🔜 Tính năng "Xem tất cả leads" đang được phát triển.\n\nSẽ chuyển đến trang danh sách đầy đủ.');
+  };
+
   // Use real leads if available, otherwise use mock data
   const displayLeads = leads.length > 0 ? leads : mockRecentLeads;
 
@@ -432,7 +458,7 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
             <CardTitle className="text-lg text-gray-900">Leads gần đây</CardTitle>
             <CardDescription>Các lead mới nhất cần follow-up</CardDescription>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleViewAll}>
             Xem tất cả
           </Button>
         </div>
