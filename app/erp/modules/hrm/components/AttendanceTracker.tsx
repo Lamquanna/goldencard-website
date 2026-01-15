@@ -565,16 +565,18 @@ export function AttendanceTracker({
         }),
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Check-in failed')
+      const data = await response.json()
+      
+      if (!response.ok || data.success === false) {
+        // Handle API error response format: { success: false, error: { message, code } }
+        const errMsg = data.error?.message || data.error || data.message || 'Check-in failed'
+        throw new Error(errMsg)
       }
 
-      const data = await response.json()
       const now = new Date()
       
       const newRecord: AttendanceRecord = {
-        id: data.record?.id || `att-${Date.now()}`,
+        id: data.data?.record?.id || data.record?.id || `att-${Date.now()}`,
         employeeId: currentUser?.id || 'emp-1',
         employeeName: currentUser?.name || 'Nguyen Van Admin',
         employeeCode: currentUser?.employeeCode || 'GES001',
@@ -599,9 +601,7 @@ export function AttendanceTracker({
       alert('✅ Check-in thành công!')
     } catch (error: any) {
       console.error('Check-in error:', error)
-      const errorMessage = typeof error === 'string' 
-        ? error 
-        : error?.message || error?.error || JSON.stringify(error) || 'Lỗi không xác định'
+      const errorMessage = error?.message || 'Lỗi không xác định'
       alert('❌ Check-in thất bại: ' + errorMessage)
     } finally {
       setIsLoading(false)

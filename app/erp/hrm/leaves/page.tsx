@@ -14,7 +14,7 @@ export default function LeavesPage() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('erp_token')
-      const res = await fetch('/api/erp/leaves', {
+      const res = await fetch('/api/erp/hrm/leaves', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,14 +23,15 @@ export default function LeavesPage() {
         body: JSON.stringify(request)
       })
       
+      const data = await res.json()
       if (res.ok) {
         alert('✅ Đã gửi đơn nghỉ phép')
         window.location.reload()
       } else {
-        alert('❌ Không thể gửi đơn')
+        alert('❌ Không thể gửi đơn: ' + (data.error || data.message || 'Lỗi không xác định'))
       }
-    } catch {
-      alert('❌ Không thể gửi đơn')
+    } catch (err: any) {
+      alert('❌ Không thể gửi đơn: ' + (err.message || 'Lỗi kết nối'))
     } finally {
       setIsLoading(false)
     }
@@ -42,19 +43,24 @@ export default function LeavesPage() {
     
     try {
       const token = localStorage.getItem('erp_token')
-      const res = await fetch(`/api/erp/leaves/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetch(`/api/erp/hrm/leaves/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: 'cancel' })
       })
       
+      const data = await res.json()
       if (res.ok) {
         alert('✅ Đã hủy đơn nghỉ phép')
         window.location.reload()
       } else {
-        alert('❌ Không thể hủy đơn')
+        alert('❌ Không thể hủy đơn: ' + (data.error || data.message || 'Lỗi không xác định'))
       }
-    } catch {
-      alert('❌ Không thể hủy đơn')
+    } catch (err: any) {
+      alert('❌ Không thể hủy đơn: ' + (err.message || 'Lỗi kết nối'))
     }
   }
 
@@ -62,46 +68,55 @@ export default function LeavesPage() {
   const handleApprove = async (id: string) => {
     try {
       const token = localStorage.getItem('erp_token')
-      const res = await fetch(`/api/erp/leaves/${id}/approve`, {
+      const res = await fetch(`/api/erp/hrm/leaves/${id}`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: 'approve' })
       })
       
+      const data = await res.json()
       if (res.ok) {
         alert('✅ Đã duyệt đơn nghỉ phép')
         window.location.reload()
       } else {
-        alert('❌ Không thể duyệt đơn')
+        alert('❌ Không thể duyệt đơn: ' + (data.error || data.message || 'Lỗi không xác định'))
       }
-    } catch {
-      alert('❌ Không thể duyệt đơn')
+    } catch (err: any) {
+      alert('❌ Không thể duyệt đơn: ' + (err.message || 'Lỗi kết nối'))
     }
   }
 
   // Reject leave request
   const handleReject = async (id: string) => {
     const reason = prompt('Nhập lý do từ chối:')
-    if (!reason) return
+    if (!reason) {
+      alert('⚠️ Vui lòng nhập lý do từ chối')
+      return
+    }
     
     try {
       const token = localStorage.getItem('erp_token')
-      const res = await fetch(`/api/erp/leaves/${id}/reject`, {
+      const res = await fetch(`/api/erp/hrm/leaves/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ reason })
+        body: JSON.stringify({ action: 'reject', rejectReason: reason })
       })
       
+      const data = await res.json()
       if (res.ok) {
         alert('✅ Đã từ chối đơn nghỉ phép')
         window.location.reload()
       } else {
-        alert('❌ Không thể từ chối đơn')
+        alert('❌ Không thể từ chối đơn: ' + (data.error || data.message || 'Lỗi không xác định'))
       }
-    } catch {
-      alert('❌ Không thể từ chối đơn')
+    } catch (err: any) {
+      alert('❌ Không thể từ chối đơn: ' + (err.message || 'Lỗi kết nối'))
     }
   }
 

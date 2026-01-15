@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Target,
@@ -23,6 +23,7 @@ import {
   Globe,
   Share2,
   MessageSquare,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -308,8 +309,8 @@ function StatCard({
 }
 
 // Component biểu đồ phễu Pipeline
-function PipelineFunnel() {
-  const maxCount = Math.max(...mockLeadsByStatus.map((s) => s.count));
+function PipelineFunnel({ data }: { data: typeof mockLeadsByStatus }) {
+  const maxCount = Math.max(...data.map((s) => s.count), 1);
 
   return (
     <Card className="bg-white border-gray-200">
@@ -319,7 +320,7 @@ function PipelineFunnel() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {mockLeadsByStatus.map((item) => {
+          {data.map((item) => {
             const config = LEAD_STATUS_CONFIG.find((s) => s.id === item.status);
             if (!config) return null;
 
@@ -360,7 +361,7 @@ function PipelineFunnel() {
 }
 
 // Component danh sách leads gần đây
-function RecentLeads() {
+function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean }) {
   const getRatingIcon = (rating: string) => {
     switch (rating) {
       case 'hot':
@@ -371,6 +372,9 @@ function RecentLeads() {
         return <Snowflake className="w-4 h-4 text-blue-500" />;
     }
   };
+
+  // Use real leads if available, otherwise use mock data
+  const displayLeads = leads.length > 0 ? leads : mockRecentLeads;
 
   return (
     <Card className="bg-white border-gray-200">
@@ -386,44 +390,55 @@ function RecentLeads() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {mockRecentLeads.map((lead) => {
-            const statusConfig = LEAD_STATUS_CONFIG.find((s) => s.id === lead.status);
-            return (
-              <div
-                key={lead.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-gray-200">
-                      {lead.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">{lead.name}</span>
-                      {getRatingIcon(lead.rating)}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-[#D4AF37]" />
+            <span className="ml-2 text-gray-500">Đang tải dữ liệu...</span>
+          </div>
+        ) : displayLeads.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            Chưa có lead nào. Hãy thêm lead mới!
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {displayLeads.map((lead) => {
+              const statusConfig = LEAD_STATUS_CONFIG.find((s) => s.id === lead.status);
+              return (
+                <div
+                  key={lead.id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-gray-200">
+                        {lead.name
+                          .split(' ')
+                          .map((n: string) => n[0])
+                          .join('')
+                          .slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{lead.name}</span>
+                        {getRatingIcon(lead.rating)}
+                      </div>
+                      <p className="text-sm text-gray-500">{lead.company}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{lead.company}</p>
+                  </div>
+                  <div className="text-right">
+                    <Badge
+                      style={{ backgroundColor: `${statusConfig?.color}20`, color: statusConfig?.color }}
+                    >
+                      {statusConfig?.nameVi}
+                    </Badge>
+                    <p className="text-xs text-gray-500 mt-1">{lead.createdAt}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge
-                    style={{ backgroundColor: `${statusConfig?.color}20`, color: statusConfig?.color }}
-                  >
-                    {statusConfig?.nameVi}
-                  </Badge>
-                  <p className="text-xs text-gray-500 mt-1">{lead.createdAt}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -793,6 +808,75 @@ function AddLeadDialog() {
 export default function CRMPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showHelp, setShowHelp] = useState(false);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [isLoadingLeads, setIsLoadingLeads] = useState(true);
+  const [stats, setStats] = useState(mockStats);
+  const [leadsByStatus, setLeadsByStatus] = useState(mockLeadsByStatus);
+
+  // Fetch leads from API on mount
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const fetchLeads = async () => {
+    try {
+      setIsLoadingLeads(true);
+      const token = localStorage.getItem('erp_token') || localStorage.getItem('auth_token');
+      
+      const response = await fetch('/api/erp/leads', {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Fetched leads:', data);
+        
+        if (data.success && data.leads) {
+          // Transform API data to match component format
+          const transformedLeads = data.leads.map((lead: any) => ({
+            id: lead.id,
+            name: lead.first_name + (lead.last_name ? ' ' + lead.last_name : ''),
+            company: lead.company_name || lead.company || '',
+            email: lead.email || '',
+            phone: lead.phone || '',
+            status: lead.status || 'new',
+            rating: lead.temperature || 'warm',
+            score: lead.score || 50,
+            source: lead.source || 'Website',
+            createdAt: lead.created_at ? new Date(lead.created_at).toLocaleDateString('vi-VN') : 'Hôm nay',
+          }));
+          
+          setLeads(transformedLeads);
+          
+          // Update stats
+          const newCount = transformedLeads.filter((l: any) => l.status === 'new').length;
+          const contactedCount = transformedLeads.filter((l: any) => l.status === 'contacted').length;
+          const qualifiedCount = transformedLeads.filter((l: any) => l.status === 'qualified').length;
+          const proposalCount = transformedLeads.filter((l: any) => l.status === 'proposal').length;
+          const negotiationCount = transformedLeads.filter((l: any) => l.status === 'negotiation').length;
+          
+          setStats(prev => ({
+            ...prev,
+            totalLeads: data.total || transformedLeads.length,
+          }));
+          
+          setLeadsByStatus([
+            { status: 'new', count: newCount, value: newCount * 15000000 },
+            { status: 'contacted', count: contactedCount, value: contactedCount * 18000000 },
+            { status: 'qualified', count: qualifiedCount, value: qualifiedCount * 20000000 },
+            { status: 'proposal', count: proposalCount, value: proposalCount * 25000000 },
+            { status: 'negotiation', count: negotiationCount, value: negotiationCount * 30000000 },
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+    } finally {
+      setIsLoadingLeads(false);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6 bg-white min-h-screen">
@@ -870,31 +954,31 @@ export default function CRMPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Tổng Leads"
-          value={mockStats.totalLeads}
-          change={mockStats.leadsChange}
+          value={stats.totalLeads}
+          change={stats.leadsChange}
           changeLabel="so với tháng trước"
           icon={Users}
           iconColor="#3B82F6"
         />
         <StatCard
           title="Liên hệ"
-          value={mockStats.totalContacts}
-          change={mockStats.contactsChange}
+          value={stats.totalContacts}
+          change={stats.contactsChange}
           changeLabel="so với tháng trước"
           icon={Handshake}
           iconColor="#8B5CF6"
         />
         <StatCard
           title="Deals đang theo"
-          value={mockStats.totalDeals}
-          change={mockStats.dealsChange}
+          value={stats.totalDeals}
+          change={stats.dealsChange}
           changeLabel="so với tháng trước"
           icon={Target}
           iconColor="#10B981"
         />
         <StatCard
           title="Giá trị Pipeline"
-          value={mockStats.pipelineValue}
+          value={stats.pipelineValue}
           icon={DollarSign}
           iconColor="#D4AF37"
           format="currency"
@@ -913,8 +997,8 @@ export default function CRMPage() {
         <TabsContent value="overview" className="mt-6 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <PipelineFunnel />
-              <RecentLeads />
+              <PipelineFunnel data={leadsByStatus} />
+              <RecentLeads leads={leads} isLoading={isLoadingLeads} />
             </div>
             <div className="space-y-6">
               <TopDeals />
@@ -924,7 +1008,7 @@ export default function CRMPage() {
         </TabsContent>
 
         <TabsContent value="leads" className="mt-6">
-          <RecentLeads />
+          <RecentLeads leads={leads} isLoading={isLoadingLeads} />
         </TabsContent>
 
         <TabsContent value="deals" className="mt-6">
