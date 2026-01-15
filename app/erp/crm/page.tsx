@@ -24,6 +24,10 @@ import {
   Share2,
   MessageSquare,
   Loader2,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +55,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Hướng dẫn sử dụng
 const helpGuide = {
@@ -362,6 +373,9 @@ function PipelineFunnel({ data }: { data: typeof mockLeadsByStatus }) {
 
 // Component danh sách leads gần đây
 function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean }) {
+  const [editingLead, setEditingLead] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  
   const getRatingIcon = (rating: string) => {
     switch (rating) {
       case 'hot':
@@ -370,6 +384,40 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
         return <ThermometerSun className="w-4 h-4 text-orange-500" />;
       default:
         return <Snowflake className="w-4 h-4 text-blue-500" />;
+    }
+  };
+
+  const handleViewLead = (lead: any) => {
+    alert(`📋 Xem chi tiết lead: ${lead.name}\n\nEmail: ${lead.email}\nPhone: ${lead.phone}\nCompany: ${lead.company}\nStatus: ${lead.status}`);
+  };
+
+  const handleEditLead = (lead: any) => {
+    setEditingLead(lead);
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteLead = async (lead: any) => {
+    if (!confirm(`Bạn có chắc muốn xóa lead "${lead.name}"?\n\nHành động này không thể hoàn tác!`)) return;
+    
+    try {
+      const token = localStorage.getItem('erp_token') || localStorage.getItem('auth_token');
+      const response = await fetch(`/api/erp/leads/${lead.id}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (response.ok) {
+        alert(`✅ Đã xóa lead: ${lead.name}`);
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert(`❌ Lỗi: ${data.error || 'Không thể xóa lead'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      alert('❌ Có lỗi xảy ra khi xóa lead');
     }
   };
 
@@ -406,7 +454,8 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
               return (
                 <div
                   key={lead.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="group flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
+                  onClick={() => handleViewLead(lead)}
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
@@ -426,13 +475,41 @@ function RecentLeads({ leads, isLoading }: { leads: any[]; isLoading: boolean })
                       <p className="text-sm text-gray-500">{lead.company}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge
-                      style={{ backgroundColor: `${statusConfig?.color}20`, color: statusConfig?.color }}
-                    >
-                      {statusConfig?.nameVi}
-                    </Badge>
-                    <p className="text-xs text-gray-500 mt-1">{lead.createdAt}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <Badge
+                        style={{ backgroundColor: `${statusConfig?.color}20`, color: statusConfig?.color }}
+                      >
+                        {statusConfig?.nameVi}
+                      </Badge>
+                      <p className="text-xs text-gray-500 mt-1">{lead.createdAt}</p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewLead(lead); }}>
+                          <Eye className="h-4 w-4 mr-2" /> Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditLead(lead); }}>
+                          <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive" 
+                          onClick={(e) => { e.stopPropagation(); handleDeleteLead(lead); }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Xóa lead
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               );
