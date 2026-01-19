@@ -184,11 +184,11 @@ export function generateOrganizationSchema(locale: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': 'https://goldenenergy.com.vn/#organization',
+    '@id': 'https://goldenenergy.vn/#organization',
     name: 'Golden Energy Vietnam',
     alternateName: locale === 'zh' ? '金能源越南' : 'Năng Lượng Vàng',
-    url: 'https://goldenenergy.com.vn',
-    logo: 'https://goldenenergy.com.vn/logo.png',
+    url: 'https://goldenenergy.vn',
+    logo: 'https://goldenenergy.vn/logo.png',
     
     // Thông tin liên hệ
     contactPoint: [{
@@ -248,7 +248,7 @@ interface ProductSchemaInput {
 }
 
 export function generateProductSchema(input: ProductSchemaInput) {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   return {
     '@context': 'https://schema.org',
@@ -311,7 +311,7 @@ export function generateProductSchema(input: ProductSchemaInput) {
 **Mục tiêu:** Google hiểu structure thông tin, tăng topical authority
 
 ```
-goldenenergy.com.vn/
+goldenenergy.vn/
 ├── giai-phap/                    (Solutions hub - Pillar page)
 │   ├── dien-mat-troi-ho-gia-dinh/     (Residential)
 │   ├── dien-mat-troi-thuong-mai/      (Commercial)
@@ -367,7 +367,7 @@ export function InternalLink({ href, children, rel }: InternalLinkProps) {
 // lib/schema/breadcrumb.ts
 export function generateBreadcrumbSchema(path: string, locale: string) {
   const segments = path.split('/').filter(Boolean)
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   const itemListElement = segments.map((segment, index) => {
     const position = index + 2 // +1 for home, +1 for 1-indexed
@@ -424,11 +424,11 @@ export function generateArticleSchema(input: ArticleInput) {
     author: {
       '@type': 'Person',
       name: input.author,
-      url: 'https://goldenenergy.com.vn/about#team'
+      url: 'https://goldenenergy.vn/about#team'
     },
     
     publisher: {
-      '@id': 'https://goldenenergy.com.vn/#organization'
+      '@id': 'https://goldenenergy.vn/#organization'
     },
     
     datePublished: input.publishedDate,
@@ -892,9 +892,9 @@ export function SmartCTA() {
 
 **URL Pattern:**
 ```
-goldenenergy.com.vn/vi/giai-phap/dien-mat-troi/
-goldenenergy.com.vn/en/solutions/solar-energy/
-goldenenergy.com.vn/zh/解决方案/太阳能/
+goldenenergy.vn/vi/giai-phap/dien-mat-troi/
+goldenenergy.vn/en/solutions/solar-energy/
+goldenenergy.vn/zh/解决方案/太阳能/
 ```
 
 **Middleware Implementation:**
@@ -1073,7 +1073,7 @@ import { generateHrefLangTags } from '@/lib/i18n/hreflang'
 
 export async function generateMetadata({ params }: { params: { locale: string } }) {
   const { locale } = params
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   return {
     alternates: {
