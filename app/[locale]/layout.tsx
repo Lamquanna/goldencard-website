@@ -11,6 +11,7 @@ import { getSitewide } from "@/lib/content";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n";
 import { getPrimaryNavigation } from "@/lib/navigation";
 import { montserrat, playfairDisplay } from "@/app/fonts";
+import { generateOrganizationSchema } from "@/lib/schema";
 
 interface LocaleLayoutProps {
   children: ReactNode;
@@ -34,9 +35,18 @@ export default async function LocaleLayout({
   const locale = candidate as Locale;
   const sitewide = getSitewide(locale);
   const navItems = getPrimaryNavigation(locale);
+  
+  // Generate Organization Schema for entire site
+  const organizationSchema = generateOrganizationSchema({ locale: locale as any });
 
   return (
     <>
+      {/* Global Organization Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      
       <LocaleLangSetter locale={locale} />
       <LoadingScreen />
       <PageTransition>
