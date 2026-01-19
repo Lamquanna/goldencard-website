@@ -1,8 +1,9 @@
 ﻿import type { Metadata } from "next";
 import { bodyFont, headingFont } from "./fonts";
 import "./globals.css";
-import AnalyticsProvider from "@/components/AnalyticsProvider";
+import { AnalyticsProvider, GTMNoScript } from "@/components/analytics/AnalyticsProvider";
 import { BreadcrumbSchema } from "@/components/BreadcrumbSchema";
+import { SITE_CONFIG } from "@/lib/config/site";
 // import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
@@ -15,7 +16,13 @@ const criticalStyles = `
 `;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://goldenenergy.vn"),
+  metadataBase: new URL(SITE_CONFIG.url),
+  verification: {
+    google: SITE_CONFIG.verification.google,
+    other: {
+      'msvalidate.01': SITE_CONFIG.verification.bing || '',
+    },
+  },
   title: {
     default: "Golden Energy Vietnam - Giải Pháp Điện Mặt Trời & Năng Lượng Tái Tạo Hàng Đầu",
     template: "%s | Golden Energy Vietnam",
@@ -95,17 +102,13 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://goldenenergy.vn",
+    canonical: SITE_CONFIG.url,
     languages: {
-      "vi-VN": "https://goldenenergy.vn/vi",
-      "en-US": "https://goldenenergy.vn/en",
-      "zh-CN": "https://goldenenergy.vn/zh",
+      "vi-VN": `${SITE_CONFIG.url}/vi`,
+      "en-US": `${SITE_CONFIG.url}/en`,
+      "zh-CN": `${SITE_CONFIG.url}/zh`,
+      "id-ID": `${SITE_CONFIG.url}/id`,
     },
-  },
-  verification: {
-    // Add verification codes when available
-    // google: "your-google-verification-code",
-    // yandex: "your-yandex-verification-code",
   },
   category: "Renewable Energy",
 };
@@ -114,11 +117,13 @@ export const metadata: Metadata = {
 const organizationStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Golden Energy Vietnam",
+  name: SITE_CONFIG.name,
   alternateName: "GoldenEnergy",
-  url: "https://goldenenergy.vn",
-  logo: "https://goldenenergy.vn/images/logo.png",
+  url: SITE_CONFIG.url,
+  logo: `${SITE_CONFIG.url}/images/logo.png`,
   description: "Công ty năng lượng tái tạo hàng đầu Việt Nam - Điện mặt trời, điện gió, IoT thông minh",
+  email: SITE_CONFIG.email,
+  telephone: SITE_CONFIG.phone,
   address: {
     "@type": "PostalAddress",
     streetAddress: "A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè",
@@ -127,12 +132,18 @@ const organizationStructuredData = {
     postalCode: "700000",
     addressCountry: "VN"
   },
+  sameAs: [
+    SITE_CONFIG.social.facebook,
+    SITE_CONFIG.social.linkedin,
+    SITE_CONFIG.social.youtube,
+    SITE_CONFIG.social.twitter,
+  ],
   contactPoint: [
     {
       "@type": "ContactPoint",
-      telephone: "+84-3333-142-88",
+      telephone: SITE_CONFIG.phone,
       contactType: "sales",
-      availableLanguage: ["Vietnamese", "English", "Chinese"]
+      availableLanguage: ["Vietnamese", "English", "Chinese", "Indonesian"]
     },
     {
       "@type": "ContactPoint",
@@ -140,10 +151,6 @@ const organizationStructuredData = {
       contactType: "customer service",
       availableLanguage: ["Vietnamese", "English"]
     }
-  ],
-  sameAs: [
-    "https://www.facebook.com/goldenenergyvn",
-    "https://www.linkedin.com/company/goldenenergy-vietnam"
   ],
   areaServed: {
     "@type": "Country",
@@ -236,47 +243,17 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Golden Energy Vietnam",
-              "alternateName": "Golden Card Vietnam",
-              "url": "https://goldenenergy.vn",
-              "logo": "https://goldenenergy.vn/logo.png",
-              "description": "Công ty cung cấp giải pháp năng lượng mặt trời hàng đầu Việt Nam với hơn 500+ dự án và 50MW+ công suất lắp đặt",
-              "email": "info@goldenenergy.vn",
-              "telephone": "+84-28-1234-5678",
-              "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "123 Đường Điện Biên Phủ",
-                "addressLocality": "Quận Bình Thạnh",
-                "addressRegion": "TP. Hồ Chí Minh",
-                "postalCode": "700000",
-                "addressCountry": "VN"
-              },
-              "sameAs": [
-                "https://www.facebook.com/goldenenergy",
-                "https://www.linkedin.com/company/goldenenergy",
-                "https://www.youtube.com/@goldenenergy"
-              ],
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": "+84-28-1234-5678",
-                "contactType": "customer service",
-                "areaServed": "VN",
-                "availableLanguage": ["Vietnamese", "English", "Chinese"]
-              },
-              "foundingDate": "2015",
-              "numberOfEmployees": {
-                "@type": "QuantitativeValue",
-                "value": 100
-              },
-              "slogan": "Năng lượng xanh - Tương lai bền vững"
-            })
+            __html: JSON.stringify(organizationStructuredData)
           }}
         />
         
-        <AnalyticsProvider>
+        {/* GTM NoScript fallback */}
+        {SITE_CONFIG.analytics.gtmId && <GTMNoScript gtmId={SITE_CONFIG.analytics.gtmId} />}
+        
+        <AnalyticsProvider 
+          gaId={SITE_CONFIG.analytics.googleAnalyticsId}
+          gtmId={SITE_CONFIG.analytics.gtmId}
+        >
           {children}
           <BreadcrumbSchema />
         </AnalyticsProvider>

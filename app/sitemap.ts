@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
+import { SITE_CONFIG } from '@/lib/config/site';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://goldenenergy.vn';
-  const locales = ['vi', 'en', 'zh', 'id'];
+  const baseUrl = SITE_CONFIG.url;
+  const locales = SITE_CONFIG.supportedLocales;
   
   // Core pages (high priority)
   const corePages = [
