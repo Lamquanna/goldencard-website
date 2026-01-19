@@ -61,8 +61,8 @@ const COMPANY_HQ = {
   address: 'Sunrise Riverside, Block A, Nguyễn Hữu Thọ/Đ. D1 ấp 5, Phước Kiển, Nhà Bè, Thành phố Hồ Chí Minh 70000',
   lat: 10.740842,
   lng: 106.703168,
-  phone: '1900 6868 66',
-  email: 'info@goldenenergy.vn',
+  phone: '+84 3333 142 88',
+  email: 'sales@goldenenergy.vn',
 };
 
 // Dữ liệu mẫu cho các địa điểm

@@ -119,15 +119,15 @@ export default async function ContactPage({ params }: ContactPageProps) {
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': ['LocalBusiness', 'Store', 'HomeAndConstructionBusiness'],
-    '@id': 'https://goldenenergy.com.vn/#organization',
+    '@id': 'https://goldenenergy.vn/#organization',
     name: 'Golden Energy Vietnam',
     alternateName: locale === 'zh' ? '金能源越南' : 'Năng Lượng Vàng',
-    url: 'https://goldenenergy.com.vn',
-    logo: 'https://goldenenergy.com.vn/logo.png',
-    image: 'https://goldenenergy.com.vn/images/headquarters.jpg',
+    url: 'https://goldenenergy.vn',
+    logo: 'https://goldenenergy.vn/logo.png',
+    image: 'https://goldenenergy.vn/images/headquarters.jpg',
     
     // Contact Information
-    telephone: '+84-3333-142-88',
+    telephone: '+84 3333 142 88',
     email: 'sales@goldenenergy.vn',
     
     // Address - Headquarters

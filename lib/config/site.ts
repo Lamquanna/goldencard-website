@@ -17,14 +17,18 @@ export const SITE_CONFIG = {
   description: 'Giải pháp năng lượng mặt trời, điện gió hàng đầu Việt Nam. 500+ dự án, 50MW+ công suất lắp đặt.',
   
   // Contact
-  email: 'info@goldenenergy.vn',
-  phone: '+84-28-1234-5678',
+  email: 'sales@goldenenergy.vn',
+  phone: '+84 3333 142 88',
+  phoneSecondary: '+84 903 117 277',
   address: {
-    street: '123 Đường ABC',
+    street: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiển, Nhà Bè',
     city: 'TP. Hồ Chí Minh',
     country: 'Vietnam',
-    postalCode: '700000',
+    postalCode: '70000',
   },
+  officeRepresentative: '625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM',
+  warehouse: '354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, TP.HCM',
+  workHours: '8:00 - 17:30 (T2 - T7)',
   
   // Social Media
   social: {
