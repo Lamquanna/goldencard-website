@@ -7,11 +7,17 @@ const defaultLocale = 'vi';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Skip middleware for API routes, static files
+  // Skip middleware for API routes, static files, and special app routes
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/erp') ||      // ERP System
+    pathname.startsWith('/auth') ||     // Auth pages
+    pathname.startsWith('/admin') ||    // Admin panel
+    pathname.startsWith('/chat') ||     // Chat widget
+    pathname.startsWith('/analytics') || // Analytics
+    pathname.startsWith('/projects') ||  // Projects without locale
     /\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(pathname)
   ) {
     return NextResponse.next();
