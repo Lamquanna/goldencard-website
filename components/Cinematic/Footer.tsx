@@ -40,6 +40,11 @@ export default function Footer({ navItems, locale }: FooterProps) {
       slogan: "清洁能源，绿色生活，黄金未来",
       navigation: "导航",
       contact: "联系方式"
+    },
+    id: {
+      slogan: "Energi bersih, kehidupan hijau, masa depan emas",
+      navigation: "Navigasi",
+      contact: "Kontak"
     }
   };
   

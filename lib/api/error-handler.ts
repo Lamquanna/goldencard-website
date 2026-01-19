@@ -198,5 +198,7 @@ export function logApiRequest(
   startTime: number
 ) {
   const duration = Date.now() - startTime
-  console.log(`[API] ${method} ${path} - ${requestId} (${duration}ms)`)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[API] ${method} ${path} - ${requestId} (${duration}ms)`);
+  }
 }

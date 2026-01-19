@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const locales = ['vi', 'en', 'zh'] as const;
+const locales = ['vi', 'en', 'zh', 'id'] as const;
 const defaultLocale = 'vi';
 
 export async function middleware(request: NextRequest) {
@@ -67,12 +67,14 @@ function detectFromAcceptLanguage(request: NextRequest): string | null {
   if (!acceptLanguage) return null;
   
   try {
-    // Parse "vi-VN,vi;q=0.9,en;q=0.8,zh;q=0.7"
+    // Parse "vi-VN,vi;q=0.9,en;q=0.8,zh;q=0.7,id;q=0.6"
     const languages = acceptLanguage
       .split(',')
       .map(lang => {
         const [locale, quality = 'q=1'] = lang.trim().split(';');
-        const parsedLocale = locale.split('-')[0].toLowerCase(); // 'vi-VN' -> 'vi'
+        let parsedLocale = locale.split('-')[0].toLowerCase(); // 'vi-VN' -> 'vi'
+        // Handle Indonesian variants ('in' is old code)
+        if (parsedLocale === 'in') parsedLocale = 'id';
         const parsedQuality = parseFloat(quality.split('=')[1] || '1');
         return { locale: parsedLocale, quality: parsedQuality };
       })
@@ -97,6 +99,8 @@ function detectFromGeo(request: NextRequest): string | null {
     'CN': 'zh',
     'TW': 'zh',
     'HK': 'zh',
+    'ID': 'id',
+    'MY': 'id',
     'SG': 'en',
     'US': 'en',
     'GB': 'en',
