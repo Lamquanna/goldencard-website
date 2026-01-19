@@ -9,6 +9,7 @@ import MapSection from "@/components/MapSection";
 import { getContactSection } from "@/lib/content";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
+import { generateBreadcrumbSchema } from "@/lib/schema";
 
 interface ContactPageProps {
   params: Promise<{ locale: string }>;
@@ -111,8 +112,113 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
   const consultContent = FREE_CONSULTATION[locale as keyof typeof FREE_CONSULTATION] || FREE_CONSULTATION['en'];
 
+  // Generate schemas
+  const breadcrumbPath = `/${locale}/contact`
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbPath, locale as any)
+
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': ['LocalBusiness', 'Store', 'HomeAndConstructionBusiness'],
+    '@id': 'https://goldenenergy.com.vn/#organization',
+    name: 'Golden Energy Vietnam',
+    alternateName: locale === 'zh' ? '金能源越南' : 'Năng Lượng Vàng',
+    url: 'https://goldenenergy.com.vn',
+    logo: 'https://goldenenergy.com.vn/logo.png',
+    image: 'https://goldenenergy.com.vn/images/headquarters.jpg',
+    
+    // Contact Information
+    telephone: '+84-3333-142-88',
+    email: 'sales@goldenenergy.vn',
+    
+    // Address - Headquarters
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiển, Nhà Bè',
+      addressLocality: 'TP. Hồ Chí Minh',
+      addressRegion: 'TP.HCM',
+      postalCode: '700000',
+      addressCountry: 'VN'
+    },
+    
+    // Geographic coordinates (Sunrise Riverside approximate)
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 10.6965,
+      longitude: 106.7144
+    },
+    
+    // Opening Hours
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '08:00',
+      closes: '17:30'
+    },
+    
+    // Business Type
+    priceRange: '$$',
+    
+    // Services
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Solar Energy Solutions',
+      itemListElement: [
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: locale === 'vi' ? 'Lắp đặt điện mặt trời hộ gia đình' : 'Residential Solar Installation',
+            description: locale === 'vi' ? 'Hệ thống điện mặt trời cho nhà ở' : 'Solar energy systems for homes'
+          }
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: locale === 'vi' ? 'Điện mặt trời thương mại' : 'Commercial Solar Installation',
+            description: locale === 'vi' ? 'Hệ thống cho doanh nghiệp, khách sạn, văn phòng' : 'Systems for businesses, hotels, offices'
+          }
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: locale === 'vi' ? 'Điện mặt trời công nghiệp' : 'Industrial Solar Installation',
+            description: locale === 'vi' ? 'Hệ thống quy mô lớn cho nhà máy' : 'Large-scale systems for factories'
+          }
+        }
+      ]
+    },
+    
+    // Social media
+    sameAs: [
+      'https://www.facebook.com/goldenenergyvn',
+      'https://www.linkedin.com/company/goldenenergyvn',
+      'https://www.youtube.com/c/goldenenergyvn'
+    ],
+    
+    // Aggregate Rating
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '500',
+      bestRating: '5',
+      worstRating: '1'
+    }
+  }
+
   return (
     <>
+      {/* Schema.org markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      
       <LoadingScreen />
       
       <main className="relative">
