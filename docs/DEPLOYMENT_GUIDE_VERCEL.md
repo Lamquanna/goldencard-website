@@ -12,7 +12,7 @@
 - [x] GitHub account with repository access
 - [x] Vercel account (free tier OK for testing)
 - [x] Database URL (PostgreSQL from Vercel/Supabase/Railway)
-- [x] Domain (optional: goldencardvietnam.com)
+- [x] Domain (optional: goldenenergy.vn)
 
 ### Required Information
 Gather these before starting:
@@ -38,7 +38,7 @@ DATABASE_URL="postgresql://user:password@host:5432/dbname"
 
 # Authentication
 NEXTAUTH_SECRET="your-secret-key-here"  # Generate: openssl rand -base64 32
-NEXTAUTH_URL="https://www.goldencardvietnam.com"
+NEXTAUTH_URL="https://goldenenergy.vn"
 
 # APIs
 COZE_API_KEY="your-coze-key"
@@ -114,7 +114,7 @@ Click **"Environment Variables"** tab:
 |-----|-------|-------------|
 | `DATABASE_URL` | postgresql://... | Production, Preview |
 | `NEXTAUTH_SECRET` | (generated secret) | Production, Preview |
-| `NEXTAUTH_URL` | https://www.goldencardvietnam.com | Production only |
+| `NEXTAUTH_URL` | https://goldenenergy.vn | Production only |
 | `NEXTAUTH_URL` | https://preview-url.vercel.app | Preview only |
 | `COZE_API_KEY` | (your key) | All |
 | `FIREBASE_PROJECT_ID` | (your project) | All |
@@ -153,8 +153,8 @@ Build completed in 2m 14s
 
 1. In Vercel project → **Settings** → **Domains**
 2. Click **"Add Domain"**
-3. Enter: `www.goldencardvietnam.com`
-4. Click **"Add"**
+3. Enter: `goldenenergy.vn`
+4. Click **"Add"
 
 ### 3.2 Configure DNS (Domain Registrar)
 
@@ -184,7 +184,7 @@ TTL: 3600
 
 - Vercel auto-provisions SSL (Let's Encrypt)
 - Wait 5-10 minutes for propagation
-- Check: https://www.goldencardvietnam.com
+- Check: https://goldenenergy.vn
 
 ---
 
@@ -193,7 +193,7 @@ TTL: 3600
 ### 4.1 Core Functionality Checks
 
 **Homepage:**
-- [ ] https://www.goldencardvietnam.com loads
+- [ ] https://goldenenergy.vn loads
 - [ ] All 4 locales work (vi, en, zh, id)
 - [ ] Images load correctly
 - [ ] Navigation works
@@ -222,13 +222,13 @@ TTL: 3600
 
 **Sitemap:**
 ```bash
-curl https://www.goldencardvietnam.com/sitemap.xml
+curl https://goldenenergy.vn/sitemap.xml
 # Should return 221 URLs
 ```
 
 **Robots.txt:**
 ```bash
-curl https://www.goldencardvietnam.com/robots.txt
+curl https://goldenenergy.vn/robots.txt
 # Should show Allow/Disallow rules
 ```
 
@@ -253,7 +253,7 @@ curl https://www.goldencardvietnam.com/robots.txt
 npm install -g lighthouse
 
 # Run audit
-lighthouse https://www.goldencardvietnam.com --view
+lighthouse https://goldenenergy.vn --view
 
 # Or use Chrome DevTools → Lighthouse tab
 ```
@@ -294,7 +294,7 @@ lighthouse https://www.goldencardvietnam.com --view
 
 **Mobile Speed:**
 - Use [PageSpeed Insights](https://pagespeed.web.dev/)
-- Test: https://www.goldencardvietnam.com
+- Test: https://goldenenergy.vn
 - Mobile score: 90+ ✅
 
 ---
@@ -306,7 +306,7 @@ lighthouse https://www.goldencardvietnam.com --view
 1. Go to [Google Search Console](https://search.google.com/search-console)
 2. Click **"Add Property"**
 3. Select **"URL prefix"**
-4. Enter: `https://www.goldencardvietnam.com`
+4. Enter: `https://goldenenergy.vn`
 
 ### 5.2 Verify Ownership
 
@@ -407,10 +407,10 @@ git push
 **Check Nameservers:**
 ```bash
 # Windows
-nslookup -type=NS goldencardvietnam.com
+nslookup -type=NS goldenenergy.vn
 
 # macOS/Linux
-dig NS goldencardvietnam.com
+dig NS goldenenergy.vn
 ```
 
 ### Issue 4: Images Not Loading
@@ -644,7 +644,7 @@ npx @sentry/wizard@latest -i nextjs
 ## 🎉 Deployment Complete!
 
 **Your website is now live at:**
-🌐 **https://www.goldencardvietnam.com**
+🌐 **https://goldenenergy.vn**
 
 **Next steps:**
 1. ✅ Submit sitemap to Google Search Console

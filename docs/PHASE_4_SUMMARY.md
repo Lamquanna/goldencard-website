@@ -87,7 +87,7 @@ Phase 4 focused on final launch preparation, ensuring the website is production-
 ```
 User-agent: *
 Allow: /
-Sitemap: https://www.goldencardvietnam.com/sitemap.xml
+Sitemap: https://goldenenergy.vn/sitemap.xml
 ```
 
 **Disallow Rules (Protected Routes):**

@@ -241,10 +241,10 @@ export default function RootLayout({
               "@type": "Organization",
               "name": "Golden Energy Vietnam",
               "alternateName": "Golden Card Vietnam",
-              "url": "https://www.goldencardvietnam.com",
-              "logo": "https://www.goldencardvietnam.com/logo.png",
+              "url": "https://goldenenergy.vn",
+              "logo": "https://goldenenergy.vn/logo.png",
               "description": "Công ty cung cấp giải pháp năng lượng mặt trời hàng đầu Việt Nam với hơn 500+ dự án và 50MW+ công suất lắp đặt",
-              "email": "info@goldencardvietnam.com",
+              "email": "info@goldenenergy.vn",
               "telephone": "+84-28-1234-5678",
               "address": {
                 "@type": "PostalAddress",
@@ -255,9 +255,9 @@ export default function RootLayout({
                 "addressCountry": "VN"
               },
               "sameAs": [
-                "https://www.facebook.com/goldencardvietnam",
-                "https://www.linkedin.com/company/goldencardvietnam",
-                "https://www.youtube.com/@goldencardvietnam"
+                "https://www.facebook.com/goldenenergy",
+                "https://www.linkedin.com/company/goldenenergy",
+                "https://www.youtube.com/@goldenenergy"
               ],
               "contactPoint": {
                 "@type": "ContactPoint",

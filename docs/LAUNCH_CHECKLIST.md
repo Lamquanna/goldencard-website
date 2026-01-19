@@ -1,7 +1,7 @@
 # 🚀 LAUNCH CHECKLIST - Golden Energy Vietnam Website
 
 > **Launch Date:** TBD  
-> **Domain:** https://www.goldencardvietnam.com  
+> **Domain:** https://goldenenergy.vn  
 > **Status:** 🟡 Pre-Launch Testing
 
 ---
@@ -231,7 +231,7 @@
 
 ### Initial Setup
 
-- [ ] **Add Property** - https://www.goldencardvietnam.com
+- [ ] **Add Property** - https://goldenenergy.vn
 - [ ] **Verify Ownership** - DNS TXT record or HTML file
 - [ ] **Submit Sitemap** - /sitemap.xml
 - [ ] **Request Indexing** - Submit homepage

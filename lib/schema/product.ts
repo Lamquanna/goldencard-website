@@ -16,7 +16,7 @@ export interface ProductSchemaInput {
 }
 
 export function generateProductSchema(input: ProductSchemaInput) {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   const categoryNames = {
     residential: {
@@ -171,3 +171,4 @@ export function generateAggregateOfferSchema(
     offers: products.map(p => generateProductSchema(p).offers)
   }
 }
+

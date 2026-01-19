@@ -22,7 +22,7 @@ export interface ArticleSchemaInput {
 }
 
 export function generateArticleSchema(input: ArticleSchemaInput) {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   // Extract entities from content (keywords that map to our knowledge graph)
   const entities = extractEntities(input.content)
@@ -129,7 +129,7 @@ export function generateHowToSchema(
     locale: 'vi' | 'en' | 'zh'
   }
 ) {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   return {
     '@context': 'https://schema.org',
@@ -195,7 +195,7 @@ function extractEntities(content: string): Entity[] {
     },
     'golden energy': {
       name: 'Golden Energy Vietnam',
-      sameAs: 'https://goldenenergy.com.vn/#organization'
+      sameAs: 'https://goldenenergy.vn/#organization'
     },
     'roi': {
       name: 'Return on Investment',
@@ -221,3 +221,4 @@ function extractEntities(content: string): Entity[] {
   
   return foundEntities
 }
+

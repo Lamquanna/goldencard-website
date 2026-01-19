@@ -56,7 +56,7 @@ export function generateBreadcrumbSchema(
   path: string, 
   locale: 'vi' | 'en' | 'zh'
 ) {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   // Remove leading/trailing slashes and locale prefix
   const cleanPath = path
@@ -120,7 +120,7 @@ export function getBreadcrumbSegments(
   path: string, 
   locale: 'vi' | 'en' | 'zh'
 ): BreadcrumbSegment[] {
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   const cleanPath = path
     .replace(/^\/+|\/+$/g, '')
@@ -150,3 +150,4 @@ export function getBreadcrumbSegments(
   
   return breadcrumbs
 }
+

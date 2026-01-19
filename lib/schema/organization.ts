@@ -10,7 +10,7 @@ export interface OrganizationSchemaOptions {
 
 export function generateOrganizationSchema(options: OrganizationSchemaOptions) {
   const { locale } = options
-  const baseUrl = 'https://goldenenergy.com.vn'
+  const baseUrl = 'https://goldenenergy.vn'
   
   const names = {
     vi: 'Golden Energy Vietnam',
@@ -135,3 +135,4 @@ export function generateOrganizationSchema(options: OrganizationSchemaOptions) {
       : 'Green Energy - Sustainable Future'
   }
 }
+

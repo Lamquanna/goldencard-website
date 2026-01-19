@@ -579,15 +579,14 @@ goldenenergy.com.vn/
 ```bash
 DATABASE_URL=postgresql://...
 NEXTAUTH_SECRET=...
-NEXTAUTH_URL=https://goldencardvietnam.com
+NEXTAUTH_URL=https://goldenenergy.vn
 COZE_API_KEY=...
 FIREBASE_CONFIG=...
 GOOGLE_ANALYTICS_ID=G-...
 ```
 
 **Domain Configuration:**
-- Primary: www.goldencardvietnam.com
-- Redirect: goldencardvietnam.com → www
+- Primary: goldenenergy.vn
 - SSL: Auto-provisioned by Vercel
 - Region: Asia Pacific (Singapore) - sin1
 
@@ -624,7 +623,7 @@ GOOGLE_ANALYTICS_ID=G-...
 ### Post-Deployment
 
 **Google Search Console:**
-1. Add property: https://www.goldencardvietnam.com
+1. Add property: https://goldenenergy.vn
 2. Verify ownership (DNS TXT or HTML file)
 3. Submit sitemap: /sitemap.xml
 4. Request indexing for homepage
@@ -868,7 +867,7 @@ const schema = generateSchema(pageData)
 ## 📞 Contact & Support
 
 ### Production URLs
-- **Website:** https://www.goldencardvietnam.com (pending deployment)
+- **Website:** https://goldenenergy.vn (pending deployment)
 - **Repository:** https://github.com/Lamquanna/goldencard-website
 - **Documentation:** `/docs` folder
 

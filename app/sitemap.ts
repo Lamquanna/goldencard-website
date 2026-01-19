@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.goldencardvietnam.com';
+  const baseUrl = 'https://goldenenergy.vn';
   const locales = ['vi', 'en', 'zh', 'id'];
   
   // Core pages (high priority)

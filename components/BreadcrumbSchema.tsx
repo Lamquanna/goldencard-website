@@ -55,7 +55,7 @@ export function BreadcrumbSchema() {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.name,
-      "item": `https://www.goldencardvietnam.com${item.path}`
+      "item": `https://goldenenergy.vn${item.path}`
     }))
   };
   
