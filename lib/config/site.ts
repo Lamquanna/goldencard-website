@@ -57,7 +57,7 @@ export const SITE_CONFIG = {
   // Social Media
   social: {
     facebook: 'https://facebook.com/goldenenergyvn',
-    linkedin: 'https://linkedin.com/company/goldenenergy-vietnam',
+    linkedin: 'https://www.linkedin.com/in/golden-energy-solutions-48b2503a7/',
     youtube: 'https://youtube.com/@goldenenergyvn',
     zalo: 'https://zalo.me/0903117277',
   },

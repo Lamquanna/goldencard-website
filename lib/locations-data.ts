@@ -85,8 +85,8 @@ export const locations: Location[] = [
     name: 'Golden Energy - Trụ Sở Chính',
     address: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP. Hồ Chí Minh',
     coordinates: {
-      lat: 10.7217334,
-      lng: 106.7029635,
+      lat: 10.6865,
+      lng: 106.7532,
     },
     phone: '+84 333 142 888',
     email: 'sales@goldenenergy.vn',
@@ -107,8 +107,8 @@ export const locations: Location[] = [
     name: 'Golden Energy - Văn Phòng Đại Diện',
     address: '625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP. Hồ Chí Minh',
     coordinates: {
-      lat: 10.7367,
-      lng: 106.7258,
+      lat: 10.7328,
+      lng: 106.7219,
     },
     phone: '+84 333 142 888',
     email: 'sales@goldenenergy.vn',
@@ -128,8 +128,8 @@ export const locations: Location[] = [
     name: 'Golden Energy - Kho Hàng',
     address: '354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, Quận 7, TP. Hồ Chí Minh',
     coordinates: {
-      lat: 10.7298,
-      lng: 106.7165,
+      lat: 10.7381,
+      lng: 106.7071,
     },
     phone: '+84 333 142 888',
     email: 'warehouse@goldenenergy.vn',

@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${project.title} | Golden Energy Projects`,
-    description: project.challenges || project.solutions || '',
+    description: project.challenges || project.solution || '',
   };
 }
 
@@ -164,7 +164,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       <div className="relative h-96 bg-gradient-to-r from-green-900 to-green-700">
         <div className="absolute inset-0">
           <Image
-            src={project.mainImageUrl}
+            src={project.imageUrl || '/Projects/Solar energy/Project 1.jpg'}
             alt={project.mainImageAlt || project.title}
             fill
             className="object-cover opacity-30"
@@ -185,7 +185,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <span className="px-3 py-1 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm">
                 {typeLabel}
               </span>
-              {project.location?.city && (
+              {typeof project.location === 'string' ? (
+                <span className="flex items-center text-white/90">
+                  📍 {project.location}
+                </span>
+              ) : project.location?.city && (
                 <span className="flex items-center text-white/90">
                   📍 {project.location.city}
                 </span>
@@ -234,11 +238,13 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                   </div>
                 )}
                 
-                {project.location?.address && (
+                {project.location && (
                   <div className="flex justify-between py-3 border-b border-gray-200">
                     <span className="text-gray-600">{t.location}:</span>
                     <span className="font-semibold text-gray-900 text-right">
-                      {project.location.address}, {project.location.city}
+                      {typeof project.location === 'string' 
+                        ? project.location 
+                        : `${project.location.address || ''}, ${project.location.city || ''}`}
                     </span>
                   </div>
                 )}
@@ -272,10 +278,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 </div>
               )}
               
-              {project.solutions && (
+              {project.solution && (
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">{t.solution}</h3>
-                  <p className="text-gray-700 leading-relaxed">{project.solutions}</p>
+                  <p className="text-gray-700 leading-relaxed">{project.solution}</p>
                 </div>
               )}
             </div>
@@ -309,11 +315,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </h2>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {project.galleryImages.map((image, index) => (
+              {project.galleryImages.map((imageUrl, index) => (
                 <div key={index} className="relative aspect-square overflow-hidden rounded-lg">
                   <Image
-                    src={image.url}
-                    alt={image.alt || `Gallery image ${index + 1}`}
+                    src={imageUrl}
+                    alt={`${project.title} - Gallery image ${index + 1}`}
                     fill
                     className="object-cover hover:scale-110 transition-transform duration-500"
                     sizes="(max-width: 768px) 50vw, 33vw"

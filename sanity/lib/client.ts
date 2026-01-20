@@ -61,37 +61,39 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
 export interface Project {
   _id: string
   title: string
-  slug: string
-  client?: string
-  location: {
+  slug: string | { current: string }
+  projectType?: string
+  locale?: string
+  systemType: 'residential' | 'commercial' | 'industrial'
+  capacity: number
+  location: string | {
     address?: string
     city?: string
     region?: string
   }
-  systemType: 'residential' | 'commercial' | 'industrial'
-  capacity: number
+  client?: string
   investment?: number
   savings?: number
   paybackPeriod?: number
   completionDate: string
   featured: boolean
-  mainImageUrl: string
+  imageUrl?: string // From mainImage.asset->url
   mainImageAlt?: string
-  description?: any[]
+  shortDescription?: string
+  fullDescription?: any[]
   challenges?: string
-  solutions?: string
+  solution?: string
   results?: string[]
+  roi?: number
+  annualSavings?: number
+  investmentCost?: number
   testimonial?: {
     quote?: string
     author?: string
     position?: string
     rating?: number
   }
-  galleryImages?: Array<{
-    url: string
-    alt?: string
-    caption?: string
-  }>
+  galleryImages?: string[] // Array of URLs from gallery
 }
 
 export async function getProjects(
@@ -99,10 +101,45 @@ export async function getProjects(
   limit: number = 100
 ): Promise<Project[]> {
   try {
-    const data = await client.fetch(projectsQuery, { locale, limit }, { next: { revalidate: 60 } })
+    console.log('🔍 Fetching projects for locale:', locale)
+    const data = await client.fetch(
+      `*[_type == "project" && locale == $locale] | order(completionDate desc) [0...${limit}] {
+        _id,
+        title,
+        slug,
+        locale,
+        systemType,
+        capacity,
+        location,
+        client,
+        completionDate,
+        investment,
+        savings,
+        paybackPeriod,
+        shortDescription,
+        fullDescription,
+        challenges,
+        solution,
+        results,
+        testimonial,
+        "imageUrl": mainImage.asset->url,
+        "imageAlt": mainImage.alt,
+        "galleryImages": gallery[].asset->url,
+        featured,
+        roi,
+        annualSavings,
+        investmentCost
+      }`,
+      { locale },
+      { next: { revalidate: 60 } }
+    )
+    console.log('✅ Fetched projects count:', data?.length || 0)
+    if (data && data.length > 0) {
+      console.log('📦 Sample project:', data[0]?.title)
+    }
     return data || []
   } catch (error) {
-    console.error('Failed to fetch projects:', error)
+    console.error('❌ Failed to fetch projects:', error)
     return []
   }
 }

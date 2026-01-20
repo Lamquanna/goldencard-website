@@ -157,17 +157,21 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
               // Support both Sanity format and mock data format
               const projectId = project._id || project.id;
               const projectName = project.title || project.name;
-              const projectSlug = project.slug || project.id;
-              const projectImage = project.mainImageUrl || projectImages[index % projectImages.length];
+              const slugValue = typeof project.slug === 'string' 
+                ? project.slug 
+                : (project.slug as any)?.current || project.id;
+              const projectImage = project.imageUrl || projectImages[index % projectImages.length];
               const projectCapacity = project.capacity ? `${project.capacity}kW` : project.capacity;
               const projectSavings = project.savings || 0;
               const projectType = project.systemType || project.category;
-              const projectLocation = project.location?.city || project.location;
+              const projectLocation = typeof project.location === 'string' 
+                ? project.location 
+                : project.location?.city || project.location?.address;
               
               return (
                 <RevealOnScroll key={projectId} delay={0.1 * (index % 3)}>
                   <Link 
-                    href={`/${locale}/projects/${projectSlug}`}
+                    href={`/${locale}/projects/${slugValue}`}
                     className="group block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-500"
                   >
                     {/* Project Image */}
