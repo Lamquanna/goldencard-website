@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/studio') ||   // Sanity Studio CMS
     pathname.startsWith('/erp') ||      // ERP System
     pathname.startsWith('/auth') ||     // Auth pages
     pathname.startsWith('/admin') ||    // Admin panel

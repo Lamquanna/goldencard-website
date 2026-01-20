@@ -16,10 +16,17 @@ export function CozeWidget({
   position = 'bottom-right',
   primaryColor = '#4CAF50',
 }: CozeWidgetProps) {
+  // Temporarily disabled until Coze SDK issue is resolved
+  return null
+  
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const [isOpen, setIsOpen] = useState(false)
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const [isLoaded, setIsLoaded] = useState(false)
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const [error, setError] = useState<string | null>(null)
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   useEffect(() => {
     if (!botId) {
       console.warn('CozeWidget: NEXT_PUBLIC_COZE_BOT_ID not configured')
