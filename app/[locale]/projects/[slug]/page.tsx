@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
-import { getProjectBySlug, getProjects } from '@/sanity/lib/client';
+import { getProjectBySlug, getProjects, Project } from '@/sanity/lib/client';
 import { isLocale, type Locale } from '@/lib/i18n';
+import goldenEnergyContent from "@/lib/content-goldenenergy.json";
 
 interface PageProps {
   params: Promise<{
@@ -13,24 +14,75 @@ interface PageProps {
   }>;
 }
 
-// Generate static paths for all projects
+// Mock project type matching JSON structure
+interface MockProject {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  capacity: string;
+  location: string;
+  year: string;
+  output: string;
+  image: string;
+  description: string;
+}
+
+// Helper to get mock project by ID
+function getMockProjectById(id: string, locale: 'vi' | 'en' | 'zh'): MockProject | null {
+  const content = goldenEnergyContent[locale];
+  const projects = content?.projects?.featured as MockProject[] | undefined;
+  if (!projects) return null;
+  return projects.find(p => p.id === id) || null;
+}
+
+// Convert mock project to unified format for rendering
+function mockToProject(mock: MockProject): Partial<Project> {
+  return {
+    _id: mock.id,
+    title: mock.name,
+    slug: mock.id,
+    systemType: mock.category === 'Solar' ? 'commercial' : 'industrial',
+    capacity: parseInt(mock.capacity) || 0,
+    location: mock.location,
+    completionDate: `${mock.year}-01-01`,
+    imageUrl: mock.image,
+    shortDescription: mock.description,
+    challenges: mock.output,
+    solution: mock.description,
+  };
+}
+
+// Generate static paths for all projects (Sanity + Mock)
 export async function generateStaticParams() {
   const locales = ['vi', 'en', 'zh', 'id'];
-  const paths = [];
+  const paths: { locale: string; slug: string }[] = [];
 
   for (const locale of locales) {
-    const projects = await getProjects(locale);
-    for (const project of projects) {
-      // Handle both string and {current: string} slug formats
-      const slugValue = typeof project.slug === 'string' 
-        ? project.slug 
-        : (project.slug as any)?.current || '';
-      
-      if (slugValue) {
-        paths.push({
-          locale,
-          slug: slugValue,
-        });
+    // Get Sanity projects
+    try {
+      const projects = await getProjects(locale);
+      for (const project of projects) {
+        const slugValue = typeof project.slug === 'string' 
+          ? project.slug 
+          : (project.slug as any)?.current || '';
+        
+        if (slugValue) {
+          paths.push({ locale, slug: slugValue });
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to fetch Sanity projects for ${locale}:`, error);
+    }
+    
+    // Add mock project paths
+    const normalizedLocale = (locale === 'id' ? 'en' : locale) as keyof typeof goldenEnergyContent;
+    const mockProjects = goldenEnergyContent[normalizedLocale]?.projects?.featured;
+    if (mockProjects && Array.isArray(mockProjects)) {
+      for (const mock of mockProjects as MockProject[]) {
+        if (mock.id && !paths.some(p => p.locale === locale && p.slug === mock.id)) {
+          paths.push({ locale, slug: mock.id });
+        }
       }
     }
   }
@@ -40,7 +92,22 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const project = await getProjectBySlug(slug, locale);
+  
+  // Try Sanity first
+  let project = await getProjectBySlug(slug, locale);
+  
+  // Fallback to mock data if not found in Sanity
+  if (!project && (slug.startsWith('proj-') || slug.length < 20)) {
+    const normalizedLocale = (locale === 'id' ? 'en' : locale) as 'vi' | 'en' | 'zh';
+    const mockProject = getMockProjectById(slug, normalizedLocale);
+    if (mockProject) {
+      const converted = mockToProject(mockProject);
+      return {
+        title: `${converted.title} | Golden Energy Projects`,
+        description: converted.shortDescription || '',
+      };
+    }
+  }
 
   if (!project) {
     return {
@@ -63,7 +130,20 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   }
   
   const locale = localeParam as Locale;
-  const project = await getProjectBySlug(slug, locale);
+  const normalizedLocale = (locale === 'id' ? 'en' : locale) as 'vi' | 'en' | 'zh';
+  
+  // Try Sanity first
+  let project = await getProjectBySlug(slug, locale);
+  let isMockData = false;
+  
+  // Fallback to mock data if not found in Sanity
+  if (!project) {
+    const mockProject = getMockProjectById(slug, normalizedLocale);
+    if (mockProject) {
+      project = mockToProject(mockProject) as any;
+      isMockData = true;
+    }
+  }
 
   if (!project) {
     notFound();
