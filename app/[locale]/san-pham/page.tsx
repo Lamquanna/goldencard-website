@@ -3,6 +3,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Container } from '@/components/Container'
 import { generateBreadcrumbSchema } from '@/lib/schema'
+import { client } from '@/sanity/lib/client'
+import { productsQuery } from '@/sanity/lib/queries'
+import { urlForImage } from '@/sanity/lib/image'
 import { 
   Zap, 
   Battery, 
@@ -13,6 +16,9 @@ import {
   Shield,
   TrendingUp
 } from 'lucide-react'
+
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
 
 // Translation type
 interface Translations {

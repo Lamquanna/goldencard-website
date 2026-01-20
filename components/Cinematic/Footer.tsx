@@ -8,9 +8,23 @@ interface NavItem {
   href: string;
 }
 
+interface SiteData {
+  phone: string;
+  phoneSecondary: string;
+  email: string;
+  address: string;
+  socialLinks: {
+    facebook?: string;
+    linkedin?: string;
+    youtube?: string;
+    zalo?: string;
+  };
+}
+
 interface FooterProps {
   navItems: NavItem[];
   locale: string;
+  siteData: SiteData;
 }
 
 /**
@@ -22,7 +36,7 @@ interface FooterProps {
  * - Clean typography
  * - YouTube video background
  */
-export default function Footer({ navItems, locale }: FooterProps) {
+export default function Footer({ navItems, locale, siteData }: FooterProps) {
   const currentYear = new Date().getFullYear();
   
   const translations = {
@@ -125,7 +139,7 @@ export default function Footer({ navItems, locale }: FooterProps) {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact - ✅ DYNAMIC DATA FROM SANITY */}
           <div>
             <h3
               className="text-white text-sm uppercase tracking-[0.15em] font-semibold mb-6"
@@ -135,23 +149,42 @@ export default function Footer({ navItems, locale }: FooterProps) {
             </h3>
             <ul className="space-y-3 text-base text-white font-semibold">
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em" }}>
-                📧 sales@goldenenergy.vn
+                📧 <a href={`mailto:${siteData.email}`} className="hover:text-[#D4AF37] transition-colors">{siteData.email}</a>
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em" }}>
-                📞 03333 142 88 / 0903 117 277
+                📞 <a href={`tel:${siteData.phone}`} className="hover:text-[#D4AF37] transition-colors">{siteData.phone}</a> / <a href={`tel:${siteData.phoneSecondary}`} className="hover:text-[#D4AF37] transition-colors">{siteData.phoneSecondary}</a>
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                🏢 Sunrise Riverside, Block A, Nguyễn Hữu Thọ/Đ. D1 ấp 5, Phước Kiển, Nhà Bè, Thành phố Hồ Chí Minh 70000
-              </li>
-              <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                🏢 625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM
-              </li>
-              <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                📦 354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, Quận 7, TP.HCM
+                🏢 {siteData.address}
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.7rem", opacity: 0.8 }}>
                 {locale === 'vi' ? 'Giờ làm việc: 8:00 - 17:30 (T2-T7)' : locale === 'zh' ? '工作时间：8:00 - 17:30' : 'Hours: 8:00 AM - 5:30 PM (Mon-Sat)'}
               </li>
+              {/* Social Links */}
+              {(siteData.socialLinks.facebook || siteData.socialLinks.linkedin || siteData.socialLinks.youtube) && (
+                <li className="flex gap-3 pt-2">
+                  {siteData.socialLinks.facebook && (
+                    <a href={siteData.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">
+                      FB
+                    </a>
+                  )}
+                  {siteData.socialLinks.linkedin && (
+                    <a href={siteData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">
+                      LI
+                    </a>
+                  )}
+                  {siteData.socialLinks.youtube && (
+                    <a href={siteData.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">
+                      YT
+                    </a>
+                  )}
+                  {siteData.socialLinks.zalo && (
+                    <a href={siteData.socialLinks.zalo} target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">
+                      Zalo
+                    </a>
+                  )}
+                </li>
+              )}
             </ul>
           </div>
         </div>

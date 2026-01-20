@@ -4,11 +4,14 @@ const siteSettings = {
   name: 'siteSettings',
   title: 'Site Settings',
   type: 'document',
+  __experimental_singleton: true,
   fields: [
     {
       name: 'title',
       title: 'Site Title',
       type: 'string',
+      description: 'Golden Energy Vietnam',
+      initialValue: 'Golden Energy Vietnam',
       validation: (Rule: any) => Rule.required(),
     },
     {

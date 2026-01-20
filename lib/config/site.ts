@@ -1,6 +1,6 @@
 /**
  * SITE CONFIGURATION - Single Source of Truth
- * 
+ * Source: CompanyProfile.md (GoldenCard/GoldenEnergy)
  * CRITICAL: This is the centralized config for all domain references.
  * DO NOT hardcode domains elsewhere in the codebase.
  */
@@ -13,29 +13,53 @@ export const SITE_CONFIG = {
   // Branding
   name: 'Golden Energy Vietnam',
   nameShort: 'Golden Energy',
+  nameVi: 'Golden Energy Việt Nam',
   alternateName: 'Năng Lượng Vàng',
   description: 'Giải pháp năng lượng mặt trời, điện gió hàng đầu Việt Nam. 500+ dự án, 50MW+ công suất lắp đặt.',
   
+  // Parent Company Info
+  parent: {
+    name: 'Golden Card Solution Co., Ltd',
+    nameVi: 'Công ty TNHH Giải pháp Thẻ Vàng',
+    established: 2009,
+    ceo: 'Jimmy Ha (Hà Hoàng Hà)',
+    revenue3Years: 110_000_000_000, // 110 tỷ VND (2022-2024)
+  },
+  
   // Contact
   email: 'sales@goldenenergy.vn',
-  phone: '+84 3333 142 88',
-  phoneSecondary: '+84 903 117 277',
+  emailCEO: 'jimmyha@goldencard.vn',
+  phone: '0903 117 277',
+  phoneSecondary: '03333 142 88',
   address: {
-    street: 'A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiển, Nhà Bè',
+    street: 'Sunrise Riverside',
+    district: 'Nhà Bè',
     city: 'TP. Hồ Chí Minh',
-    country: 'Vietnam',
+    country: 'Việt Nam',
+    full: 'Sunrise Riverside, Nhà Bè, TP. Hồ Chí Minh',
     postalCode: '70000',
   },
-  officeRepresentative: '625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM',
-  warehouse: '354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, TP.HCM',
+  officeRepresentative: 'Sunrise Riverside, Phường Phước Kiển, Nhà Bè, TP.HCM',
+  warehouse: 'Kho GoldenCard, TP.HCM',
   workHours: '8:00 - 17:30 (T2 - T7)',
+  
+  // Company Values
+  slogan: {
+    vi: 'Năng lượng sạch, cuộc sống xanh, tương lai vàng',
+    en: 'Clean Energy, Green Life, Golden Future',
+    zh: '清洁能源，绿色生活，黄金未来',
+  },
+  commitment: {
+    vi: 'Cam kết chất lượng vàng',
+    en: 'Commitment to Golden Quality',
+  },
   
   // Social Media
   social: {
     facebook: 'https://facebook.com/goldenenergyvn',
     linkedin: 'https://linkedin.com/company/goldenenergy-vietnam',
     youtube: 'https://youtube.com/@goldenenergyvn',
-    twitter: 'https://twitter.com/goldenenergyvn',
+    zalo: 'https://zalo.me/0903117277',
   },
   
   // SEO

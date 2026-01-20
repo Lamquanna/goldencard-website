@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import Hero from "@/components/Cinematic/Hero";
 import Section from "@/components/Cinematic/Section";
 import RevealOnScroll from "@/components/Cinematic/RevealOnScroll";
 import { isLocale, type Locale } from "@/lib/i18n";
+import { getProjects, getProjectStats } from "@/sanity/lib/client";
 import goldenEnergyContent from "@/lib/content-goldenenergy.json";
+
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
 
 // Solar project images mapping
 const projectImages = [
@@ -54,15 +59,28 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
   const normalizedLocale = normalizeLocale(localeParam);
   const locale = (normalizedLocale === 'id' ? 'en' : normalizedLocale) as 'vi' | 'en' | 'zh';
   const content = goldenEnergyContent[locale];
-  const { projects } = content;
+  const { projects: pageContent } = content;
 
-  const statusLabels = {
-    vi: { all: 'Tất cả', Live: 'Đang vận hành', Pilot: 'Thí điểm', Incoming: 'Sắp triển khai' },
-    en: { all: 'All', Live: 'Live', Pilot: 'Pilot', Incoming: 'Incoming' },
-    zh: { all: '全部', Live: '运行中', Pilot: '试点', Incoming: '即将推出' }
+  // ✅ FETCH FROM SANITY CMS
+  const projects = await getProjects(locale, 50);
+  const stats = await getProjectStats(locale);
+
+  // Fallback to mock data if CMS is empty
+  const displayProjects = projects.length > 0 ? projects : pageContent.featured;
+  const displayStats = stats.total > 0 ? stats : {
+    totalCapacity: 50,
+    total: 500,
+    satisfied: 300,
   };
 
-  const allProjects = projects.featured;
+  // Type labels
+  const typeLabels = {
+    residential: locale === 'vi' ? 'Hộ gia đình' : locale === 'zh' ? '住宅' : 'Residential',
+    commercial: locale === 'vi' ? 'Thương mại' : locale === 'zh' ? '商业' : 'Commercial',
+    industrial: locale === 'vi' ? 'Công nghiệp' : locale === 'zh' ? '工业' : 'Industrial',
+  };
+
+  const allProjects = displayProjects;
 
   return (
     <div className="min-h-screen bg-white">
@@ -76,12 +94,12 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
         sliderInterval={4000}
       />
       
-      {/* Stats Bar */}
+      {/* Stats Bar - ✅ DYNAMIC FROM SANITY */}
       <Section backgroundColor="bg-white">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
           <RevealOnScroll delay={0.1}>
             <div className="text-center p-4 border border-gray-10">
-              <div className="text-3xl md:text-4xl font-light text-gray-900 mb-2">50+ MW</div>
+              <div className="text-3xl md:text-4xl font-light text-gray-900 mb-2">{displayStats.totalCapacity || 50}+ MW</div>
               <div className="text-xs text-gray-400 uppercase tracking-wider">
                 {locale === 'vi' ? 'Công suất' : locale === 'zh' ? '容量' : 'Capacity'}
               </div>
@@ -89,7 +107,7 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
           </RevealOnScroll>
           <RevealOnScroll delay={0.2}>
             <div className="text-center p-4 border border-gray-10">
-              <div className="text-3xl md:text-4xl font-light text-gray-900 mb-2">500+</div>
+              <div className="text-3xl md:text-4xl font-light text-gray-900 mb-2">{displayStats.total || 500}+</div>
               <div className="text-xs text-gray-400 uppercase tracking-wider">
                 {locale === 'vi' ? 'Dự án' : locale === 'zh' ? '项目' : 'Projects'}
               </div>
@@ -134,71 +152,102 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
       {/* Projects Grid */}
       <Section backgroundColor="bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {allProjects.map((project: { id: string; name: string; category: string; status: string; capacity: string; location: string; year: string; output: string; description: string }, index: number) => (
-              <RevealOnScroll key={project.id} delay={0.1 * index}>
-                <div className="group border border-gray-10 overflow-hidden hover:border-gray-30 transition-all duration-500">
-                  {/* Project Image */}
-                  <div className="aspect-video bg-gradient-to-br from-white/10 to-white/5 relative overflow-hidden">
-                    <Image
-                      src={projectImages[index % projectImages.length]}
-                      alt={project.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                      <div className="text-white text-sm uppercase tracking-wider font-semibold">
-                        {locale === 'vi' ? 'Xem chi tiết' : locale === 'zh' ? '查看详情' : 'View details'}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {allProjects.map((project: any, index: number) => {
+              // Support both Sanity format and mock data format
+              const projectId = project._id || project.id;
+              const projectName = project.title || project.name;
+              const projectSlug = project.slug || project.id;
+              const projectImage = project.mainImageUrl || projectImages[index % projectImages.length];
+              const projectCapacity = project.capacity ? `${project.capacity}kW` : project.capacity;
+              const projectSavings = project.savings || 0;
+              const projectType = project.systemType || project.category;
+              const projectLocation = project.location?.city || project.location;
+              
+              return (
+                <RevealOnScroll key={projectId} delay={0.1 * (index % 3)}>
+                  <Link 
+                    href={`/${locale}/projects/${projectSlug}`}
+                    className="group block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-500"
+                  >
+                    {/* Project Image */}
+                    <div className="relative h-64 overflow-hidden">
+                      <Image
+                        src={projectImage}
+                        alt={projectName}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                      
+                      {/* Type Badge */}
+                      <div className="absolute top-4 left-4">
+                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold rounded-full">
+                          {typeLabels[projectType as keyof typeof typeLabels] || projectType}
+                        </span>
+                      </div>
+                      
+                      {/* Capacity Badge */}
+                      <div className="absolute top-4 right-4">
+                        <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                          {projectCapacity}
+                        </span>
                       </div>
                     </div>
-                    
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#D4AF37] text-white text-xs font-bold uppercase tracking-wider">
-                      {statusLabels[locale][project.status as keyof typeof statusLabels['vi']] || project.status}
-                    </div>
-                  </div>
 
-                  {/* Project Info */}
-                  <div className="p-6 bg-[#0A0A0A]/5">
-                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
-                      {project.category}
-                    </div>
-                    <h3 className="text-2xl font-light text-gray-900 mb-2 group-hover:text-gray-200 transition-colors">
-                      {project.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-                      {project.description}
-                    </p>
-
-                    {/* Location & Year */}
-                    <div className="flex gap-4 mb-4 text-xs text-gray-500">
-                      <span>📍 {project.location}</span>
-                      <span>📅 {project.year}</span>
-                    </div>
-
-                    {/* Metrics Grid */}
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-10">
-                      <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-                          {locale === 'vi' ? 'Công suất' : locale === 'zh' ? '容量' : 'Capacity'}
+                    {/* Project Info */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+                        {projectName}
+                      </h3>
+                      
+                      {projectLocation && (
+                        <p className="text-sm text-gray-600 mb-3">
+                          📍 {projectLocation}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <div className="text-sm">
+                          <span className="text-gray-500">
+                            {locale === 'vi' ? 'Tiết kiệm' : locale === 'zh' ? '节省' : 'Savings'}:
+                          </span>
+                          <span className="ml-2 font-bold text-green-600">
+                            {projectSavings}%
+                          </span>
                         </div>
-                        <div className="text-gray-900 font-light text-lg">{project.capacity}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-                          {locale === 'vi' ? 'Sản lượng' : locale === 'zh' ? '产量' : 'Output'}
+                        
+                        <div className="text-green-600 font-semibold">
+                          {locale === 'vi' ? 'Xem chi tiết' : locale === 'zh' ? '查看详情' : 'View details'} →
                         </div>
-                        <div className="text-gray-900 font-light text-lg">{project.output}</div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
-            ))}
+                  </Link>
+                </RevealOnScroll>
+              );
+            })}
           </div>
+
+          {/* No Projects Message - Only show if Sanity is empty */}
+          {projects.length === 0 && (
+            <div className="text-center py-12 mt-8">
+              <div className="inline-block px-8 py-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-gray-700 mb-4">
+                  {locale === 'vi' 
+                    ? '⚠️ Chưa có dự án nào trong CMS. Vui lòng thêm dự án trong Sanity Studio.'
+                    : 'No projects found in CMS. Please add projects in Sanity Studio.'}
+                </p>
+                <a 
+                  href="/cms" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                >
+                  {locale === 'vi' ? 'Mở Sanity Studio' : 'Open Sanity Studio'}
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </Section>
 

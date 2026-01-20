@@ -9,7 +9,7 @@ interface CozeWidgetProps {
 
 export function CozeWidget({
   botId = process.env.NEXT_PUBLIC_COZE_BOT_ID || '7594311757871972405',
-  token = process.env.NEXT_PUBLIC_COZE_API_TOKEN,
+  token, // Token from server-side, not env
 }: CozeWidgetProps) {
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -59,23 +59,24 @@ export function CozeWidget({
             },
           }
 
-          // Add auth if token is provided
+          // Add auth config with token if provided, otherwise use public bot mode
           if (token) {
-            config.auth = {
+            config.config.auth = {
               type: 'token',
               token: token,
-              onRefreshToken: function () {
-                return token
-              }
             }
+          } else {
+            // For public bots without token - explicitly set auth to null
+            config.config.auth = null
           }
 
           new (window as any).CozeWebSDK.WebChatClient(config)
           setIsLoaded(true)
-          console.log('✅ Coze chat initialized')
+          console.log('✅ Coze chat initialized successfully')
         }
       } catch (err: any) {
-        console.error('Coze initialization error:', err)
+        console.error('❌ Coze initialization error:', err)
+        setIsLoaded(false)
       }
     }
 

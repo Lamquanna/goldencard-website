@@ -61,12 +61,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google-analytics.com https://www.googletagmanager.com https://static.cloudflareinsights.com https://sf-cdn.coze.com https://*.coze.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google-analytics.com https://www.googletagmanager.com https://static.cloudflareinsights.com https://sf-cdn.coze.com https://*.coze.com https://*.sanity.io https://sanity-cdn.com https://*.sanity-cdn.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.sanity.io",
               "img-src 'self' data: blob: https: http:",
-              "font-src 'self' https://fonts.gstatic.com",
-              "frame-src 'self' https://www.youtube.com https://www.google.com https://*.coze.com",
-              "connect-src 'self' https://www.google-analytics.com https://api.mapbox.com https://api.coze.com https://*.coze.com wss: wss://*.coze.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "frame-src 'self' https://www.youtube.com https://www.google.com https://*.coze.com https://*.sanity.io",
+              "connect-src 'self' https://www.google-analytics.com https://api.mapbox.com https://api.coze.com https://*.coze.com https://*.sanity.io https://*.api.sanity.io wss: wss://*.coze.com",
               "media-src 'self' https://www.youtube.com",
             ].join('; ')
           }

@@ -12,6 +12,8 @@ import { defaultLocale, locales, type Locale } from "@/lib/i18n";
 import { getPrimaryNavigation } from "@/lib/navigation";
 import { montserrat, playfairDisplay } from "@/app/fonts";
 import { generateOrganizationSchema } from "@/lib/schema";
+import { getSiteSettings } from "@/sanity/lib/client";
+import { SITE_CONFIG } from "@/lib/config/site";
 
 interface LocaleLayoutProps {
   children: ReactNode;
@@ -36,6 +38,18 @@ export default async function LocaleLayout({
   const sitewide = getSitewide(locale);
   const navItems = getPrimaryNavigation(locale);
   
+  // ✅ FETCH FROM SANITY CMS
+  const settings = await getSiteSettings();
+  
+  // Fallback to config defaults
+  const siteData = {
+    phone: settings?.hotline || SITE_CONFIG.phone,
+    phoneSecondary: SITE_CONFIG.phoneSecondary,
+    email: settings?.email || SITE_CONFIG.email,
+    address: settings?.address || SITE_CONFIG.address.full,
+    socialLinks: settings?.socialLinks || SITE_CONFIG.social,
+  };
+  
   // Generate Organization Schema for entire site
   const organizationSchema = generateOrganizationSchema({ locale: locale as any });
 
@@ -56,7 +70,7 @@ export default async function LocaleLayout({
         >
           <Navbar locale={locale} navItems={navItems} />
           <main className="flex-1">{children}</main>
-          <Footer locale={locale} navItems={navItems} />
+          <Footer locale={locale} navItems={navItems} siteData={siteData} />
         </div>
       </PageTransition>
       <ChatWidget locale={locale} />

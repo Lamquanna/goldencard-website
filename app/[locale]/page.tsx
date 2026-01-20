@@ -10,6 +10,7 @@ import RevealOnScroll from "@/components/Cinematic/RevealOnScroll";
 import TiltCard from "@/components/ui/TiltCard";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import SectionDivider from "@/components/ui/SectionDivider";
+import { RevenueStats } from "@/components/RevenueStats";
 
 import { isLocale, type Locale } from "@/lib/i18n";
 import goldenEnergyContent from "@/lib/content-goldenenergy.json";
@@ -158,6 +159,9 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </RevealOnScroll>
       </Section>
+
+      {/* Revenue Stats Section - NEW */}
+      <RevenueStats />
 
       {/* Calculator Teaser */}
       <Section backgroundColor="bg-white">

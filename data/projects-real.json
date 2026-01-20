@@ -1,0 +1,443 @@
+{
+  "projects": [
+    {
+      "title": "Homestay NLMT Cà Mau",
+      "slug": "homestay-nlmt-ca-mau",
+      "type": "residential",
+      "locale": "vi",
+      "capacity": 3,
+      "location": "Cà Mau",
+      "completionDate": "2023-03-15",
+      "investment": 45000000,
+      "savings": 70,
+      "paybackPeriod": 3.5,
+      "description": "Hệ thống điện mặt trời 3kW cho homestay ven biển, tối ưu chi phí vận hành và thân thiện môi trường.",
+      "challenge": "Homestay nhỏ ven biển với hóa đơn điện cao do chạy điều hòa liên tục. Chủ muốn giảm chi phí vận hành và tạo hình ảnh xanh thu hút khách du lịch sinh thái.",
+      "solution": "Lắp đặt hệ thống 3kW với 8 tấm pin Canadian Solar 370W, biến tần Growatt 3kW. Tích hợp giám sát online để tracking sản lượng real-time.",
+      "results": [
+        "Tiết kiệm 70% hóa đơn điện hàng tháng",
+        "ROI 3.5 năm với mức giá điện hiện tại",
+        "Giảm 2.5 tấn CO2/năm",
+        "Tăng 15% booking từ khách du lịch xanh"
+      ],
+      "testimonial": {
+        "quote": "Từ khi lắp điện mặt trời, homestay mình vừa tiết kiệm được tiền điện, vừa có điểm nhấn marketing. Khách rất thích concept xanh!",
+        "author": "Chị Lan Anh",
+        "position": "Chủ Homestay"
+      },
+      "images": [
+        "/projects/homestay-camau-1.jpg",
+        "/projects/homestay-camau-2.jpg",
+        "/projects/homestay-camau-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["homestay", "residential", "solar", "eco-tourism"]
+    },
+    {
+      "title": "Nhà xưởng may mặc 50kW",
+      "slug": "nha-xuong-may-mac-50kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 50,
+      "location": "Bình Dương",
+      "completionDate": "2023-06-20",
+      "investment": 650000000,
+      "savings": 65,
+      "paybackPeriod": 5.2,
+      "description": "Dự án điện mặt trời mái nhà 50kW cho nhà xưởng may mặc, giảm chi phí điện sản xuất đáng kể.",
+      "challenge": "Nhà xưởng may 500 công nhân, chạy máy từ 6h-18h. Hóa đơn điện 40-50 triệu/tháng. Áp lực giảm giá thành sản phẩm để cạnh tranh với Trung Quốc.",
+      "solution": "Hệ thống 50kW với 135 tấm pin Longi 370W, 2 biến tần Sungrow 25kW. Thiết kế phân tán 2 mái để tối ưu diện tích. Lắp đặt không gián đoạn sản xuất.",
+      "results": [
+        "Tiết kiệm 65% chi phí điện ban ngày (giờ cao điểm)",
+        "Giảm 8% giá thành sản phẩm",
+        "ROI 5.2 năm",
+        "Giảm 42 tấn CO2/năm"
+      ],
+      "testimonial": {
+        "quote": "Đầu tư 650 triệu nhưng mỗi tháng tiết kiệm gần 10 triệu tiền điện. Quan trọng hơn là giá thành sản phẩm giảm, đơn hàng tăng!",
+        "author": "Anh Minh",
+        "position": "Giám đốc nhà xưởng"
+      },
+      "images": [
+        "/projects/nha-xuong-may-1.jpg",
+        "/projects/nha-xuong-may-2.jpg",
+        "/projects/nha-xuong-may-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["factory", "commercial", "manufacturing", "cost-saving"]
+    },
+    {
+      "title": "Trường mầm non NLMT 10kW",
+      "slug": "truong-mam-non-nlmt-10kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 10,
+      "location": "TP. Hồ Chí Minh",
+      "completionDate": "2023-09-10",
+      "investment": 130000000,
+      "savings": 75,
+      "paybackPeriod": 4.0,
+      "description": "Hệ thống điện mặt trời 10kW cho trường mầm non, giáo dục năng lượng sạch cho thế hệ tương lai.",
+      "challenge": "Trường mầm non 200 học sinh cần giảm chi phí điện (điều hòa 12 phòng) và giáo dục trẻ về năng lượng xanh. Phụ huynh quan tâm môi trường học tập an toàn.",
+      "solution": "Lắp 10kW với 27 tấm pin JinkoSolar 370W, biến tần Growatt 10kW. Thiết kế màn hình LED giám sát công suất để trẻ quan sát. An toàn tuyệt đối (cáp chống cháy, chống sét).",
+      "results": [
+        "Tiết kiệm 75% hóa đơn điện (8-9 triệu/tháng)",
+        "ROI 4 năm",
+        "Giảm 8.5 tấn CO2/năm",
+        "Trở thành điểm tham quan STEM cho trường khác"
+      ],
+      "testimonial": {
+        "quote": "Các bé rất thích xem màn hình điện mặt trời. Mỗi ngày các cô giáo dạy về năng lượng xanh, vừa tiết kiệm tiền vừa có giá trị giáo dục!",
+        "author": "Cô Thu Hà",
+        "position": "Hiệu trưởng"
+      },
+      "images": [
+        "/projects/truong-mam-non-1.jpg",
+        "/projects/truong-mam-non-2.jpg",
+        "/projects/truong-mam-non-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["school", "education", "commercial", "green-education"]
+    },
+    {
+      "title": "Khách sạn 3 sao 80kW",
+      "slug": "khach-san-3-sao-80kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 80,
+      "location": "Đà Nẵng",
+      "completionDate": "2023-11-05",
+      "investment": 1040000000,
+      "savings": 60,
+      "paybackPeriod": 5.5,
+      "description": "Dự án điện mặt trời 80kW cho khách sạn 3 sao, tối ưu chi phí vận hành và hướng đến chứng chỉ xanh.",
+      "challenge": "Khách sạn 60 phòng với hóa đọn điện 70-80 triệu/tháng (điều hòa, nước nóng, thang máy). Cần giảm chi phí để cạnh tranh với Airbnb và hướng đến Green Hotel Certificate.",
+      "solution": "Hệ thống 80kW với 216 tấm pin Trina Solar 370W, 2 biến tần Huawei 40kW. Lắp trên mái tầng 7, tích hợp giám sát năng lượng vào hệ thống BMS của khách sạn.",
+      "results": [
+        "Tiết kiệm 60% chi phí điện ban ngày",
+        "Giảm 11.5 triệu đồng mỗi tháng",
+        "ROI 5.5 năm",
+        "Giảm 68 tấn CO2/năm",
+        "Đạt Green Key Certificate"
+      ],
+      "testimonial": {
+        "quote": "Khách quốc tế rất quan tâm đến hotel xanh. Sau khi lắp NLMT, booking.com rating tăng từ 8.2 lên 8.7 điểm!",
+        "author": "Anh Tuấn",
+        "position": "Giám đốc khách sạn"
+      },
+      "images": [
+        "/projects/khach-san-danang-1.jpg",
+        "/projects/khach-san-danang-2.jpg",
+        "/projects/khach-san-danang-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["hotel", "commercial", "tourism", "green-certificate"]
+    },
+    {
+      "title": "Nhà xưởng sản xuất nhựa 100kW",
+      "slug": "nha-xuong-san-xuat-nhua-100kw",
+      "type": "industrial",
+      "locale": "vi",
+      "capacity": 100,
+      "location": "Đồng Nai",
+      "completionDate": "2024-02-15",
+      "investment": 1300000000,
+      "savings": 68,
+      "paybackPeriod": 5.0,
+      "description": "Hệ thống điện mặt trời 100kW cho nhà xưởng sản xuất nhựa, giảm chi phí sản xuất và đạt tiêu chuẩn ESG.",
+      "challenge": "Nhà máy sản xuất nhựa công nghiệp, hóa đơn điện 120-140 triệu/tháng. Áp lực từ khách hàng xuất khẩu Châu Âu về ESG compliance (giảm carbon footprint).",
+      "solution": "Hệ thống 100kW với 270 tấm pin Canadian Solar 370W, 2 biến tần Sungrow 50kW. Thiết kế chống ăn mòn hóa chất. Tích hợp Carbon Tracking Dashboard cho báo cáo ESG.",
+      "results": [
+        "Tiết kiệm 68% chi phí điện ca ngày (7h-17h)",
+        "Giảm 18.5 triệu đồng mỗi tháng",
+        "ROI 5 năm",
+        "Giảm 85 tấn CO2/năm",
+        "Pass kiểm tra ESG của Nike & Adidas"
+      ],
+      "testimonial": {
+        "quote": "Không chỉ tiết kiệm tiền điện mà còn giữ được đơn hàng từ Nike. Họ audit nhà máy và rất hài lòng với hệ thống NLMT + carbon report!",
+        "author": "Ông Hải",
+        "position": "Tổng giám đốc"
+      },
+      "images": [
+        "/projects/nha-xuong-nhua-1.jpg",
+        "/projects/nha-xuong-nhua-2.jpg",
+        "/projects/nha-xuong-nhua-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["factory", "industrial", "manufacturing", "esg-compliance"]
+    },
+    {
+      "title": "Biệt thự cao cấp 8kW",
+      "slug": "biet-thu-cao-cap-8kw",
+      "type": "residential",
+      "locale": "vi",
+      "capacity": 8,
+      "location": "TP. Hồ Chí Minh",
+      "completionDate": "2024-04-10",
+      "investment": 120000000,
+      "savings": 80,
+      "paybackPeriod": 3.8,
+      "description": "Hệ thống điện mặt trời 8kW cho biệt thự cao cấp, thiết kế thẩm mỹ và tối ưu hiệu suất.",
+      "challenge": "Biệt thự 300m² với hóa đơn điện 12-15 triệu/tháng (điều hòa 8 phòng, hồ bơi, sân vườn). Chủ nhà quan tâm thẩm mỹ (không muốn tấm pin nổi bật) và công nghệ cao cấp.",
+      "solution": "Hệ thống 8kW với 20 tấm pin SunPower 400W (hiệu suất 22.8%, thiết kế đen toàn phần). Biến tần hybrid SolarEdge 8kW + pin lưu trữ 10kWh. App giám sát thông minh.",
+      "results": [
+        "Tiết kiệm 80% hóa đơn điện",
+        "Dự phòng điện 10 giờ khi mất điện",
+        "ROI 3.8 năm",
+        "Giảm 6.8 tấn CO2/năm",
+        "Tăng giá trị bất động sản ~200 triệu"
+      ],
+      "testimonial": {
+        "quote": "Tôi chọn SunPower vì đẹp và hiệu suất cao. Giờ hóa đơn điện chỉ còn 2-3 triệu, thậm chí có tháng bán lại điện cho EVN!",
+        "author": "Anh Khoa",
+        "position": "Chủ nhà"
+      },
+      "images": [
+        "/projects/biet-thu-hcm-1.jpg",
+        "/projects/biet-thu-hcm-2.jpg",
+        "/projects/biet-thu-hcm-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["villa", "residential", "premium", "battery-storage"]
+    },
+    {
+      "title": "Siêu thị mini 20kW",
+      "slug": "sieu-thi-mini-20kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 20,
+      "location": "Vũng Tàu",
+      "completionDate": "2024-06-20",
+      "investment": 260000000,
+      "savings": 70,
+      "paybackPeriod": 4.5,
+      "description": "Hệ thống điện mặt trời 20kW cho chuỗi siêu thị mini, giảm chi phí vận hành và mở rộng quy mô.",
+      "challenge": "Chuỗi 5 siêu thị mini, mỗi cửa hàng hóa đơn điện 8-10 triệu/tháng (tủ lạnh, điều hòa, đèn 24/7). Muốn giảm chi phí để mở rộng thêm 10 cửa hàng.",
+      "solution": "Pilot 1 cửa hàng với hệ thống 20kW: 54 tấm pin Longi 370W, biến tần Growatt 20kW. Giám sát online tập trung. Nếu thành công sẽ nhân rộng 14 cửa hàng còn lại.",
+      "results": [
+        "Tiết kiệm 70% hóa đơn điện cửa hàng pilot",
+        "Giảm 1.5 triệu đồng mỗi tháng",
+        "ROI 4.5 năm",
+        "Giảm 17 tấn CO2/năm",
+        "Đã ký hợp đồng lắp 4 cửa hàng tiếp theo"
+      ],
+      "testimonial": {
+        "quote": "Cửa hàng pilot tiết kiệm được 18 triệu/năm. Nhân với 15 cửa hàng = 270 triệu/năm. Con số này giúp tôi mở thêm 2 cửa hàng mới!",
+        "author": "Chị Hương",
+        "position": "Chủ chuỗi siêu thị"
+      },
+      "images": [
+        "/projects/sieu-thi-vungtau-1.jpg",
+        "/projects/sieu-thi-vungtau-2.jpg",
+        "/projects/sieu-thi-vungtau-3.jpg"
+      ],
+      "featured": false,
+      "tags": ["retail", "commercial", "supermarket", "chain-expansion"]
+    },
+    {
+      "title": "Nhà máy thực phẩm 150kW",
+      "slug": "nha-may-thuc-pham-150kw",
+      "type": "industrial",
+      "locale": "vi",
+      "capacity": 150,
+      "location": "Long An",
+      "completionDate": "2024-08-25",
+      "investment": 1950000000,
+      "savings": 65,
+      "paybackPeriod": 5.3,
+      "description": "Dự án điện mặt trời 150kW cho nhà máy chế biến thực phẩm, đạt tiêu chuẩn HACCP và giảm chi phí năng lượng.",
+      "challenge": "Nhà máy chế biến hải sản xuất khẩu, hóa đơn điện 180-200 triệu/tháng (máy làm lạnh -25°C, phân xưởng đông lạnh). Áp lực từ Walmart & Costco về năng lượng sạch.",
+      "solution": "Hệ thống 150kW với 405 tấm pin Trina Solar 370W, 3 biến tần Huawei 50kW. Thiết kế chống ăn mòn biển (coating đặc biệt). Tích hợp vào SCADA system.",
+      "results": [
+        "Tiết kiệm 65% chi phí điện ca ngày",
+        "Giảm 28 triệu đồng mỗi tháng",
+        "ROI 5.3 năm",
+        "Giảm 127 tấn CO2/năm",
+        "Đạt chứng nhận Carbon Neutral Facility"
+      ],
+      "testimonial": {
+        "quote": "Walmart audit và approve chứng nhận carbon neutral. Giờ đơn hàng tăng 30%, premium price thêm 5% so với nhà máy không xanh!",
+        "author": "Bà Lan",
+        "position": "CEO"
+      },
+      "images": [
+        "/projects/nha-may-thuc-pham-1.jpg",
+        "/projects/nha-may-thuc-pham-2.jpg",
+        "/projects/nha-may-thuc-pham-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["factory", "industrial", "food-processing", "export"]
+    },
+    {
+      "title": "Căn hộ chung cư 5kW",
+      "slug": "can-ho-chung-cu-5kw",
+      "type": "residential",
+      "locale": "vi",
+      "capacity": 5,
+      "location": "Hà Nội",
+      "completionDate": "2024-10-15",
+      "investment": 75000000,
+      "savings": 75,
+      "paybackPeriod": 3.2,
+      "description": "Hệ thống điện mặt trời 5kW cho căn hộ chung cư, giải pháp tiên phong cho nhà ở đô thị.",
+      "challenge": "Căn hộ penthouse 120m² với ban công lớn hướng Nam. Hóa đơn điện 4-5 triệu/tháng. Chủ nhà muốn tiên phong NLMT tại chung cư (chưa có tiền lệ).",
+      "solution": "Hệ thống 5kW với 13 tấm pin JA Solar 385W lắp trên ban công + mái che. Biến tần Growatt 5kW, giám sát app. Phối hợp ban quản lý chung cư về thủ tục.",
+      "results": [
+        "Tiết kiệm 75% hóa đơn điện",
+        "ROI 3.2 năm (nhanh nhất trong danh sách)",
+        "Giảm 4.2 tấn CO2/năm",
+        "5 hộ khác trong tòa nhà đã đăng ký lắp đặt"
+      ],
+      "testimonial": {
+        "quote": "Ban đầu ban quản lý e ngại nhưng sau khi xem hệ thống chạy ổn định, họ đồng ý cho các hộ khác lắp. Tôi là người tiên phong!",
+        "author": "Anh Đức",
+        "position": "Chủ nhà"
+      },
+      "images": [
+        "/projects/chung-cu-hanoi-1.jpg",
+        "/projects/chung-cu-hanoi-2.jpg",
+        "/projects/chung-cu-hanoi-3.jpg"
+      ],
+      "featured": false,
+      "tags": ["apartment", "residential", "urban", "pioneer"]
+    },
+    {
+      "title": "Trạm xăng dầu 30kW",
+      "slug": "tram-xang-dau-30kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 30,
+      "location": "Bình Phước",
+      "completionDate": "2024-11-20",
+      "investment": 390000000,
+      "savings": 60,
+      "paybackPeriod": 5.0,
+      "description": "Hệ thống điện mặt trời 30kW cho trạm xăng, giảm chi phí vận hành và thu hút khách hàng quan tâm môi trường.",
+      "challenge": "Trạm xăng 24/7 với hóa đơn điện 20-25 triệu/tháng (đèn, máy tính, điều hòa cửa hàng tiện lợi). Chủ trạm muốn differentiate với cạnh tranh gần.",
+      "solution": "Hệ thống 30kW với 81 tấm pin Longi 370W, biến tần Sungrow 30kW. Thiết kế chống cháy nổ (cách li 10m với khu bơm xăng). Lắp màn hình LED \"Green Station\".",
+      "results": [
+        "Tiết kiệm 60% chi phí điện ban ngày",
+        "Giảm 3.2 triệu đồng mỗi tháng",
+        "ROI 5 năm",
+        "Giảm 25.5 tấn CO2/năm",
+        "Traffic tăng 20% nhờ marketing \"Trạm xanh đầu tiên\""
+      ],
+      "testimonial": {
+        "quote": "Khách hàng rất thích concept trạm xanh. Nhiều người chạy xa vài km để đổ xăng ở đây vì thấy có NLMT!",
+        "author": "Anh Tâm",
+        "position": "Chủ trạm xăng"
+      },
+      "images": [
+        "/projects/tram-xang-binhphuoc-1.jpg",
+        "/projects/tram-xang-binhphuoc-2.jpg",
+        "/projects/tram-xang-binhphuoc-3.jpg"
+      ],
+      "featured": false,
+      "tags": ["gas-station", "commercial", "24-7", "green-marketing"]
+    },
+    {
+      "title": "Nhà máy dệt may 200kW",
+      "slug": "nha-may-det-may-200kw",
+      "type": "industrial",
+      "locale": "vi",
+      "capacity": 200,
+      "location": "Bình Dương",
+      "completionDate": "2025-01-10",
+      "investment": 2600000000,
+      "savings": 70,
+      "paybackPeriod": 4.8,
+      "description": "Dự án điện mặt trời 200kW cho nhà máy dệt may xuất khẩu, giảm chi phí sản xuất và đạt tiêu chuẩn quốc tế.",
+      "challenge": "Nhà máy dệt may 1200 công nhân, xuất khẩu cho H&M, Zara. Hóa đơn điện 280-320 triệu/tháng. Áp lực giảm carbon footprint theo yêu cầu EU (Carbon Border Tax).",
+      "solution": "Hệ thống 200kW với 540 tấm pin Trina Solar 370W, 4 biến tần Huawei 50kW. Thiết kế 3 mái, tối ưu góc nghiêng. Tích hợp Carbon Accounting Software cho báo cáo EU.",
+      "results": [
+        "Tiết kiệm 70% chi phí điện ca ngày (chiếm 80% tổng điện năng)",
+        "Giảm 52 triệu đồng mỗi tháng",
+        "ROI 4.8 năm",
+        "Giảm 170 tấn CO2/năm",
+        "Pass kiểm tra Carbon Border Adjustment Mechanism (CBAM)"
+      ],
+      "testimonial": {
+        "quote": "Không chỉ tiết kiệm 600 triệu/năm mà còn giữ được đơn hàng H&M. Họ ưu tiên nhà máy có NLMT trong supply chain!",
+        "author": "Ông Vinh",
+        "position": "Tổng giám đốc"
+      },
+      "images": [
+        "/projects/nha-may-det-may-1.jpg",
+        "/projects/nha-may-det-may-2.jpg",
+        "/projects/nha-may-det-may-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["factory", "industrial", "textile", "export", "eu-compliance"]
+    },
+    {
+      "title": "Khu nghỉ dưỡng 120kW",
+      "slug": "khu-nghi-duong-120kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 120,
+      "location": "Phú Quốc",
+      "completionDate": "2025-03-15",
+      "investment": 1560000000,
+      "savings": 55,
+      "paybackPeriod": 6.0,
+      "description": "Hệ thống điện mặt trời 120kW cho khu nghỉ dưỡng sinh thái, kết hợp cảnh quan và hiệu quả năng lượng.",
+      "challenge": "Khu nghỉ dưỡng 30 bungalow trên đảo, hóa đơn điện 110-130 triệu/tháng (điều hòa, hồ bơi, spa). Định vị eco-resort nhưng chưa có giải pháp năng lượng xanh.",
+      "solution": "Hệ thống 120kW với 324 tấm pin Canadian Solar 370W, 3 biến tần Fronius 40kW (Áo - cao cấp). Thiết kế tích hợp mái che parking + mái bungalow. Pin lưu trữ 50kWh dự phòng.",
+      "results": [
+        "Tiết kiệm 55% hóa đơn điện",
+        "Giảm 16.5 triệu đồng mỗi tháng",
+        "ROI 6 năm",
+        "Giảm 102 tấn CO2/năm",
+        "Đạt LEED Gold Certificate",
+        "Tăng 25% booking từ eco-travelers"
+      ],
+      "testimonial": {
+        "quote": "Khách quốc tế sẵn sàng trả thêm $20/đêm cho eco-resort. NLMT không chỉ giảm chi phí mà còn tăng giá trị thương hiệu!",
+        "author": "Bà Ngọc",
+        "position": "Chủ khu nghỉ dưỡng"
+      },
+      "images": [
+        "/projects/khu-nghi-duong-phuquoc-1.jpg",
+        "/projects/khu-nghi-duong-phuquoc-2.jpg",
+        "/projects/khu-nghi-duong-phuquoc-3.jpg"
+      ],
+      "featured": true,
+      "tags": ["resort", "commercial", "eco-tourism", "island", "leed-certified"]
+    },
+    {
+      "title": "Văn phòng công nghệ 40kW",
+      "slug": "van-phong-cong-nghe-40kw",
+      "type": "commercial",
+      "locale": "vi",
+      "capacity": 40,
+      "location": "TP. Hồ Chí Minh",
+      "completionDate": "2025-05-20",
+      "investment": 520000000,
+      "savings": 65,
+      "paybackPeriod": 5.0,
+      "description": "Hệ thống điện mặt trời 40kW cho văn phòng công ty công nghệ, giảm chi phí vận hành và đạt mục tiêu Net Zero.",
+      "challenge": "Văn phòng công ty IT 300 nhân viên, data center 24/7, hóa đơn điện 45-55 triệu/tháng. Công ty cam kết Net Zero 2030, cần giải pháp năng lượng sạch.",
+      "solution": "Hệ thống 40kW với 108 tấm pin Longi 370W, biến tần SolarEdge 40kW. Tích hợp IoT sensors giám sát real-time. Dashboard hiển thị tại lobby để nhân viên thấy impact.",
+      "results": [
+        "Tiết kiệm 65% chi phí điện giờ hành chính",
+        "Giảm 8.5 triệu đồng mỗi tháng",
+        "ROI 5 năm",
+        "Giảm 34 tấn CO2/năm",
+        "Hoàn thành 25% roadmap Net Zero 2030"
+      ],
+      "testimonial": {
+        "quote": "Nhân viên Gen Z rất tự hào khi công ty dùng năng lượng xanh. Employer branding tăng, dễ tuyển dụng hơn!",
+        "author": "Anh Quang",
+        "position": "CEO công ty IT"
+      },
+      "images": [
+        "/projects/van-phong-it-hcm-1.jpg",
+        "/projects/van-phong-it-hcm-2.jpg",
+        "/projects/van-phong-it-hcm-3.jpg"
+      ],
+      "featured": false,
+      "tags": ["office", "commercial", "tech", "net-zero", "data-center"]
+    }
+  ]
+}
