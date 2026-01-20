@@ -101,7 +101,7 @@ export async function getProjects(
   limit: number = 100
 ): Promise<Project[]> {
   try {
-    console.log('🔍 Fetching projects for locale:', locale)
+    console.log('🔍 [Sanity] Fetching projects for locale:', locale)
     const data = await client.fetch(
       `*[_type == "project" && locale == $locale] | order(completionDate desc) [0...${limit}] {
         _id,
@@ -133,13 +133,17 @@ export async function getProjects(
       { locale },
       { next: { revalidate: 60 } }
     )
-    console.log('✅ Fetched projects count:', data?.length || 0)
+    console.log('✅ [Sanity] Fetched projects count:', data?.length || 0)
     if (data && data.length > 0) {
-      console.log('📦 Sample project:', data[0]?.title)
+      console.log('📦 [Sanity] Sample project:', data[0]?.title)
+      console.log('📋 [Sanity] Projects:', data.map((p: Project) => ({ title: p.title, hasImage: !!p.imageUrl })))
+    } else {
+      console.warn('⚠️ [Sanity] No projects found for locale:', locale)
     }
     return data || []
-  } catch (error) {
-    console.error('❌ Failed to fetch projects:', error)
+  } catch (error: any) {
+    console.error('❌ [Sanity] Failed to fetch projects:', error?.message || error)
+    console.error('🔧 [Sanity] Error details:', { locale, limit, error })
     return []
   }
 }
@@ -159,10 +163,42 @@ export async function getProjectBySlug(
   locale: string = 'vi'
 ): Promise<Project | null> {
   try {
-    const data = await client.fetch(projectBySlugQuery, { slug, locale }, { next: { revalidate: 60 } })
+    console.log('🔍 Fetching project by slug:', slug, 'locale:', locale)
+    const data = await client.fetch(
+      `*[_type == "project" && slug.current == $slug && locale == $locale][0] {
+        _id,
+        title,
+        slug,
+        locale,
+        systemType,
+        capacity,
+        location,
+        client,
+        completionDate,
+        investment,
+        savings,
+        paybackPeriod,
+        shortDescription,
+        fullDescription,
+        challenges,
+        solution,
+        results,
+        testimonial,
+        "imageUrl": mainImage.asset->url,
+        "imageAlt": mainImage.alt,
+        "galleryImages": gallery[].asset->url,
+        featured,
+        roi,
+        annualSavings,
+        investmentCost
+      }`,
+      { slug, locale },
+      { next: { revalidate: 60 } }
+    )
+    console.log('✅ Project found:', data ? data.title : 'null')
     return data
   } catch (error) {
-    console.error('Failed to fetch project by slug:', error)
+    console.error('❌ Failed to fetch project by slug:', error)
     return null
   }
 }

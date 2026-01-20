@@ -231,27 +231,6 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
               );
             })}
           </div>
-
-          {/* No Projects Message - Only show if Sanity is empty */}
-          {projects.length === 0 && (
-            <div className="text-center py-12 mt-8">
-              <div className="inline-block px-8 py-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-gray-700 mb-4">
-                  {locale === 'vi' 
-                    ? '⚠️ Chưa có dự án nào trong CMS. Vui lòng thêm dự án trong Sanity Studio.'
-                    : 'No projects found in CMS. Please add projects in Sanity Studio.'}
-                </p>
-                <a 
-                  href="/cms" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
-                >
-                  {locale === 'vi' ? 'Mở Sanity Studio' : 'Open Sanity Studio'}
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       </Section>
 
