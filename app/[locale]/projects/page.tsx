@@ -86,8 +86,8 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
     <div className="min-h-screen bg-white">
       {/* Hero with Image Slider */}
       <Hero
-        title={projects.title}
-        subtitle={projects.subtitle}
+        title={pageContent.title}
+        subtitle={pageContent.subtitle}
         backgroundImage="/Projects/Solar energy/Project 3.jpg"
         useStaticBackground={true}
         enableSlider={true}

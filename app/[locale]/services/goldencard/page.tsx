@@ -6,6 +6,8 @@ import { ContactForm } from "@/components/ContactForm";
 import RevealOnScroll from "@/components/Cinematic/RevealOnScroll";
 import Footer from "@/components/Cinematic/Footer";
 import { isLocale, type Locale } from "@/lib/i18n";
+import { getSiteSettings } from "@/sanity/lib/client";
+import { SITE_CONFIG } from "@/lib/config/site";
 
 interface GoldenCardPageProps {
   params: Promise<{ locale: string }>;
@@ -41,6 +43,16 @@ export async function generateMetadata({ params }: GoldenCardPageProps): Promise
 export default async function GoldenCardPage({ params }: GoldenCardPageProps) {
   const { locale: localeParam } = await params;
   const locale = normalizeLocale(localeParam);
+
+  // Fetch site settings for Footer
+  const settings = await getSiteSettings();
+  const siteData = {
+    phone: settings?.hotline || SITE_CONFIG.phone,
+    phoneSecondary: settings?.phone2 || SITE_CONFIG.phoneSecondary || SITE_CONFIG.phone,
+    email: settings?.email || SITE_CONFIG.email,
+    address: settings?.address || SITE_CONFIG.address.full,
+    socialLinks: settings?.socialLinks || SITE_CONFIG.social,
+  };
 
   return (
     <>
@@ -385,6 +397,7 @@ export default async function GoldenCardPage({ params }: GoldenCardPageProps) {
 
       <Footer 
         locale={locale}
+        siteData={siteData}
         navItems={[
           { label: "Home", href: `/${locale}` },
           { label: "About", href: `/${locale}/about` },

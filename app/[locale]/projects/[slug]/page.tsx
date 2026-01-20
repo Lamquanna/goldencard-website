@@ -21,10 +21,17 @@ export async function generateStaticParams() {
   for (const locale of locales) {
     const projects = await getProjects(locale);
     for (const project of projects) {
-      paths.push({
-        locale,
-        slug: project.slug,
-      });
+      // Handle both string and {current: string} slug formats
+      const slugValue = typeof project.slug === 'string' 
+        ? project.slug 
+        : (project.slug as any)?.current || '';
+      
+      if (slugValue) {
+        paths.push({
+          locale,
+          slug: slugValue,
+        });
+      }
     }
   }
 

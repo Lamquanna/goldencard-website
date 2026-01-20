@@ -4,12 +4,10 @@ import { apiVersion, dataset, projectId, useCdn } from '../env'
 import {
   siteSettingsQuery,
   productsQuery,
-  productDetailQuery,
+  productBySlugQuery,
   projectsQuery,
   featuredProjectsQuery,
-  projectDetailQuery,
-  projectsByTypeQuery,
-  projectStatsQuery,
+  projectBySlugQuery,
 } from './queries'
 
 export const client = createClient({
@@ -29,6 +27,7 @@ export interface SiteSettings {
   title: string
   description?: string
   hotline: string
+  phone2?: string
   email: string
   address: string
   logoUrl?: string
@@ -123,7 +122,7 @@ export async function getProjectBySlug(
   locale: string = 'vi'
 ): Promise<Project | null> {
   try {
-    const data = await client.fetch(projectDetailQuery, { slug, locale }, { next: { revalidate: 60 } })
+    const data = await client.fetch(projectBySlugQuery, { slug, locale }, { next: { revalidate: 60 } })
     return data
   } catch (error) {
     console.error('Failed to fetch project by slug:', error)
@@ -136,7 +135,11 @@ export async function getProjectsByType(
   locale: string = 'vi'
 ): Promise<Project[]> {
   try {
-    const data = await client.fetch(projectsByTypeQuery, { systemType, locale }, { next: { revalidate: 60 } })
+    const data = await client.fetch(
+      `*[_type == "project" && systemType == $systemType && locale == $locale] | order(completionDate desc)`,
+      { systemType, locale },
+      { next: { revalidate: 60 } }
+    )
     return data || []
   } catch (error) {
     console.error('Failed to fetch projects by type:', error)
@@ -146,7 +149,18 @@ export async function getProjectsByType(
 
 export async function getProjectStats(locale: string = 'vi') {
   try {
-    const data = await client.fetch(projectStatsQuery, { locale }, { next: { revalidate: 60 } })
+    const data = await client.fetch(
+      `{
+        "total": count(*[_type == "project" && locale == $locale]),
+        "residential": count(*[_type == "project" && locale == $locale && systemType == "residential"]),
+        "commercial": count(*[_type == "project" && locale == $locale && systemType == "commercial"]),
+        "industrial": count(*[_type == "project" && locale == $locale && systemType == "industrial"]),
+        "totalCapacity": sum(*[_type == "project" && locale == $locale].capacity),
+        "featured": count(*[_type == "project" && locale == $locale && featured == true])
+      }`,
+      { locale },
+      { next: { revalidate: 60 } }
+    )
     return data
   } catch (error) {
     console.error('Failed to fetch project stats:', error)
@@ -161,55 +175,33 @@ export async function getProjectStats(locale: string = 'vi') {
   }
 }
 
-export async function getSiteSettings() {
-  return client.fetch(`*[_type == "siteSettings"][0]`)
-}
-
-export async function getProducts(locale: string = 'vi') {
-  return client.fetch(
-    `*[_type == "product" && locale == $locale] | order(name asc)`,
-    { locale }
-  )
-}
-
 export async function getProduct(slug: string, locale: string = 'vi') {
-  return client.fetch(
-    `*[_type == "product" && slug.current == $slug && locale == $locale][0]`,
-    { slug, locale }
-  )
-}
-
-export async function getProjects(locale: string = 'vi', featured?: boolean) {
-  const filter = featured
-    ? `*[_type == "project" && locale == $locale && featured == true]`
-    : `*[_type == "project" && locale == $locale]`
-  
-  return client.fetch(`${filter} | order(completionDate desc)`, { locale })
-}
-
-export async function getProject(slug: string, locale: string = 'vi') {
-  return client.fetch(
-    `*[_type == "project" && slug.current == $slug && locale == $locale][0]`,
-    { slug, locale }
-  )
+  try {
+    const data = await client.fetch(
+      productBySlugQuery,
+      { slug, locale },
+      { next: { revalidate: 60 } }
+    )
+    return data
+  } catch (error) {
+    console.error('Failed to fetch product:', error)
+    return null
+  }
 }
 
 export async function getProductsByCategory(
   category: string,
   locale: string = 'vi'
 ) {
-  return client.fetch(
-    `*[_type == "product" && category == $category && locale == $locale] | order(name asc)`,
-    { category, locale }
-  )
-}
-
-export async function getProjectsByType(
-  systemType: string,
-  locale: string = 'vi'
-) {
-  return client.fetch(
-    `*[_type == "project" && systemType == $systemType && locale == $locale] | order(completionDate desc)`,
-    { systemType, locale }
-  )
+  try {
+    const data = await client.fetch(
+      `*[_type == "product" && category == $category && locale == $locale] | order(name asc)`,
+      { category, locale },
+      { next: { revalidate: 60 } }
+    )
+    return data || []
+  } catch (error) {
+    console.error('Failed to fetch products by category:', error)
+    return []
+  }
 }

@@ -4,7 +4,6 @@ import "./globals.css";
 import { AnalyticsProvider, GTMNoScript } from "@/components/analytics/AnalyticsProvider";
 import { BreadcrumbSchema } from "@/components/BreadcrumbSchema";
 import { SITE_CONFIG } from "@/lib/config/site";
-import { CozeWidget } from "@/components/CozeWidget";
 // import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
@@ -137,8 +136,8 @@ const organizationStructuredData = {
     SITE_CONFIG.social.facebook,
     SITE_CONFIG.social.linkedin,
     SITE_CONFIG.social.youtube,
-    SITE_CONFIG.social.twitter,
-  ],
+    SITE_CONFIG.social.zalo,
+  ].filter(Boolean),
   contactPoint: [
     {
       "@type": "ContactPoint",
@@ -260,12 +259,6 @@ export default function RootLayout({
         </AnalyticsProvider>
         {/* DevTools disabled - causing infinite loop */}
         {/* <DevTools /> */}
-        
-        {/* Coze AI Sales Agent */}
-        <CozeWidget
-          position="bottom-right"
-          primaryColor="#4CAF50"
-        />
       </body>
     </html>
   );
