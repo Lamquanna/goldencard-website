@@ -3,7 +3,6 @@ import { bodyFont, headingFont } from "./fonts";
 import "./globals.css";
 import { AnalyticsProvider, GTMNoScript } from "@/components/analytics/AnalyticsProvider";
 import { BreadcrumbSchema } from "@/components/BreadcrumbSchema";
-import { CozeChatWidget } from "@/components/CozeChatWidget";
 import { SITE_CONFIG } from "@/lib/config/site";
 // import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
@@ -257,13 +256,7 @@ export default function RootLayout({
         >
           {children}
           <BreadcrumbSchema />
-          {/* AI Chatbot - Golden Energy Assistant */}
-          <CozeChatWidget 
-            userId="golden-energy-user"
-            botId={process.env.NEXT_PUBLIC_COZE_BOT_ID}
-            position="bottom-right"
-            defaultOpen={false}
-          />
+          {/* AI Chatbot moved to app/[locale]/layout.tsx for proper locale support */}
         </AnalyticsProvider>
         {/* DevTools disabled - causing infinite loop */}
         {/* <DevTools /> */}
