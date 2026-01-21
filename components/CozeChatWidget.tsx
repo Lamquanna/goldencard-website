@@ -44,21 +44,27 @@ export function CozeChatWidget({
   
   // Anti-spam & user verification
   const [userQuestionCount, setUserQuestionCount] = useState(0);
-  const [showContactForm, setShowContactForm] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(true); // Show login form immediately
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [lastMessageTime, setLastMessageTime] = useState<number>(0);
   const [spamWarningCount, setSpamWarningCount] = useState(0);
+  const [sessionMessageCount, setSessionMessageCount] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
+  const [isLongCooldown, setIsLongCooldown] = useState(false);
   
   // Draggable state
   const [widgetPosition, setWidgetPosition] = useState({ x: 24, y: 24 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
-  // Anti-spam settings
-  const MIN_MESSAGE_INTERVAL = 3000; // 3 seconds between messages
-  const MAX_QUESTIONS_BEFORE_CONTACT = 2; // Require contact info after 2 questions
-  const SPAM_THRESHOLD = 5; // Flag as spam after 5 rapid attempts
+  // Anti-spam settings (ENHANCED)
+  const MIN_MESSAGE_INTERVAL = 5000; // 5 seconds between messages
+  const MAX_MESSAGES_PER_SESSION = 15; // Max 15 messages per 30 minutes
+  const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+  const LONG_COOLDOWN_DURATION = 10 * 60; // 10 minutes in seconds
+  const SPAM_THRESHOLD = 3; // Flag as spam after 3 rapid attempts
+  const MAX_QUESTIONS_BEFORE_CONTACT = 0; // Require login IMMEDIATELY
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,13 +74,25 @@ export function CozeChatWidget({
     scrollToBottom();
   }, [messages]);
 
-  // Cooldown timer
+  // Cooldown timer with long cooldown reset
   useEffect(() => {
     if (cooldownSeconds > 0) {
-      const timer = setTimeout(() => setCooldownSeconds(cooldownSeconds - 1), 1000);
+      const timer = setTimeout(() => {
+        setCooldownSeconds(cooldownSeconds - 1);
+        if (cooldownSeconds - 1 === 0 && isLongCooldown) {
+          setIsLongCooldown(false);
+          const resetMessage: Message = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: '✅ Tài khoản đã được mở khóa. Vui lòng sử dụng đúng mục đích và tránh spam. Cảm ơn!',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, resetMessage]);
+        }
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [cooldownSeconds]);
+  }, [cooldownSeconds, isLongCooldown]);
 
   // Handle drag start
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -131,43 +149,70 @@ export function CozeChatWidget({
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    // Check if contact info is required
-    if (userQuestionCount >= MAX_QUESTIONS_BEFORE_CONTACT && !userInfo) {
+    // REQUIRE LOGIN FIRST
+    if (!userInfo) {
       setShowContactForm(true);
       const warningMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: '⚠️ Để tiếp tục sử dụng dịch vụ AI, vui lòng cung cấp thông tin liên hệ của bạn. Điều này giúp chúng tôi phục vụ bạn tốt hơn và tránh spam.',
+        content: '⚠️ Vui lòng đăng nhập thông tin trước khi sử dụng dịch vụ AI. Điều này giúp chúng tôi phục vụ bạn tốt hơn và tránh spam.',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, warningMessage]);
       return;
     }
 
-    // Anti-spam: Check message interval
+    // Check session message limit
     const now = Date.now();
+    if (now - sessionStartTime > SESSION_DURATION) {
+      // Reset session after 30 minutes
+      setSessionStartTime(now);
+      setSessionMessageCount(0);
+    }
+
+    if (sessionMessageCount >= MAX_MESSAGES_PER_SESSION) {
+      const limitMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `🚫 Bạn đã đạt giới hạn ${MAX_MESSAGES_PER_SESSION} tin nhắn trong 30 phút. Vui lòng chờ ${Math.ceil((SESSION_DURATION - (now - sessionStartTime)) / 60000)} phút để tiếp tục hoặc liên hệ hotline: 0903 117 277 để được hỗ trợ ngay.`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, limitMessage]);
+      return;
+    }
+
+    // Anti-spam: Check message interval
     if (lastMessageTime && (now - lastMessageTime) < MIN_MESSAGE_INTERVAL) {
       const remainingCooldown = Math.ceil((MIN_MESSAGE_INTERVAL - (now - lastMessageTime)) / 1000);
       setCooldownSeconds(remainingCooldown);
       setSpamWarningCount(prev => prev + 1);
       
-      // Track spam attempts
+      // Track spam attempts - STRICTER ENFORCEMENT
       if (spamWarningCount >= SPAM_THRESHOLD) {
         console.warn('🚨 SPAM DETECTED:', {
           userId,
+          userInfo,
           timestamp: new Date().toISOString(),
           attemptCount: spamWarningCount + 1,
           userAgent: navigator.userAgent,
+          sessionMessages: sessionMessageCount,
         });
+        
+        // LONG COOLDOWN: 10-15 minutes
+        const cooldownMinutes = 10 + Math.floor(Math.random() * 6); // Random 10-15 minutes
+        const cooldownSecs = cooldownMinutes * 60;
+        
+        setIsLongCooldown(true);
+        setCooldownSeconds(cooldownSecs);
+        setSpamWarningCount(0); // Reset after penalty
         
         const spamMessage: Message = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: '🚫 Phát hiện hành vi spam! Tài khoản của bạn đã bị tạm khóa 60 giây. Nếu tiếp tục, bạn sẽ bị chặn vĩnh viễn.',
+          content: `🚫 Phát hiện hành vi spam! Tài khoản của bạn đã bị tạm khóa ${cooldownMinutes} phút.\n\n⏰ Vui lòng chờ ${cooldownMinutes} phút để tiếp tục sử dụng.\n📞 Cần hỗ trợ gấp? Liên hệ: 0903 117 277`,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, spamMessage]);
-        setCooldownSeconds(60);
         return;
       }
       
@@ -176,6 +221,8 @@ export function CozeChatWidget({
 
     setLastMessageTime(now);
     setUserQuestionCount(prev => prev + 1);
+    setSessionMessageCount(prev => prev + 1);
+    setSpamWarningCount(0); // Reset spam counter on successful send
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -270,28 +317,34 @@ export function CozeChatWidget({
       return;
     }
     
-    // Validate phone number (basic)
+    // Validate phone number (Vietnamese format)
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(userInfo.phone.replace(/\s/g, ''))) {
+    const cleanPhone = userInfo.phone.replace(/\s/g, '');
+    if (!phoneRegex.test(cleanPhone)) {
       alert('Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.');
       return;
     }
     
+    // Initialize session tracking
+    setSessionStartTime(Date.now());
+    setSessionMessageCount(0);
     setShowContactForm(false);
+    
     const thankYouMessage: Message = {
       id: Date.now().toString(),
       role: 'assistant',
-      content: `✅ Cảm ơn ${userInfo.name}! Thông tin của bạn đã được lưu. Bạn có thể tiếp tục đặt câu hỏi.`,
+      content: `✅ Xin chào ${userInfo.name}! Cảm ơn bạn đã đăng nhập.\n\n📊 Giới hạn sử dụng:\n• Tối đa ${MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút\n• Giãn cách 5 giây giữa mỗi tin nhắn\n\n💬 Bạn có thể bắt đầu đặt câu hỏi ngay bây giờ!`,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, thankYouMessage]);
     
     // Log user info for admin tracking
-    console.log('✅ User verified:', {
+    console.log('✅ User verified and logged in:', {
       name: userInfo.name,
-      phone: userInfo.phone,
+      phone: cleanPhone,
       timestamp: new Date().toISOString(),
       conversationId,
+      sessionStart: new Date().toISOString(),
     });
   };
 
@@ -355,32 +408,36 @@ export function CozeChatWidget({
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-orange-50/30 to-white">
-            {/* Question counter & spam warning */}
-            {!userInfo && userQuestionCount > 0 && (
-              <div className="text-center">
-                <div className="inline-block bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full border border-yellow-300">
-                  {userQuestionCount >= MAX_QUESTIONS_BEFORE_CONTACT ? (
-                    <span className="flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
-                      Cần xác minh để tiếp tục
-                    </span>
-                  ) : (
-                    `Câu hỏi ${userQuestionCount}/${MAX_QUESTIONS_BEFORE_CONTACT} (miễn phí)`
+            {/* Session status & usage limits */}
+            {userInfo && (
+              <div className="text-center mb-3">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 text-xs px-4 py-2 rounded-full border border-green-300">
+                  <Sparkles className="w-3 h-3 text-green-600" />
+                  <span className="font-medium">
+                    {sessionMessageCount}/{MAX_MESSAGES_PER_SESSION} tin nhắn
+                  </span>
+                  {sessionMessageCount >= MAX_MESSAGES_PER_SESSION - 3 && (
+                    <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse" />
                   )}
                 </div>
               </div>
             )}
             
-            {/* Contact Form Modal */}
+            {/* Login Form - REQUIRED */}
             {showContactForm && (
               <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2 text-orange-700 font-semibold">
                   <User className="w-5 h-5" />
-                  <span>Xác minh thông tin</span>
+                  <span>Đăng nhập để sử dụng AI</span>
                 </div>
                 <p className="text-sm text-gray-700">
-                  Để tiếp tục sử dụng AI và nhận tư vấn chuyên sâu, vui lòng cung cấp:
+                  ⚠️ <strong>Bắt buộc đăng nhập</strong> để sử dụng Golden Energy AI:
                 </p>
+                <ul className="text-xs text-gray-600 space-y-1 ml-4">
+                  <li>• Giới hạn: {MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút</li>
+                  <li>• Chống spam tự động</li>
+                  <li>• Hỗ trợ tốt hơn với thông tin của bạn</li>
+                </ul>
                 <input
                   type="text"
                   placeholder="Họ và tên *"
@@ -447,11 +504,29 @@ export function CozeChatWidget({
 
           {/* Input */}
           <div className="p-4 border-t bg-gradient-to-r from-orange-50 to-yellow-50">
-            {/* Cooldown warning */}
+            {/* Cooldown warning - Enhanced */}
             {cooldownSeconds > 0 && (
-              <div className="mb-2 bg-red-100 border border-red-300 text-red-700 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Vui lòng đợi {cooldownSeconds}s trước khi gửi tin nhắn tiếp theo</span>
+              <div className={`mb-2 border text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+                isLongCooldown 
+                  ? 'bg-red-100 border-red-400 text-red-800' 
+                  : 'bg-yellow-100 border-yellow-300 text-yellow-800'
+              }`}>
+                <AlertTriangle className="w-4 h-4 animate-pulse" />
+                <div className="flex-1">
+                  {isLongCooldown ? (
+                    <div>
+                      <p className="font-bold">🚫 Tài khoản bị khóa do spam</p>
+                      <p className="mt-1">
+                        ⏰ Thời gian còn lại: {Math.floor(cooldownSeconds / 60)} phút {cooldownSeconds % 60} giây
+                      </p>
+                      <p className="mt-1 text-[10px]">
+                        📞 Cần gấp? Hotline: 0903 117 277
+                      </p>
+                    </div>
+                  ) : (
+                    <span>Vui lòng đợi {cooldownSeconds}s trước khi gửi tin nhắn tiếp theo</span>
+                  )}
+                </div>
               </div>
             )}
             
