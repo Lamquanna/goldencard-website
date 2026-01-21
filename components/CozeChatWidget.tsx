@@ -33,7 +33,7 @@ export function CozeChatWidget({
     {
       id: '1',
       role: 'assistant',
-      content: '👋 Xin chào! Tôi là Golden Energy AI - trợ lý thông minh của bạn. Tôi có thể giúp gì cho bạn?',
+      content: 'Xin chào! Tôi là Golden Energy AI - trợ lý thông minh của bạn. Tôi có thể giúp gì cho bạn?',
       timestamp: new Date(),
     },
   ]);
@@ -84,7 +84,7 @@ export function CozeChatWidget({
           const resetMessage: Message = {
             id: Date.now().toString(),
             role: 'assistant',
-            content: '✅ Tài khoản đã được mở khóa. Vui lòng sử dụng đúng mục đích và tránh spam. Cảm ơn!',
+            content: 'Tài khoản đã được mở khóa. Vui lòng sử dụng đúng mục đích và tránh spam. Cảm ơn!',
             timestamp: new Date(),
           };
           setMessages(prev => [...prev, resetMessage]);
@@ -155,7 +155,7 @@ export function CozeChatWidget({
       const warningMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: '⚠️ Vui lòng đăng nhập thông tin trước khi sử dụng dịch vụ AI. Điều này giúp chúng tôi phục vụ bạn tốt hơn và tránh spam.',
+        content: 'Vui lòng đăng nhập thông tin trước khi sử dụng dịch vụ AI. Điều này giúp chúng tôi phục vụ bạn tốt hơn và tránh spam.',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, warningMessage]);
@@ -174,7 +174,7 @@ export function CozeChatWidget({
       const limitMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `🚫 Bạn đã đạt giới hạn ${MAX_MESSAGES_PER_SESSION} tin nhắn trong 30 phút. Vui lòng chờ ${Math.ceil((SESSION_DURATION - (now - sessionStartTime)) / 60000)} phút để tiếp tục hoặc liên hệ hotline: 0903 117 277 để được hỗ trợ ngay.`,
+        content: `Bạn đã đạt giới hạn ${MAX_MESSAGES_PER_SESSION} tin nhắn trong 30 phút. Vui lòng chờ ${Math.ceil((SESSION_DURATION - (now - sessionStartTime)) / 60000)} phút để tiếp tục hoặc liên hệ hotline: 0903 117 277 để được hỗ trợ ngay.`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, limitMessage]);
@@ -209,7 +209,7 @@ export function CozeChatWidget({
         const spamMessage: Message = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `🚫 Phát hiện hành vi spam! Tài khoản của bạn đã bị tạm khóa ${cooldownMinutes} phút.\n\n⏰ Vui lòng chờ ${cooldownMinutes} phút để tiếp tục sử dụng.\n📞 Cần hỗ trợ gấp? Liên hệ: 0903 117 277`,
+          content: `Phát hiện hành vi spam! Tài khoản của bạn đã bị tạm khóa ${cooldownMinutes} phút.\n\nVui lòng chờ ${cooldownMinutes} phút để tiếp tục sử dụng.\nCần hỗ trợ gấp? Liên hệ: 0903 117 277`,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, spamMessage]);
@@ -255,7 +255,7 @@ export function CozeChatWidget({
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: '🔧 ' + (data.error || 'AI Chat đang được bảo trì. Vui lòng thử lại sau hoặc liên hệ qua hotline: 0901 234 567'),
+          content: data.error || 'AI Chat đang được bảo trì. Vui lòng thử lại sau hoặc liên hệ qua hotline: 0901 234 567',
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, errorMessage]);
@@ -294,7 +294,7 @@ export function CozeChatWidget({
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `❌ Lỗi kết nối: ${error.message || 'Không thể kết nối với AI Assistant'}. Vui lòng kiểm tra kết nối mạng và thử lại.`,
+        content: `Lỗi kết nối: ${error.message || 'Không thể kết nối với AI Assistant'}. Vui lòng kiểm tra kết nối mạng và thử lại.`,
         timestamp: new Date(),
       };
       
@@ -333,7 +333,7 @@ export function CozeChatWidget({
     const thankYouMessage: Message = {
       id: Date.now().toString(),
       role: 'assistant',
-      content: `✅ Xin chào ${userInfo.name}! Cảm ơn bạn đã đăng nhập.\n\n📊 Giới hạn sử dụng:\n• Tối đa ${MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút\n• Giãn cách 5 giây giữa mỗi tin nhắn\n\n💬 Bạn có thể bắt đầu đặt câu hỏi ngay bây giờ!`,
+      content: `Xin chào ${userInfo.name}! Cảm ơn bạn đã đăng nhập.\n\nGiới hạn sử dụng:\n• Tối đa ${MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút\n• Giãn cách 5 giây giữa mỗi tin nhắn\n\nBạn có thể bắt đầu đặt câu hỏi ngay bây giờ!`,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, thankYouMessage]);
@@ -431,7 +431,7 @@ export function CozeChatWidget({
                   <span>Đăng nhập để sử dụng AI</span>
                 </div>
                 <p className="text-sm text-gray-700">
-                  ⚠️ <strong>Bắt buộc đăng nhập</strong> để sử dụng Golden Energy AI:
+                  <strong>Bắt buộc đăng nhập</strong> để sử dụng Golden Energy AI:
                 </p>
                 <ul className="text-xs text-gray-600 space-y-1 ml-4">
                   <li>• Giới hạn: {MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút</li>
@@ -459,7 +459,7 @@ export function CozeChatWidget({
                   Xác nhận và tiếp tục
                 </button>
                 <p className="text-xs text-gray-500 text-center">
-                  🔒 Thông tin được bảo mật theo chính sách của Golden Energy
+                  Thông tin được bảo mật theo chính sách của Golden Energy
                 </p>
               </div>
             )}
@@ -515,12 +515,12 @@ export function CozeChatWidget({
                 <div className="flex-1">
                   {isLongCooldown ? (
                     <div>
-                      <p className="font-bold">🚫 Tài khoản bị khóa do spam</p>
+                      <p className="font-bold">Tài khoản bị khóa do spam</p>
                       <p className="mt-1">
-                        ⏰ Thời gian còn lại: {Math.floor(cooldownSeconds / 60)} phút {cooldownSeconds % 60} giây
+                        Thời gian còn lại: {Math.floor(cooldownSeconds / 60)} phút {cooldownSeconds % 60} giây
                       </p>
                       <p className="mt-1 text-[10px]">
-                        📞 Cần gấp? Hotline: 0903 117 277
+                        Cần gấp? Hotline: 0903 117 277
                       </p>
                     </div>
                   ) : (
@@ -556,7 +556,7 @@ export function CozeChatWidget({
                 Powered by Golden Energy AI
               </span>
               {userInfo && (
-                <span className="text-green-600 font-medium">✓ Đã xác minh</span>
+                <span className="text-green-600 font-medium">Đã xác minh</span>
               )}
             </div>
           </div>
