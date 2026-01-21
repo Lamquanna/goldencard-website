@@ -14,6 +14,7 @@ import { RevenueStats } from "@/components/RevenueStats";
 
 import { isLocale, type Locale } from "@/lib/i18n";
 import goldenEnergyContent from "@/lib/content-goldenenergy.json";
+import { generateOrganizationSchema } from "@/lib/schema";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
@@ -71,8 +72,52 @@ export default async function HomePage({ params }: HomePageProps) {
   const content = goldenEnergyContent[locale];
   const { hero, origin, pillars, projects, cta } = content;
 
+  // Generate Semantic Schemas
+  const organizationSchema = generateOrganizationSchema({ locale: locale as any });
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://goldenenergy.vn/#website",
+    "url": "https://goldenenergy.vn",
+    "name": "Golden Energy Vietnam",
+    "description": locale === "vi" 
+      ? "Giải pháp năng lượng mặt trời hàng đầu Việt Nam" 
+      : locale === "zh"
+      ? "越南领先的太阳能解决方案"
+      : locale === "id"
+      ? "Solusi energi surya terkemuka di Vietnam"
+      : "Leading solar energy solutions in Vietnam",
+    "publisher": {
+      "@id": "https://goldenenergy.vn/#organization"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://goldenenergy.vn/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "inLanguage": ["vi", "en", "zh", "id"]
+  };
+
   return (
     <>
+      {/* Semantic Web Schemas */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteSchema),
+        }}
+      />
+
       {/* Loading Screen */}
       <LoadingScreen />
 

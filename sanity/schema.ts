@@ -119,11 +119,12 @@ const product = {
       type: 'string',
       options: {
         list: [
-          { title: 'Solar Panels', value: 'panels' },
-          { title: 'Inverters', value: 'inverters' },
-          { title: 'Batteries', value: 'batteries' },
-          { title: 'Monitoring', value: 'monitoring' },
+          { title: 'Solar Panel', value: 'solar-panel' },
+          { title: 'Inverter', value: 'inverter' },
+          { title: 'Battery', value: 'battery' },
+          { title: 'Accessory', value: 'accessory' },
         ],
+        layout: 'dropdown',
       },
       validation: (Rule: any) => Rule.required(),
     },
@@ -136,6 +137,58 @@ const product = {
       name: 'model',
       title: 'Model',
       type: 'string',
+    },
+    {
+      name: 'techSpecs',
+      title: 'Technical Specifications',
+      type: 'object',
+      description: 'Technical specs for calculator (required for product recommendations)',
+      fields: [
+        {
+          name: 'capacity',
+          title: 'Capacity (Watt)',
+          type: 'number',
+          description: 'Power capacity in Watts (e.g., 5000 for 5kW inverter, 450 for 450W panel)',
+          validation: (Rule: any) => Rule.required().positive(),
+        },
+        {
+          name: 'efficiency',
+          title: 'Efficiency (%)',
+          type: 'number',
+          description: 'Efficiency percentage (e.g., 98.5 for inverter, 21.5 for solar panel)',
+          validation: (Rule: any) => Rule.required().min(0).max(100),
+        },
+        {
+          name: 'warrantyYears',
+          title: 'Warranty (Years)',
+          type: 'number',
+          description: 'Warranty period in years',
+          validation: (Rule: any) => Rule.required().positive(),
+        },
+        {
+          name: 'voltage',
+          title: 'Voltage (V)',
+          type: 'number',
+          description: 'Operating voltage (optional)',
+        },
+        {
+          name: 'current',
+          title: 'Current (A)',
+          type: 'number',
+          description: 'Operating current (optional)',
+        },
+        {
+          name: 'dimensions',
+          title: 'Dimensions (mm)',
+          type: 'string',
+          description: 'Format: Length x Width x Height (e.g., 2100 x 1050 x 35)',
+        },
+        {
+          name: 'weight',
+          title: 'Weight (kg)',
+          type: 'number',
+        },
+      ],
     },
     {
       name: 'price',
@@ -175,8 +228,9 @@ const product = {
     },
     {
       name: 'specs',
-      title: 'Specifications',
+      title: 'Specifications (Display)',
       type: 'array',
+      description: 'User-friendly specs for display (use techSpecs for calculator)',
       of: [
         {
           type: 'object',
@@ -240,6 +294,16 @@ const product = {
       title: 'name',
       subtitle: 'brand',
       media: 'mainImage',
+      category: 'category',
+      capacity: 'techSpecs.capacity',
+    },
+    prepare(selection: any) {
+      const { title, subtitle, media, category, capacity } = selection
+      return {
+        title: title,
+        subtitle: `${subtitle || ''} | ${category} | ${capacity ? capacity + 'W' : 'N/A'}`,
+        media: media,
+      }
     },
   },
 }
@@ -444,6 +508,253 @@ const project = {
   },
 }
 
+const post = {
+  name: 'post',
+  title: 'Blog Post',
+  type: 'document',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96,
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'author',
+      title: 'Author',
+      type: 'string',
+      initialValue: 'Golden Energy Team',
+    },
+    {
+      name: 'mainImage',
+      title: 'Main Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'categories',
+      title: 'Categories',
+      type: 'array',
+      of: [
+        {
+          type: 'string',
+          options: {
+            list: [
+              { title: 'News', value: 'news' },
+              { title: 'Guide', value: 'guide' },
+              { title: 'Technology', value: 'technology' },
+              { title: 'Case Study', value: 'case-study' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      name: 'excerpt',
+      title: 'Excerpt',
+      type: 'text',
+      rows: 3,
+      description: 'Short summary for listings',
+    },
+    {
+      name: 'body',
+      title: 'Body',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+        },
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'publishedAt',
+      title: 'Published At',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+    },
+    {
+      name: 'featured',
+      title: 'Featured Post',
+      type: 'boolean',
+      initialValue: false,
+    },
+    {
+      name: 'locale',
+      title: 'Language',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Vietnamese', value: 'vi' },
+          { title: 'English', value: 'en' },
+          { title: 'Chinese', value: 'zh' },
+          { title: 'Indonesian', value: 'id' },
+        ],
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      author: 'author',
+      media: 'mainImage',
+      date: 'publishedAt',
+    },
+    prepare(selection: any) {
+      const { title, author, media, date } = selection
+      return {
+        title: title,
+        subtitle: `${author} | ${new Date(date).toLocaleDateString()}`,
+        media: media,
+      }
+    },
+  },
+}
+
+const solution = {
+  name: 'solution',
+  title: 'Solution',
+  type: 'document',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96,
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'type',
+      title: 'Solution Type',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Residential', value: 'residential' },
+          { title: 'Commercial', value: 'commercial' },
+          { title: 'Industrial', value: 'industrial' },
+          { title: 'Hybrid', value: 'hybrid' },
+        ],
+        layout: 'dropdown',
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'text',
+      rows: 3,
+    },
+    {
+      name: 'benefits',
+      title: 'Key Benefits',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'title',
+              title: 'Benefit Title',
+              type: 'string',
+            },
+            {
+              name: 'description',
+              title: 'Description',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'features',
+      title: 'Features',
+      type: 'array',
+      of: [{ type: 'string' }],
+    },
+    {
+      name: 'images',
+      title: 'Images',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
+    },
+    {
+      name: 'priceRange',
+      title: 'Price Range',
+      type: 'object',
+      fields: [
+        {
+          name: 'min',
+          title: 'Minimum (VND)',
+          type: 'number',
+        },
+        {
+          name: 'max',
+          title: 'Maximum (VND)',
+          type: 'number',
+        },
+      ],
+    },
+    {
+      name: 'locale',
+      title: 'Language',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Vietnamese', value: 'vi' },
+          { title: 'English', value: 'en' },
+          { title: 'Chinese', value: 'zh' },
+          { title: 'Indonesian', value: 'id' },
+        ],
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'type',
+      media: 'images.0',
+    },
+  },
+}
+
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [siteSettings, product, project],
+  types: [siteSettings, product, project, post, solution],
 }
