@@ -48,10 +48,15 @@ export default function CalculatorPage() {
           placeholder: 'VD: 2,000,000',
           unit: 'VND',
         },
-        roofArea: {
-          label: 'Diện tích mái khả dụng',
-          placeholder: 'VD: 50',
-          unit: 'm²',
+        roofLength: {
+          label: 'Chiều dài mái',
+          placeholder: 'VD: 10',
+          unit: 'm',
+        },
+        roofWidth: {
+          label: 'Chiều rộng mái',
+          placeholder: 'VD: 5',
+          unit: 'm',
         },
         roofType: {
           label: 'Loại mái',
@@ -119,10 +124,15 @@ export default function CalculatorPage() {
           placeholder: 'Ex: 2,000,000',
           unit: 'VND',
         },
-        roofArea: {
-          label: 'Available roof area',
-          placeholder: 'Ex: 50',
-          unit: 'm²',
+        roofLength: {
+          label: 'Roof length',
+          placeholder: 'Ex: 10',
+          unit: 'm',
+        },
+        roofWidth: {
+          label: 'Roof width',
+          placeholder: 'Ex: 5',
+          unit: 'm',
         },
         roofType: {
           label: 'Roof type',
@@ -190,10 +200,15 @@ export default function CalculatorPage() {
           placeholder: '例: 2,000,000',
           unit: 'VND',
         },
-        roofArea: {
-          label: '可用屋顶面积',
-          placeholder: '例: 50',
-          unit: 'm²',
+        roofLength: {
+          label: '屋顶长度',
+          placeholder: '例: 10',
+          unit: 'm',
+        },
+        roofWidth: {
+          label: '屋顶宽度',
+          placeholder: '例: 5',
+          unit: 'm',
         },
         roofType: {
           label: '屋顶类型',
@@ -257,14 +272,15 @@ export default function CalculatorPage() {
       metadata: { step: 1 },
     });
     
-    if (!input.monthlyElectricBill || !input.roofArea || !input.location?.province) {
+    if (!input.monthlyElectricBill || !input.roofLength || !input.roofWidth || !input.location?.province) {
       alert('Please fill in all required fields');
       return;
     }
     
     const calculatorInput: CalculatorInput = {
       monthlyElectricBill: input.monthlyElectricBill!,
-      roofArea: input.roofArea!,
+      roofLength: input.roofLength!,
+      roofWidth: input.roofWidth!,
       location: {
         province: input.location!.province,
         lat: 10.8231, // Default HCM
@@ -363,25 +379,59 @@ export default function CalculatorPage() {
             
             {step === 2 && (
               <div className="space-y-6">
-                <div>
-                  <label className="block text-lg font-semibold text-gray-900 mb-4">
-                    {t.form.roofArea.label}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={input.roofArea || ''}
-                      onChange={(e) =>
-                        setInput({ ...input, roofArea: Number(e.target.value) })
-                      }
-                      placeholder={t.form.roofArea.placeholder}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-600 focus:outline-none"
-                    />
-                    <span className="absolute right-4 top-3 text-gray-500">
-                      {t.form.roofArea.unit}
-                    </span>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Roof Length */}
+                  <div>
+                    <label className="block text-lg font-semibold text-gray-900 mb-4">
+                      {t.form.roofLength.label}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={input.roofLength || ''}
+                        onChange={(e) =>
+                          setInput({ ...input, roofLength: Number(e.target.value) })
+                        }
+                        placeholder={t.form.roofLength.placeholder}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-600 focus:outline-none"
+                      />
+                      <span className="absolute right-4 top-3 text-gray-500">
+                        {t.form.roofLength.unit}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Roof Width */}
+                  <div>
+                    <label className="block text-lg font-semibold text-gray-900 mb-4">
+                      {t.form.roofWidth.label}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={input.roofWidth || ''}
+                        onChange={(e) =>
+                          setInput({ ...input, roofWidth: Number(e.target.value) })
+                        }
+                        placeholder={t.form.roofWidth.placeholder}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-600 focus:outline-none"
+                      />
+                      <span className="absolute right-4 top-3 text-gray-500">
+                        {t.form.roofWidth.unit}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                
+                {/* Display calculated area */}
+                {input.roofLength && input.roofWidth && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-900">
+                      <span className="font-semibold">{locale === 'vi' ? 'Diện tích mái:' : locale === 'zh' ? '屋顶面积:' : 'Roof area:'}</span>
+                      {' '}{(input.roofLength * input.roofWidth).toFixed(2)} m²
+                    </p>
+                  </div>
+                )}
                 
                 <div>
                   <label className="block text-lg font-semibold text-gray-900 mb-4">
@@ -556,8 +606,20 @@ export default function CalculatorPage() {
               
               {step < 3 && (
                 <button
-                  onClick={() => setStep(step + 1)}
-                  className="ml-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+                  onClick={() => {
+                    // Validate step 2 (roof dimensions)
+                    if (step === 2 && (!input.roofLength || !input.roofWidth)) {
+                      alert(locale === 'vi' 
+                        ? 'Vui lòng nhập chiều dài và chiều rộng mái nhà' 
+                        : locale === 'zh' 
+                        ? '请输入屋顶长度和宽度' 
+                        : 'Please enter roof length and width');
+                      return;
+                    }
+                    setStep(step + 1);
+                  }}
+                  disabled={step === 1 && !input.monthlyElectricBill}
+                  className="ml-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t.buttons.next}
                 </button>

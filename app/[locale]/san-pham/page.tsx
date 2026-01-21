@@ -661,7 +661,7 @@ export default function ProductsPage({
           <div className="grid md:grid-cols-2 gap-8">
             {/* Solar Panels */}
             <ProductCard
-              category="panels"
+              category="tam-pin"
               icon={productCategories.panels.icon}
               color={productCategories.panels.color}
               bgGradient={productCategories.panels.bgGradient}
@@ -676,7 +676,7 @@ export default function ProductsPage({
 
             {/* Inverters */}
             <ProductCard
-              category="inverters"
+              category="bien-tan"
               icon={productCategories.inverters.icon}
               color={productCategories.inverters.color}
               bgGradient={productCategories.inverters.bgGradient}
@@ -691,7 +691,7 @@ export default function ProductsPage({
 
             {/* Battery Storage */}
             <ProductCard
-              category="batteries"
+              category="pin-luu-tru"
               icon={productCategories.batteries.icon}
               color={productCategories.batteries.color}
               bgGradient={productCategories.batteries.bgGradient}
@@ -706,7 +706,7 @@ export default function ProductsPage({
 
             {/* Monitoring Systems */}
             <ProductCard
-              category="monitoring"
+              category="giam-sat"
               icon={productCategories.monitoring.icon}
               color={productCategories.monitoring.color}
               bgGradient={productCategories.monitoring.bgGradient}

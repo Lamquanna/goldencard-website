@@ -228,7 +228,9 @@ export async function getProjectStats(locale: string = 'vi') {
         "residential": count(*[_type == "project" && locale == $locale && systemType == "residential"]),
         "commercial": count(*[_type == "project" && locale == $locale && systemType == "commercial"]),
         "industrial": count(*[_type == "project" && locale == $locale && systemType == "industrial"]),
-        "totalCapacity": sum(*[_type == "project" && locale == $locale].capacity),
+        "totalCapacity": math::sum(
+          *[_type == "project" && locale == $locale].capacity
+        ),
         "featured": count(*[_type == "project" && locale == $locale && featured == true])
       }`,
       { locale },

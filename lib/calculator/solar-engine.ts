@@ -5,7 +5,8 @@
 
 export interface CalculatorInput {
   monthlyElectricBill: number; // VND
-  roofArea: number; // m²
+  roofLength: number; // m
+  roofWidth: number; // m
   location: {
     province: string;
     lat: number;
@@ -83,30 +84,33 @@ export const VIETNAM_SOLAR_CONSTANTS = {
  * Main calculation function
  */
 export function calculateSolarSystem(input: CalculatorInput): CalculatorOutput {
-  // Step 1: Calculate monthly energy consumption from bill
+  // Step 1: Calculate roof area from dimensions
+  const roofArea = input.roofLength * input.roofWidth;
+  
+  // Step 2: Calculate monthly energy consumption from bill
   const monthlyConsumption = estimateMonthlyConsumption(input.monthlyElectricBill);
 
-  // Step 2: Determine region & solar radiation
+  // Step 3: Determine region & solar radiation
   const region = getRegion(input.location.province);
   const dailySolarRadiation = VIETNAM_SOLAR_CONSTANTS.solarRadiation[region];
 
-  // Step 3: Calculate required system capacity
+  // Step 4: Calculate required system capacity
   const dailyEnergyNeeded = monthlyConsumption / 30;
   const systemCapacity = calculateCapacity(
     dailyEnergyNeeded,
     dailySolarRadiation,
-    input.roofArea,
+    roofArea,
     input.shading
   );
 
-  // Step 4: Determine solution type (residential/commercial/industrial)
+  // Step 5: Determine solution type (residential/commercial/industrial)
   const solutionType = determineSolutionType(systemCapacity, monthlyConsumption);
 
-  // Step 5: Calculate costs
+  // Step 6: Calculate costs
   const costPerKW = VIETNAM_SOLAR_CONSTANTS.systemCost[solutionType];
   const totalCost = systemCapacity * costPerKW;
 
-  // Step 6: Calculate ROI metrics
+  // Step 7: Calculate ROI metrics
   const roi = calculateROI(
     systemCapacity,
     totalCost,
@@ -114,10 +118,10 @@ export function calculateSolarSystem(input: CalculatorInput): CalculatorOutput {
     dailySolarRadiation
   );
 
-  // Step 7: System specifications
-  const systemSpecs = calculateSystemSpecs(systemCapacity, solutionType, input.roofArea);
+  // Step 8: System specifications
+  const systemSpecs = calculateSystemSpecs(systemCapacity, solutionType, roofArea);
 
-  // Step 8: Environmental impact
+  // Step 9: Environmental impact
   const environmentalImpact = calculateEnvironmentalImpact(
     systemCapacity,
     dailySolarRadiation
