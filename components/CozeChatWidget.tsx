@@ -20,6 +20,7 @@ interface CozeChatWidgetProps {
 interface UserInfo {
   name: string;
   phone: string;
+  email?: string;
 }
 
 export function CozeChatWidget({
@@ -33,7 +34,7 @@ export function CozeChatWidget({
     {
       id: '1',
       role: 'assistant',
-      content: 'Xin chào! Tôi là Golden Energy AI - trợ lý thông minh của bạn. Tôi có thể giúp gì cho bạn?',
+      content: 'Xin chào Anh/Chị! Em là trợ lý tư vấn của Golden Energy. Em có thể hỗ trợ Anh/Chị về giải pháp năng lượng mặt trời ngay hôm nay.',
       timestamp: new Date(),
     },
   ]);
@@ -52,6 +53,15 @@ export function CozeChatWidget({
   const [sessionMessageCount, setSessionMessageCount] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
   const [isLongCooldown, setIsLongCooldown] = useState(false);
+  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
+  
+  // Quick question suggestions - Guide to actual website features
+  const quickQuestions = [
+    'Hướng dẫn sử dụng công cụ tính toán điện mặt trời',
+    'Xem các dự án điện mặt trời đã triển khai',
+    'Tư vấn giải pháp phù hợp cho tôi',
+    'Liên hệ để được khảo sát miễn phí',
+  ];
   
   // Draggable state
   const [widgetPosition, setWidgetPosition] = useState({ x: 24, y: 24 });
@@ -155,7 +165,7 @@ export function CozeChatWidget({
       const warningMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: 'Vui lòng đăng nhập thông tin trước khi sử dụng dịch vụ AI. Điều này giúp chúng tôi phục vụ bạn tốt hơn và tránh spam.',
+        content: 'Để được tư vấn chi tiết và trải nghiệm tốt nhất, Anh/Chị vui lòng cung cấp thông tin liên hệ. Em sẽ hỗ trợ Anh/Chị ngay ạ!',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, warningMessage]);
@@ -174,7 +184,7 @@ export function CozeChatWidget({
       const limitMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `Bạn đã đạt giới hạn ${MAX_MESSAGES_PER_SESSION} tin nhắn trong 30 phút. Vui lòng chờ ${Math.ceil((SESSION_DURATION - (now - sessionStartTime)) / 60000)} phút để tiếp tục hoặc liên hệ hotline: 0903 117 277 để được hỗ trợ ngay.`,
+        content: `Để phục vụ Anh/Chị tốt hơn, em xin mời Anh/Chị liên hệ trực tiếp hotline:\n• 0903 117 277\n• 0333 314 288\nĐể được tư vấn chi tiết. Cảm ơn Anh/Chị!`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, limitMessage]);
@@ -209,7 +219,7 @@ export function CozeChatWidget({
         const spamMessage: Message = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `Phát hiện hành vi spam! Tài khoản của bạn đã bị tạm khóa ${cooldownMinutes} phút.\n\nVui lòng chờ ${cooldownMinutes} phút để tiếp tục sử dụng.\nCần hỗ trợ gấp? Liên hệ: 0903 117 277`,
+          content: `Để đảm bảo chất lượng dịch vụ, Anh/Chị vui lòng liên hệ hotline:\n• 0903 117 277\n• 0333 314 288\nĐược chuyên viên hỗ trợ trực tiếp. Em xin cảm ơn!`,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, spamMessage]);
@@ -311,6 +321,24 @@ export function CozeChatWidget({
     }
   };
 
+  const handleQuickQuestion = (question: string) => {
+    setInput(question);
+    setShowQuickQuestions(false);
+    // Auto-send after a brief delay
+    setTimeout(() => {
+      if (userInfo) {
+        setInput(question);
+        // Trigger send programmatically
+        const syntheticEvent = {
+          preventDefault: () => {},
+          key: 'Enter',
+          shiftKey: false,
+        } as React.KeyboardEvent;
+        handleKeyPress(syntheticEvent);
+      }
+    }, 100);
+  };
+
   const handleContactSubmit = () => {
     if (!userInfo?.name || !userInfo?.phone) {
       alert('Vui lòng nhập đầy đủ thông tin');
@@ -325,6 +353,13 @@ export function CozeChatWidget({
       return;
     }
     
+    // Save to ERP CRM immediately (no auth needed - public API)
+    saveToCRM({
+      name: userInfo.name,
+      phone: cleanPhone,
+      email: userInfo.email || null,
+    });
+    
     // Initialize session tracking
     setSessionStartTime(Date.now());
     setSessionMessageCount(0);
@@ -333,7 +368,7 @@ export function CozeChatWidget({
     const thankYouMessage: Message = {
       id: Date.now().toString(),
       role: 'assistant',
-      content: `Xin chào ${userInfo.name}! Cảm ơn bạn đã đăng nhập.\n\nGiới hạn sử dụng:\n• Tối đa ${MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút\n• Giãn cách 5 giây giữa mỗi tin nhắn\n\nBạn có thể bắt đầu đặt câu hỏi ngay bây giờ!`,
+      content: `Xin chào Anh/Chị ${userInfo.name}! Cảm ơn Anh/Chị đã tin tưởng Golden Energy.\n\nEm có thể tư vấn cho Anh/Chị về:\n• Giải pháp điện mặt trời phù hợp nhất\n• Tính toán chi phí & lợi ích đầu tư\n• Hỗ trợ khảo sát & thiết kế hệ thống\n\nAnh/Chị có thể đặt câu hỏi hoặc sử dụng công cụ tính toán lắp đặt năng lượng mặt trời thông minh trên website nhé!`,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, thankYouMessage]);
@@ -348,6 +383,27 @@ export function CozeChatWidget({
     });
   };
 
+  // Save to ERP CRM function
+  const saveToCRM = async (contactInfo: { name: string; phone: string; email: string | null }) => {
+    try {
+      const response = await fetch('/api/chatbot-leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactInfo),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Contact saved to ERP CRM:', result.leadId);
+      } else {
+        console.error('⚠️ Failed to save to CRM (non-blocking):', await response.text());
+      }
+    } catch (error) {
+      // Non-blocking - don't show error to user
+      console.error('⚠️ CRM save error (non-blocking):', error);
+    }
+  };
+
   // Dynamic positioning based on drag
   const positionStyle = {
     right: `${widgetPosition.x}px`,
@@ -360,17 +416,17 @@ export function CozeChatWidget({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="relative bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 text-white rounded-full p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 group"
+          className="relative bg-gradient-to-br from-orange-500 to-blue-600 text-white rounded-full p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 group"
           aria-label="Open Golden Energy AI"
         >
           {/* Animated glow effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-pink-500 opacity-75 blur-md group-hover:opacity-100 animate-pulse"></div>
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-blue-600 opacity-75 blur-md group-hover:opacity-100 animate-pulse"></div>
           
           {/* AI Sparkle Icon */}
           <Sparkles className="w-7 h-7 relative z-10 animate-pulse" />
           
           {/* Badge */}
-          <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg">
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg">
             AI
           </span>
         </button>
@@ -381,7 +437,7 @@ export function CozeChatWidget({
         <div className="bg-white rounded-lg shadow-2xl w-96 h-[600px] flex flex-col">
           {/* Header - Draggable */}
           <div 
-            className={`bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 text-white p-4 rounded-t-lg flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            className={`bg-gradient-to-r from-orange-500 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             onMouseDown={handleDragStart}
             onTouchStart={handleDragStart}
           >
@@ -389,12 +445,12 @@ export function CozeChatWidget({
               <GripVertical className="w-4 h-4 opacity-50" />
               <div className="relative">
                 <Sparkles className="w-6 h-6 animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-ping"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full"></div>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Golden Energy AI</h3>
-                <p className="text-xs opacity-90">Trợ lý thông minh • Kéo để di chuyển</p>
+                <h3 className="font-bold text-lg">Tư Vấn Năng Lượng</h3>
+                <p className="text-xs opacity-90">Golden Energy • Trực tuyến</p>
               </div>
             </div>
             <button
@@ -408,36 +464,21 @@ export function CozeChatWidget({
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-orange-50/30 to-white">
-            {/* Session status & usage limits */}
-            {userInfo && (
-              <div className="text-center mb-3">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 text-xs px-4 py-2 rounded-full border border-green-300">
-                  <Sparkles className="w-3 h-3 text-green-600" />
-                  <span className="font-medium">
-                    {sessionMessageCount}/{MAX_MESSAGES_PER_SESSION} tin nhắn
-                  </span>
-                  {sessionMessageCount >= MAX_MESSAGES_PER_SESSION - 3 && (
-                    <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse" />
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Session status - Hidden from customers */}
             
             {/* Login Form - REQUIRED */}
             {showContactForm && (
-              <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-lg p-4 space-y-3">
+              <div className="bg-gradient-to-br from-orange-50 to-blue-50 border-2 border-orange-400 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2 text-orange-700 font-semibold">
                   <User className="w-5 h-5" />
                   <span>Đăng nhập để sử dụng AI</span>
                 </div>
-                <p className="text-sm text-gray-700">
-                  <strong>Bắt buộc đăng nhập</strong> để sử dụng Golden Energy AI:
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Để trải nghiệm tốt nhất, Anh/Chị vui lòng cung cấp số điện thoại và thông tin để bên em liên hệ.
                 </p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-4">
-                  <li>• Giới hạn: {MAX_MESSAGES_PER_SESSION} tin nhắn / 30 phút</li>
-                  <li>• Chống spam tự động</li>
-                  <li>• Hỗ trợ tốt hơn với thông tin của bạn</li>
-                </ul>
+                <p className="text-xs text-gray-600">
+                  Kết hợp cùng bộ tính toán lắp đặt năng lượng mặt trời thông minh, em sẽ tư vấn giải pháp phù hợp nhất cho Anh/Chị.
+                </p>
                 <input
                   type="text"
                   placeholder="Họ và tên *"
@@ -454,7 +495,7 @@ export function CozeChatWidget({
                 />
                 <button
                   onClick={handleContactSubmit}
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-2 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all"
+                  className="w-full bg-gradient-to-r from-orange-500 to-blue-600 text-white font-semibold py-2 rounded-lg hover:from-orange-600 hover:to-blue-700 transition-all"
                 >
                   Xác nhận và tiếp tục
                 </button>
@@ -504,6 +545,27 @@ export function CozeChatWidget({
 
           {/* Input */}
           <div className="p-4 border-t bg-gradient-to-r from-orange-50 to-yellow-50">
+            {/* Quick Questions - Show only if not logged in or on first message */}
+            {showQuickQuestions && !userInfo && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-600 mb-2">Gợi ý câu hỏi:</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {quickQuestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setShowContactForm(true);
+                        setInput(q);
+                      }}
+                      className="text-left text-xs bg-white border border-orange-200 hover:border-orange-400 hover:bg-orange-50 rounded-lg px-3 py-2 transition-all"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {/* Cooldown warning - Enhanced */}
             {cooldownSeconds > 0 && (
               <div className={`mb-2 border text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
@@ -515,16 +577,11 @@ export function CozeChatWidget({
                 <div className="flex-1">
                   {isLongCooldown ? (
                     <div>
-                      <p className="font-bold">Tài khoản bị khóa do spam</p>
-                      <p className="mt-1">
-                        Thời gian còn lại: {Math.floor(cooldownSeconds / 60)} phút {cooldownSeconds % 60} giây
-                      </p>
-                      <p className="mt-1 text-[10px]">
-                        Cần gấp? Hotline: 0903 117 277
-                      </p>
+                      <p className="font-medium">Để được hỗ trợ tốt hơn, Anh/Chị vui lòng liên hệ:</p>
+                      <p className="text-[10px] mt-1">• 0903 117 277 hoặc • 0333 314 288</p>
                     </div>
                   ) : (
-                    <span>Vui lòng đợi {cooldownSeconds}s trước khi gửi tin nhắn tiếp theo</span>
+                    <span>Vui lòng đợi {cooldownSeconds}s...</span>
                   )}
                 </div>
               </div>
@@ -543,21 +600,18 @@ export function CozeChatWidget({
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading || cooldownSeconds > 0}
-                className="bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg px-4 py-2 hover:from-orange-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                className="bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-lg px-4 py-2 hover:from-orange-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
                 aria-label="Send message"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
+            <div className="mt-2 flex items-center justify-center text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-orange-500" />
-                Powered by Golden Energy AI
+                Golden Energy AI
               </span>
-              {userInfo && (
-                <span className="text-green-600 font-medium">Đã xác minh</span>
-              )}
             </div>
           </div>
         </div>
