@@ -1,894 +1,539 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
+import type { CalculatorResult } from '@/sanity/services/calculatorService';
 
-interface PanelType {
-  label: string;
-  labelVi: string;
-  labelZh: string;
-  wattage: number;
+// ============================================
+// INTERFACES & TYPES
+// ============================================
+interface TranslatedContent {
+  title: string;
+  subtitle: string;
+  inputLabel: string;
+  inputPlaceholder: string;
+  systemTypeLabel: string;
+  gridTied: string;
+  hybrid: string;
+  calculateButton: string;
+  loadingText: string;
+  resultsTitle: string;
+  systemSize: string;
+  monthlyProduction: string;
+  monthlySavings: string;
+  paybackPeriod: string;
+  totalInvestment: string;
+  recommendedProducts: string;
+  inverter: string;
+  solarPanels: string;
+  battery: string;
+  capacity: string;
   efficiency: string;
-  // Panel physical specifications
-  lengthMm: number; // mm
-  widthMm: number;  // mm
-  weightKg: number; // kg
-  category: 'standard' | 'high-power' | 'ultra-high-power';
+  warranty: string;
+  quantity: string;
+  years: string;
+  contactButton: string;
+  errorTitle: string;
+  errorMessage: string;
+  fallbackTitle: string;
 }
 
-interface InverterType {
-  label: string;
-  labelVi: string;
-  labelZh: string;
-  minCapacityKW: number;
-  maxCapacityKW: number;
-  type: 'string' | 'micro' | 'hybrid' | 'central';
-  features: string[];
-  featuresVi: string[];
-  featuresZh: string[];
-  recommendReason: string;
-  recommendReasonVi: string;
-  recommendReasonZh: string;
-  brands: string[];
-}
-
-const PANEL_TYPES: PanelType[] = [
-  // Standard panels (330W-450W)
-  { 
-    label: 'Polycrystalline 330W', 
-    labelVi: 'Đa tinh thể 330W', 
-    labelZh: '多晶硅 330W', 
-    wattage: 330, 
-    efficiency: '17%',
-    lengthMm: 1956,
-    widthMm: 992,
-    weightKg: 22.5,
-    category: 'standard'
-  },
-  { 
-    label: 'Monocrystalline 450W', 
-    labelVi: 'Đơn tinh thể 450W', 
-    labelZh: '单晶硅 450W', 
-    wattage: 450, 
-    efficiency: '21%',
-    lengthMm: 2094,
-    widthMm: 1038,
-    weightKg: 24,
-    category: 'standard'
-  },
-  // High-power panels (500W-600W)
-  { 
-    label: 'Bifacial 500W', 
-    labelVi: 'Song mặt 500W', 
-    labelZh: '双面 500W', 
-    wattage: 500, 
-    efficiency: '22%',
-    lengthMm: 2172,
-    widthMm: 1048,
-    weightKg: 26.5,
-    category: 'high-power'
-  },
-  { 
-    label: 'High-Efficiency 550W', 
-    labelVi: 'Hiệu suất cao 550W', 
-    labelZh: '高效 550W', 
-    wattage: 550, 
-    efficiency: '23%',
-    lengthMm: 2278,
-    widthMm: 1134,
-    weightKg: 28,
-    category: 'high-power'
-  },
-  { 
-    label: 'N-Type TOPCon 600W', 
-    labelVi: 'N-Type TOPCon 600W', 
-    labelZh: 'N型TOPCon 600W', 
-    wattage: 600, 
-    efficiency: '23.5%',
-    lengthMm: 2384,
-    widthMm: 1134,
-    weightKg: 30.5,
-    category: 'high-power'
-  },
-  // Ultra high-power panels (650W-800W+)
-  { 
-    label: 'Ultra Power 650W', 
-    labelVi: 'Siêu công suất 650W', 
-    labelZh: '超高功率 650W', 
-    wattage: 650, 
-    efficiency: '24%',
-    lengthMm: 2465,
-    widthMm: 1134,
-    weightKg: 32,
-    category: 'ultra-high-power'
-  },
-  { 
-    label: 'Premium N-Type 700W', 
-    labelVi: 'Premium N-Type 700W', 
-    labelZh: '高端N型 700W', 
-    wattage: 700, 
-    efficiency: '24.5%',
-    lengthMm: 2538,
-    widthMm: 1188,
-    weightKg: 34.5,
-    category: 'ultra-high-power'
-  },
-  { 
-    label: 'Industrial HJT 750W', 
-    labelVi: 'Công nghiệp HJT 750W', 
-    labelZh: '工业HJT 750W', 
-    wattage: 750, 
-    efficiency: '25%',
-    lengthMm: 2592,
-    widthMm: 1188,
-    weightKg: 36,
-    category: 'ultra-high-power'
-  },
-  { 
-    label: 'Max Power 800W+', 
-    labelVi: 'Công suất tối đa 800W+', 
-    labelZh: '最大功率 800W+', 
-    wattage: 800, 
-    efficiency: '25.5%',
-    lengthMm: 2650,
-    widthMm: 1302,
-    weightKg: 38.5,
-    category: 'ultra-high-power'
-  },
-];
-
-const INVERTER_TYPES: InverterType[] = [
-  {
-    label: 'String Inverter',
-    labelVi: 'Biến tần chuỗi',
-    labelZh: '组串逆变器',
-    minCapacityKW: 3,
-    maxCapacityKW: 110,
-    type: 'string',
-    features: ['Cost-effective', 'Easy installation', 'Good for uniform roofs', 'Single/three phase'],
-    featuresVi: ['Tiết kiệm chi phí', 'Lắp đặt dễ dàng', 'Phù hợp mái đồng đều', 'Một pha/ba pha'],
-    featuresZh: ['成本效益高', '安装简便', '适合均匀屋顶', '单相/三相'],
-    recommendReason: 'Best for residential and small commercial systems with unshaded roofs. Offers the best balance of cost and performance.',
-    recommendReasonVi: 'Phù hợp nhất cho hệ thống gia đình và thương mại nhỏ với mái không bị che bóng. Cân bằng tốt nhất giữa chi phí và hiệu suất.',
-    recommendReasonZh: '最适合无遮挡屋顶的住宅和小型商业系统。提供成本和性能的最佳平衡。',
-    brands: ['Huawei SUN2000', 'SMA Sunny Tripower', 'Growatt', 'Sungrow']
-  },
-  {
-    label: 'Micro Inverter',
-    labelVi: 'Biến tần vi mô',
-    labelZh: '微型逆变器',
-    minCapacityKW: 0.3,
-    maxCapacityKW: 15,
-    type: 'micro',
-    features: ['Panel-level optimization', 'Shading tolerance', 'Individual monitoring', 'Safer DC voltage'],
-    featuresVi: ['Tối ưu từng tấm pin', 'Chịu bóng râm tốt', 'Giám sát riêng lẻ', 'Điện áp DC an toàn hơn'],
-    featuresZh: ['面板级优化', '耐遮挡', '单独监控', '更安全的直流电压'],
-    recommendReason: 'Ideal for complex roofs with shading issues or multiple orientations. Higher initial cost but better long-term performance.',
-    recommendReasonVi: 'Lý tưởng cho mái phức tạp có vấn đề bóng râm hoặc nhiều hướng. Chi phí ban đầu cao hơn nhưng hiệu suất dài hạn tốt hơn.',
-    recommendReasonZh: '适合有遮挡问题或多方向的复杂屋顶。初始成本较高但长期性能更好。',
-    brands: ['Enphase IQ8', 'Hoymiles', 'APsystems']
-  },
-  {
-    label: 'Hybrid Inverter',
-    labelVi: 'Biến tần hybrid',
-    labelZh: '混合逆变器',
-    minCapacityKW: 3,
-    maxCapacityKW: 50,
-    type: 'hybrid',
-    features: ['Battery compatible', 'Backup power', 'Energy storage', 'Grid-tie + Off-grid'],
-    featuresVi: ['Tương thích pin lưu trữ', 'Điện dự phòng', 'Lưu trữ năng lượng', 'Hòa lưới + Độc lập'],
-    featuresZh: ['兼容电池', '备用电源', '储能', '并网+离网'],
-    recommendReason: 'Perfect for areas with unstable grid or frequent outages. Future-proof with battery storage capability.',
-    recommendReasonVi: 'Hoàn hảo cho khu vực lưới điện không ổn định hoặc hay mất điện. Sẵn sàng cho tương lai với khả năng lưu trữ pin.',
-    recommendReasonZh: '非常适合电网不稳定或经常停电的地区。具备电池储能功能，面向未来。',
-    brands: ['Huawei LUNA', 'Growatt SPH', 'Goodwe ES', 'Deye']
-  },
-  {
-    label: 'Central Inverter',
-    labelVi: 'Biến tần trung tâm',
-    labelZh: '集中式逆变器',
-    minCapacityKW: 50,
-    maxCapacityKW: 5000,
-    type: 'central',
-    features: ['High capacity', 'Industrial grade', 'Lower cost per kW', 'Professional maintenance'],
-    featuresVi: ['Công suất cao', 'Cấp công nghiệp', 'Chi phí thấp hơn/kW', 'Bảo trì chuyên nghiệp'],
-    featuresZh: ['大容量', '工业级', '每千瓦成本更低', '专业维护'],
-    recommendReason: 'Designed for large-scale solar farms and industrial installations. Most cost-effective for systems above 100kW.',
-    recommendReasonVi: 'Thiết kế cho trang trại điện mặt trời quy mô lớn và lắp đặt công nghiệp. Hiệu quả chi phí nhất cho hệ thống trên 100kW.',
-    recommendReasonZh: '专为大型太阳能电站和工业安装设计。对于100kW以上系统最具成本效益。',
-    brands: ['Huawei SUN2000', 'SMA Sunny Central', 'Sungrow', 'ABB']
-  }
-];
-
-const TRANSLATIONS = {
+const translations: Record<string, TranslatedContent> = {
   vi: {
-    title: 'Ước Tính Hệ Thống Năng Lượng Mặt Trời',
-    subtitle: 'Nhập thông tin để tính toán công suất phù hợp',
-    inputBill: 'Hóa đơn điện hàng tháng (VNĐ)',
-    inputPanel: 'Loại tấm pin mặt trời',
-    inputRoofLength: 'Chiều dài mái (m)',
-    inputRoofWidth: 'Chiều rộng mái (m)',
-    inputRoof: 'Diện tích mái khả dụng (m²)',
-    calculate: 'Tính toán',
-    reset: 'Đặt lại',
-    results: 'Kết quả ước tính',
-    capacity: 'Công suất đề xuất',
-    panelCount: 'Số lượng tấm pin',
-    requiredArea: 'Diện tích cần thiết',
-    areaWarning: '⚠️ Diện tích mái không đủ!',
-    areaWarningDetail: 'Mái của bạn chỉ đủ lắp được',
-    areaOk: '✅ Diện tích mái đủ',
-    idealCapacity: 'Công suất theo nhu cầu',
-    actualCapacity: 'Công suất có thể lắp',
-    roofLimitation: 'Giới hạn bởi diện tích mái',
-    suggestion: 'Gợi ý',
-    suggestionInsufficientRoof: 'Với diện tích mái hiện tại, bạn có thể lắp hệ thống điện mặt trời công suất',
-    suggestionInsufficientRoof2: 'Để đạt được công suất mong muốn, bạn cần',
-    suggestionOption1: '1. Tăng diện tích mái khả dụng lên',
-    suggestionOption2: '2. Sử dụng tấm pin công suất cao hơn để giảm số lượng tấm cần thiết',
-    suggestionOption3: '3. Xem xét lắp hệ thống trên nhiều mái (nếu có)',
-    coveragePercent: 'Đáp ứng được',
-    disclaimer: 'Đây chỉ là ước tính sơ bộ dựa trên mức tiêu thụ trung bình và 3.5 giờ nắng/ngày. Vui lòng liên hệ chuyên gia để khảo sát chi tiết và báo giá chính xác.',
-    contactExpert: 'Liên hệ chuyên gia miễn phí',
-    tooltipBill: 'Nhập số tiền hóa đơn điện trung bình hàng tháng của bạn',
-    tooltipPanel: 'Chọn loại tấm pin phù hợp với ngân sách và không gian',
-    tooltipRoofLength: 'Đo chiều dài mái sạch, không bị che bóng',
-    tooltipRoofWidth: 'Đo chiều rộng mái sạch, không bị che bóng',
-    tooltipRoof: 'Đo diện tích mái sạch, không bị che bóng',
-    formulaTitle: 'Công thức tính (Chuẩn Việt Nam)',
-    formulaStep1: '1. Tiêu thụ tháng (kWh) = Hóa đơn ÷ 2,500 VNĐ/kWh',
-    formulaStep2: '2. Tiêu thụ ngày = Tiêu thụ tháng ÷ 30 ngày',
-    formulaStep3: '3. Công suất cần = Tiêu thụ ngày ÷ (3.5h nắng × 80% hiệu suất)',
-    formulaStep4: '4. Số tấm = (Công suất × 1000W) ÷ Công suất tấm',
-    formulaStep5: '5. Diện tích = Số tấm × diện tích tấm × 1.2 (khoảng cách 20%)',
-    // Panel specifications
-    panelSpecs: 'Thông số tấm pin',
-    panelSize: 'Kích thước',
-    panelWeight: 'Trọng lượng',
-    panelEfficiency: 'Hiệu suất',
-    totalWeight: 'Tổng trọng lượng',
-    // Panel categories
-    categoryStandard: 'Tiêu chuẩn',
-    categoryHighPower: 'Công suất cao',
-    categoryUltraHighPower: 'Siêu công suất',
-    // Inverter recommendations
-    inverterTitle: 'Đề Xuất Biến Tần',
-    inverterRecommended: 'Loại biến tần đề xuất',
-    inverterReason: 'Lý do đề xuất',
-    inverterFeatures: 'Tính năng',
-    inverterBrands: 'Thương hiệu gợi ý',
-    inverterCapacity: 'Công suất đề xuất',
+    title: 'Máy tính hệ thống điện mặt trời',
+    subtitle: 'Nhập hóa đơn điện để nhận gợi ý cấu hình phù hợp với sản phẩm thực tế',
+    inputLabel: 'Hóa đơn điện hàng tháng (VNĐ)',
+    inputPlaceholder: 'VD: 2,000,000',
+    systemTypeLabel: 'Loại hệ thống',
+    gridTied: 'Hòa lưới (Grid-tied)',
+    hybrid: 'Hybrid (Pin lưu trữ)',
+    calculateButton: 'Tính toán ngay',
+    loadingText: 'Đang tính toán...',
+    resultsTitle: 'Kết quả tính toán',
+    systemSize: 'Công suất hệ thống',
+    monthlyProduction: 'Sản lượng điện/tháng',
+    monthlySavings: 'Tiết kiệm hàng tháng',
+    paybackPeriod: 'Thời gian hoàn vốn',
+    totalInvestment: 'Tổng đầu tư ước tính',
+    recommendedProducts: 'Sản phẩm gợi ý',
+    inverter: 'Biến tần',
+    solarPanels: 'Tấm pin mặt trời',
+    battery: 'Pin lưu trữ',
+    capacity: 'Công suất',
+    efficiency: 'Hiệu suất',
+    warranty: 'Bảo hành',
+    quantity: 'Số lượng',
+    years: 'năm',
+    contactButton: 'Liên hệ tư vấn',
+    errorTitle: 'Có lỗi xảy ra',
+    errorMessage: 'Vui lòng thử lại sau hoặc liên hệ hotline 0333 314 288',
+    fallbackTitle: 'Thông báo',
   },
   en: {
-    title: 'Solar Energy System Estimate',
-    subtitle: 'Enter information to calculate suitable capacity',
-    inputBill: 'Monthly electricity bill (VND)',
-    inputPanel: 'Solar panel type',
-    inputRoofLength: 'Roof length (m)',
-    inputRoofWidth: 'Roof width (m)',
-    inputRoof: 'Available roof area (m²)',
-    calculate: 'Calculate',
-    reset: 'Reset',
-    results: 'Estimate Results',
-    capacity: 'Recommended capacity',
-    panelCount: 'Number of panels',
-    requiredArea: 'Required area',
-    areaWarning: '⚠️ Insufficient roof area!',
-    areaWarningDetail: 'Your roof can only fit',
-    areaOk: '✅ Sufficient roof area',
-    idealCapacity: 'Required capacity',
-    actualCapacity: 'Available capacity',
-    roofLimitation: 'Limited by roof area',
-    suggestion: 'Suggestion',
-    suggestionInsufficientRoof: 'With the current roof area, you can install a solar system with capacity',
-    suggestionInsufficientRoof2: 'To achieve the desired capacity, you need',
-    suggestionOption1: '1. Increase available roof area to',
-    suggestionOption2: '2. Use higher wattage panels to reduce the number of panels needed',
-    suggestionOption3: '3. Consider installing on multiple roofs (if available)',
-    coveragePercent: 'Covers',
-    disclaimer: 'This is a rough estimate based on average consumption and 3.5 peak sun hours/day. Please contact our experts for detailed site survey and accurate quotation.',
-    contactExpert: 'Contact expert for free',
-    tooltipBill: 'Enter your average monthly electricity bill amount',
-    tooltipPanel: 'Choose panel type suitable for your budget and space',
-    tooltipRoofLength: 'Measure clean roof length without shading',
-    tooltipRoofWidth: 'Measure clean roof width without shading',
-    tooltipRoof: 'Measure clean roof area without shading',
-    formulaTitle: 'Calculation Formula (Vietnam Standard)',
-    formulaStep1: '1. Monthly consumption (kWh) = Bill ÷ 2,500 VND/kWh',
-    formulaStep2: '2. Daily consumption = Monthly ÷ 30 days',
-    formulaStep3: '3. Required capacity = Daily ÷ (3.5h sun × 80% efficiency)',
-    formulaStep4: '4. Panel count = (Capacity × 1000W) ÷ Panel wattage',
-    formulaStep5: '5. Area = Panels × panel area × 1.2 (20% spacing)',
-    // Panel specifications
-    panelSpecs: 'Panel Specifications',
-    panelSize: 'Size',
-    panelWeight: 'Weight',
-    panelEfficiency: 'Efficiency',
-    totalWeight: 'Total weight',
-    // Panel categories
-    categoryStandard: 'Standard',
-    categoryHighPower: 'High Power',
-    categoryUltraHighPower: 'Ultra High Power',
-    // Inverter recommendations
-    inverterTitle: 'Inverter Recommendation',
-    inverterRecommended: 'Recommended inverter type',
-    inverterReason: 'Recommendation reason',
-    inverterFeatures: 'Features',
-    inverterBrands: 'Suggested brands',
-    inverterCapacity: 'Recommended capacity',
+    title: 'Solar System Calculator',
+    subtitle: 'Enter your electricity bill to get recommendations with actual products',
+    inputLabel: 'Monthly Electricity Bill (VND)',
+    inputPlaceholder: 'Ex: 2,000,000',
+    systemTypeLabel: 'System Type',
+    gridTied: 'Grid-tied',
+    hybrid: 'Hybrid (Battery Storage)',
+    calculateButton: 'Calculate Now',
+    loadingText: 'Calculating...',
+    resultsTitle: 'Calculation Results',
+    systemSize: 'System Capacity',
+    monthlyProduction: 'Monthly Production',
+    monthlySavings: 'Monthly Savings',
+    paybackPeriod: 'Payback Period',
+    totalInvestment: 'Estimated Investment',
+    recommendedProducts: 'Recommended Products',
+    inverter: 'Inverter',
+    solarPanels: 'Solar Panels',
+    battery: 'Battery Storage',
+    capacity: 'Capacity',
+    efficiency: 'Efficiency',
+    warranty: 'Warranty',
+    quantity: 'Quantity',
+    years: 'years',
+    contactButton: 'Contact Us',
+    errorTitle: 'Error Occurred',
+    errorMessage: 'Please try again or contact hotline 0333 314 288',
+    fallbackTitle: 'Notice',
   },
   zh: {
-    title: '太阳能系统估算',
-    subtitle: '输入信息以计算合适的容量',
-    inputBill: '每月电费（越南盾）',
-    inputPanel: '太阳能板类型',
-    inputRoofLength: '屋顶长度（m）',
-    inputRoofWidth: '屋顶宽度（m）',
-    inputRoof: '可用屋顶面积（m²）',
-    calculate: '计算',
-    reset: '重置',
-    results: '估算结果',
-    capacity: '推荐容量',
-    panelCount: '面板数量',
-    requiredArea: '所需面积',
-    areaWarning: '⚠️ 屋顶面积不足！',
-    areaWarningDetail: '您的屋顶只能安装',
-    areaOk: '✅ 屋顶面积充足',
-    idealCapacity: '所需容量',
-    actualCapacity: '可安装容量',
-    roofLimitation: '受屋顶面积限制',
-    suggestion: '建议',
-    suggestionInsufficientRoof: '根据当前屋顶面积，您可以安装容量为',
-    suggestionInsufficientRoof2: '要达到理想容量，您需要',
-    suggestionOption1: '1. 增加可用屋顶面积至',
-    suggestionOption2: '2. 使用更高功率的面板以减少所需面板数量',
-    suggestionOption3: '3. 考虑在多个屋顶上安装（如有）',
-    coveragePercent: '覆盖',
-    disclaimer: '此为参考估算，基于平均消耗和每天3.5小时峰值日照。如需详细咨询及准确报价，请联系我们的专家免费指导。',
-    contactExpert: '免费联系专家',
-    tooltipBill: '输入您的平均每月电费金额',
-    tooltipPanel: '选择适合您预算和空间的面板类型',
-    tooltipRoofLength: '测量无遮挡的屋顶长度',
-    tooltipRoofWidth: '测量无遮挡的屋顶宽度',
-    tooltipRoof: '测量无遮挡的干净屋顶面积',
-    formulaTitle: '计算公式（越南标准）',
-    formulaStep1: '1. 月消耗（kWh）= 电费 ÷ 2,500越南盾/kWh',
-    formulaStep2: '2. 日消耗 = 月消耗 ÷ 30天',
-    formulaStep3: '3. 所需容量 = 日消耗 ÷（3.5h峰值日照 × 80%效率）',
-    formulaStep4: '4. 面板数 =（容量 × 1000W）÷ 面板功率',
-    formulaStep5: '5. 面积 = 面板数 × 面板面积 × 1.2（20%间距）',
-    // Panel specifications
-    panelSpecs: '面板规格',
-    panelSize: '尺寸',
-    panelWeight: '重量',
-    panelEfficiency: '效率',
-    totalWeight: '总重量',
-    // Panel categories
-    categoryStandard: '标准',
-    categoryHighPower: '高功率',
-    categoryUltraHighPower: '超高功率',
-    // Inverter recommendations
-    inverterTitle: '逆变器推荐',
-    inverterRecommended: '推荐逆变器类型',
-    inverterReason: '推荐理由',
-    inverterFeatures: '功能特点',
-    inverterBrands: '建议品牌',
-    inverterCapacity: '推荐容量',
-  }
+    title: '太阳能系统计算器',
+    subtitle: '输入您的电费账单，获取实际产品推荐',
+    inputLabel: '月电费 (越南盾)',
+    inputPlaceholder: '例如: 2,000,000',
+    systemTypeLabel: '系统类型',
+    gridTied: '并网系统',
+    hybrid: '混合系统 (储能)',
+    calculateButton: '立即计算',
+    loadingText: '计算中...',
+    resultsTitle: '计算结果',
+    systemSize: '系统容量',
+    monthlyProduction: '月发电量',
+    monthlySavings: '月节省',
+    paybackPeriod: '回本期',
+    totalInvestment: '预估投资',
+    recommendedProducts: '推荐产品',
+    inverter: '逆变器',
+    solarPanels: '太阳能板',
+    battery: '储能电池',
+    capacity: '容量',
+    efficiency: '效率',
+    warranty: '保修',
+    quantity: '数量',
+    years: '年',
+    contactButton: '联系咨询',
+    errorTitle: '发生错误',
+    errorMessage: '请稍后重试或联系热线 0333 314 288',
+    fallbackTitle: '通知',
+  },
+  id: {
+    title: 'Kalkulator Sistem Surya',
+    subtitle: 'Masukkan tagihan listrik untuk rekomendasi produk nyata',
+    inputLabel: 'Tagihan Listrik Bulanan (VND)',
+    inputPlaceholder: 'Contoh: 2,000,000',
+    systemTypeLabel: 'Jenis Sistem',
+    gridTied: 'Grid-tied',
+    hybrid: 'Hybrid (Penyimpanan Baterai)',
+    calculateButton: 'Hitung Sekarang',
+    loadingText: 'Menghitung...',
+    resultsTitle: 'Hasil Perhitungan',
+    systemSize: 'Kapasitas Sistem',
+    monthlyProduction: 'Produksi Bulanan',
+    monthlySavings: 'Penghematan Bulanan',
+    paybackPeriod: 'Periode Balik Modal',
+    totalInvestment: 'Estimasi Investasi',
+    recommendedProducts: 'Produk yang Direkomendasikan',
+    inverter: 'Inverter',
+    solarPanels: 'Panel Surya',
+    battery: 'Penyimpanan Baterai',
+    capacity: 'Kapasitas',
+    efficiency: 'Efisiensi',
+    warranty: 'Garansi',
+    quantity: 'Jumlah',
+    years: 'tahun',
+    contactButton: 'Hubungi Kami',
+    errorTitle: 'Terjadi Kesalahan',
+    errorMessage: 'Silakan coba lagi atau hubungi hotline 0333 314 288',
+    fallbackTitle: 'Pemberitahuan',
+  },
 };
 
-interface Props {
-  locale?: 'vi' | 'en' | 'zh' | 'id';
+// ============================================
+// PRODUCT CARD COMPONENT
+// ============================================
+interface ProductCardProps {
+  title: string;
+  icon: string;
+  product: {
+    name: string;
+    brand: string;
+    model: string;
+    capacity: number;
+    efficiency?: number;
+    warranty: number;
+    price: number;
+    imageUrl?: string;
+    quantity?: number;
+    totalPrice?: number;
+  };
+  locale: string;
 }
 
-export default function SolarCalculator({ locale = 'vi' }: Props) {
-  const t = TRANSLATIONS[locale as keyof typeof TRANSLATIONS] || TRANSLATIONS['vi'];
-  
-  const [monthlyBill, setMonthlyBill] = useState<number>(0);
-  const [selectedPanel, setSelectedPanel] = useState<PanelType>(PANEL_TYPES[1]); // Default to 450W mono
-  const [roofLength, setRoofLength] = useState<number>(0);
-  const [roofWidth, setRoofWidth] = useState<number>(0);
-  const [showResults, setShowResults] = useState(false);
-  const [showFormula, setShowFormula] = useState(false);
+function ProductCard({ title, icon, product, locale }: ProductCardProps) {
+  const t = translations[locale] || translations.vi;
 
-  // Calculate roof area from length and width
-  const roofArea = roofLength * roofWidth;
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2">
+        <h3 className="text-white font-semibold flex items-center gap-2">
+          <span className="text-2xl">{icon}</span>
+          {title}
+        </h3>
+      </div>
+      <div className="p-4">
+        <div className="flex gap-4">
+          {product.imageUrl ? (
+            <div className="relative w-24 h-24 flex-shrink-0">
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded flex items-center justify-center text-4xl">
+              {icon}
+            </div>
+          )}
+          <div className="flex-1">
+            <h4 className="font-semibold text-gray-900">{product.name}</h4>
+            <p className="text-sm text-gray-600">
+              {product.brand} {product.model}
+            </p>
+            <div className="mt-2 space-y-1 text-sm">
+              <p className="text-gray-700">
+                <span className="font-medium">{t.capacity}:</span>{' '}
+                {product.capacity >= 1000
+                  ? `${(product.capacity / 1000).toFixed(1)}kW`
+                  : `${product.capacity}W`}
+              </p>
+              {product.efficiency && (
+                <p className="text-gray-700">
+                  <span className="font-medium">{t.efficiency}:</span> {product.efficiency}%
+                </p>
+              )}
+              <p className="text-gray-700">
+                <span className="font-medium">{t.warranty}:</span> {product.warranty} {t.years}
+              </p>
+              {product.quantity && (
+                <p className="text-gray-700">
+                  <span className="font-medium">{t.quantity}:</span> {product.quantity}
+                </p>
+              )}
+            </div>
+            <div className="mt-3">
+              <p className="text-lg font-bold text-green-600">
+                {formatVND(product.totalPrice || product.price)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  // CÔNG THỨC CHÍNH XÁC CHO HỆ THỐNG NĂNG LƯỢNG MẶT TRỜI VIỆT NAM
-  
-  // Bước 1: Tính tiêu thụ điện hàng tháng (kWh) từ hóa đơn
-  // Giá điện bậc thang Việt Nam trung bình: ~2,500 VNĐ/kWh
-  const ELECTRICITY_RATE = 2500; // VNĐ/kWh (trung bình)
-  const monthlyConsumptionKWh = monthlyBill / ELECTRICITY_RATE;
-  
-  // Bước 2: Tính tiêu thụ hàng ngày (kWh/ngày)
-  const dailyConsumptionKWh = monthlyConsumptionKWh / 30;
-  
-  // Bước 3: Tính công suất hệ thống cần thiết (kW)
-  // Công thức: Công suất = Tiêu thụ hàng ngày / (Giờ nắng × Hiệu suất hệ thống)
-  const PEAK_SUN_HOURS = 3.5; // Giờ nắng peak trung bình Việt Nam (3-4h thực tế)
-  const SYSTEM_EFFICIENCY = 0.8; // Hiệu suất hệ thống 80% (mất mát inverter, dây, nhiệt độ)
-  const capacityKW = dailyConsumptionKWh / (PEAK_SUN_HOURS * SYSTEM_EFFICIENCY);
-  
-  // Bước 4: Tính số lượng tấm pin theo nhu cầu
-  const idealPanelCount = Math.ceil((capacityKW * 1000) / selectedPanel.wattage);
-  
-  // Bước 5: Tính diện tích cần thiết (using actual panel dimensions)
-  // Panel area in m² (convert from mm to m)
-  const PANEL_AREA = (selectedPanel.lengthMm / 1000) * (selectedPanel.widthMm / 1000);
-  const SPACING_FACTOR = 1.2; // Thêm 20% cho khoảng cách
-  const idealRequiredArea = idealPanelCount * PANEL_AREA * SPACING_FACTOR;
-  
-  // Kiểm tra diện tích mái có đủ không
-  const areaInsufficient = idealRequiredArea > roofArea && roofArea > 0;
-  
-  // Nếu mái không đủ, tính toán lại dựa trên diện tích mái có sẵn
-  let actualPanelCount = idealPanelCount;
-  let actualCapacityKW = capacityKW;
-  let actualRequiredArea = idealRequiredArea;
-  
-  if (areaInsufficient) {
-    // Tính số tấm pin tối đa có thể lắp trên mái
-    actualPanelCount = Math.floor(roofArea / (PANEL_AREA * SPACING_FACTOR));
-    // Tính lại công suất thực tế có thể lắp được
-    actualCapacityKW = (actualPanelCount * selectedPanel.wattage) / 1000;
-    // Tính lại diện tích thực tế cần
-    actualRequiredArea = actualPanelCount * PANEL_AREA * SPACING_FACTOR;
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function formatVND(amount: number): string {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(amount);
+}
+
+function generateContactMessage(result: CalculatorResult, locale: string): string {
+  const { systemSize, products } = result;
+
+  let message = ``;
+
+  if (locale === 'vi') {
+    message = `Tôi quan tâm đến hệ thống điện mặt trời ${systemSize.toFixed(1)}kWp gồm:\n\n`;
+    if (products.inverter) {
+      message += `🔌 Biến tần: ${products.inverter.brand} ${products.inverter.model} (${products.inverter.capacity / 1000}kW)\n`;
+    }
+    if (products.panels) {
+      message += `☀️ Tấm pin: ${products.panels.quantity} tấm ${products.panels.brand} ${products.panels.model} (${products.panels.capacity}W)\n`;
+    }
+    if (products.battery) {
+      message += `🔋 Pin lưu trữ: ${products.battery.brand} ${products.battery.model} (${products.battery.capacity / 1000}kWh)\n`;
+    }
+    message += `\n💰 Tổng đầu tư ước tính: ${formatVND(result.totalInvestment)}\n`;
+    message += `💵 Tiết kiệm hàng tháng: ${formatVND(result.monthlySavings)}\n`;
+    message += `⏱️ Thời gian hoàn vốn: ${result.paybackPeriod.toFixed(1)} năm\n\n`;
+    message += `Vui lòng tư vấn chi tiết và báo giá chính xác cho tôi.`;
+  } else if (locale === 'en') {
+    message = `I'm interested in a ${systemSize.toFixed(1)}kWp solar system including:\n\n`;
+    if (products.inverter) {
+      message += `🔌 Inverter: ${products.inverter.brand} ${products.inverter.model} (${products.inverter.capacity / 1000}kW)\n`;
+    }
+    if (products.panels) {
+      message += `☀️ Solar Panels: ${products.panels.quantity} pcs ${products.panels.brand} ${products.panels.model} (${products.panels.capacity}W)\n`;
+    }
+    if (products.battery) {
+      message += `🔋 Battery: ${products.battery.brand} ${products.battery.model} (${products.battery.capacity / 1000}kWh)\n`;
+    }
+    message += `\n💰 Estimated Investment: ${formatVND(result.totalInvestment)}\n`;
+    message += `💵 Monthly Savings: ${formatVND(result.monthlySavings)}\n`;
+    message += `⏱️ Payback Period: ${result.paybackPeriod.toFixed(1)} years\n\n`;
+    message += `Please provide detailed consultation and accurate quotation.`;
+  } else {
+    // Chinese/Indonesian fallback
+    message = `System: ${systemSize.toFixed(1)}kWp\nInvestment: ${formatVND(result.totalInvestment)}\nSavings: ${formatVND(result.monthlySavings)}/month`;
   }
-  
-  // Sử dụng giá trị thực tế cho hiển thị
-  const panelCount = actualPanelCount;
-  const requiredArea = actualRequiredArea;
-  const displayCapacityKW = actualCapacityKW;
-  
-  // Tổng trọng lượng
-  const totalWeight = panelCount * selectedPanel.weightKg;
 
-  // Get recommended inverter based on actual capacity (not ideal)
-  const getRecommendedInverter = (): InverterType => {
-    // Sử dụng công suất thực tế có thể lắp được (actualCapacityKW)
-    const targetCapacity = actualCapacityKW;
-    
-    if (targetCapacity <= 15) {
-      // For small systems, recommend based on roof conditions
-      return INVERTER_TYPES.find(inv => inv.type === 'string') || INVERTER_TYPES[0];
-    } else if (targetCapacity <= 50) {
-      // For medium systems, hybrid is good for flexibility
-      return INVERTER_TYPES.find(inv => inv.type === 'hybrid') || INVERTER_TYPES[2];
-    } else {
-      // For large systems, central inverter
-      return INVERTER_TYPES.find(inv => inv.type === 'central') || INVERTER_TYPES[3];
+  return encodeURIComponent(message);
+}
+
+// ============================================
+// MAIN CALCULATOR COMPONENT
+// ============================================
+interface SolarCalculatorProps {
+  locale?: string;
+}
+
+export default function SolarCalculator({ locale = 'vi' }: SolarCalculatorProps) {
+  const t = translations[locale] || translations.vi;
+
+  const [monthlyBill, setMonthlyBill] = useState('');
+  const [systemType, setSystemType] = useState<'grid-tied' | 'hybrid'>('grid-tied');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CalculatorResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCalculate = async () => {
+    setError(null);
+    setResult(null);
+
+    const billAmount = parseFloat(monthlyBill.replace(/,/g, ''));
+
+    if (!billAmount || billAmount < 100000) {
+      setError('Vui lòng nhập hóa đơn hợp lệ (tối thiểu 100,000 VNĐ)');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/calculator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          monthlyBill: billAmount,
+          systemType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Calculation failed');
+      }
+
+      const data: CalculatorResult = await response.json();
+      setResult(data);
+    } catch (err) {
+      console.error('Calculator error:', err);
+      setError(t.errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const recommendedInverter = getRecommendedInverter();
+  const handleContactClick = () => {
+    if (!result) return;
 
-  // Get inverter label based on locale
-  const getInverterLabel = (inverter: InverterType) => {
-    if (locale === 'vi') return inverter.labelVi;
-    if (locale === 'zh') return inverter.labelZh;
-    return inverter.label;
-  };
-
-  // Get inverter features based on locale
-  const getInverterFeatures = (inverter: InverterType) => {
-    if (locale === 'vi') return inverter.featuresVi;
-    if (locale === 'zh') return inverter.featuresZh;
-    return inverter.features;
-  };
-
-  // Get inverter reason based on locale
-  const getInverterReason = (inverter: InverterType) => {
-    if (locale === 'vi') return inverter.recommendReasonVi;
-    if (locale === 'zh') return inverter.recommendReasonZh;
-    return inverter.recommendReason;
-  };
-
-  // Get panel category label
-  const getCategoryLabel = (category: PanelType['category']) => {
-    switch (category) {
-      case 'standard':
-        return t.categoryStandard;
-      case 'high-power':
-        return t.categoryHighPower;
-      case 'ultra-high-power':
-        return t.categoryUltraHighPower;
-      default:
-        return category;
-    }
-  };
-
-  const handleCalculate = () => {
-    if (monthlyBill > 0 && roofLength > 0 && roofWidth > 0) {
-      setShowResults(true);
-    }
-  };
-
-  const handleReset = () => {
-    setMonthlyBill(0);
-    setRoofLength(0);
-    setRoofWidth(0);
-    setSelectedPanel(PANEL_TYPES[1]);
-    setShowResults(false);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('vi-VN').format(Math.round(num));
-  };
-
-  const getPanelLabel = (panel: PanelType) => {
-    if (locale === 'vi') return panel.labelVi;
-    if (locale === 'zh') return panel.labelZh;
-    return panel.label;
+    const message = generateContactMessage(result, locale);
+    const phone = '0333314288';
+    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
-    <div className="w-full bg-white border border-gray-10 rounded-lg p-8 font-light shadow-lg">
+    <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl md:text-4xl text-black font-bold tracking-wide mb-3">
-          {t.title}
-        </h2>
-        <p className="text-black text-sm md:text-base font-semibold">
-          {t.subtitle}
-        </p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h2>
+        <p className="text-gray-600">{t.subtitle}</p>
       </div>
 
-      {/* Inputs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Monthly Bill */}
-        <div className="group">
-          <label className="block text-black text-sm mb-3 flex items-center gap-2 font-bold">
-            {t.inputBill}
-            <span 
-              className="text-xs text-black cursor-help font-semibold" 
-              title={t.tooltipBill}
-            >
-              ⓘ
-            </span>
-          </label>
-          <input
-            type="number"
-            value={monthlyBill || ''}
-            onChange={(e) => setMonthlyBill(Number(e.target.value))}
-            placeholder="2,000,000"
-            className="w-full bg-white border-2 border-[#D4AF37] text-black px-4 py-3 text-sm focus:border-[#B89129] focus:outline-none transition-colors rounded font-semibold"
-          />
-        </div>
-
-        {/* Panel Type with Category */}
-        <div className="group">
-          <label className="block text-black text-sm mb-3 flex items-center gap-2 font-bold">
-            {t.inputPanel}
-            <span 
-              className="text-xs text-black cursor-help font-semibold" 
-              title={t.tooltipPanel}
-            >
-              ⓘ
-            </span>
-          </label>
-          <select
-            value={selectedPanel.wattage}
-            onChange={(e) => {
-              const panel = PANEL_TYPES.find(p => p.wattage === Number(e.target.value));
-              if (panel) setSelectedPanel(panel);
-            }}
-            className="w-full bg-white border-2 border-[#D4AF37] text-black px-4 py-3 text-sm focus:border-[#B89129] focus:outline-none transition-colors cursor-pointer rounded font-semibold"
-          >
-            <optgroup label={t.categoryStandard}>
-              {PANEL_TYPES.filter(p => p.category === 'standard').map((panel) => (
-                <option key={panel.wattage} value={panel.wattage}>
-                  {getPanelLabel(panel)} ({panel.efficiency})
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label={t.categoryHighPower}>
-              {PANEL_TYPES.filter(p => p.category === 'high-power').map((panel) => (
-                <option key={panel.wattage} value={panel.wattage}>
-                  {getPanelLabel(panel)} ({panel.efficiency})
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label={t.categoryUltraHighPower}>
-              {PANEL_TYPES.filter(p => p.category === 'ultra-high-power').map((panel) => (
-                <option key={panel.wattage} value={panel.wattage}>
-                  {getPanelLabel(panel)} ({panel.efficiency})
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
-      </div>
-
-      {/* Panel Specifications Display */}
-      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <h4 className="text-black text-sm font-bold mb-3">{t.panelSpecs}: {getPanelLabel(selectedPanel)}</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+      {/* Input Form */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Monthly Bill Input */}
           <div>
-            <span className="text-gray-600 font-semibold">{t.panelSize}:</span>
-            <div className="text-black font-bold">{selectedPanel.lengthMm} × {selectedPanel.widthMm} mm</div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t.inputLabel}
+            </label>
+            <input
+              type="text"
+              value={monthlyBill}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setMonthlyBill(value);
+              }}
+              placeholder={t.inputPlaceholder}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            />
           </div>
+
+          {/* System Type Selection */}
           <div>
-            <span className="text-gray-600 font-semibold">{t.panelWeight}:</span>
-            <div className="text-black font-bold">{selectedPanel.weightKg} kg</div>
-          </div>
-          <div>
-            <span className="text-gray-600 font-semibold">{t.panelEfficiency}:</span>
-            <div className="text-black font-bold">{selectedPanel.efficiency}</div>
-          </div>
-          <div>
-            <span className="text-gray-600 font-semibold">{locale === 'vi' ? 'Loại' : locale === 'zh' ? '类型' : 'Category'}:</span>
-            <div className="text-black font-bold">{getCategoryLabel(selectedPanel.category)}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Roof Dimensions - Length and Width instead of Area */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Roof Length */}
-        <div className="group">
-          <label className="block text-black text-sm mb-3 flex items-center gap-2 font-bold">
-            {t.inputRoofLength}
-            <span 
-              className="text-xs text-black cursor-help font-semibold" 
-              title={t.tooltipRoofLength}
-            >
-              ⓘ
-            </span>
-          </label>
-          <input
-            type="number"
-            value={roofLength || ''}
-            onChange={(e) => setRoofLength(Number(e.target.value))}
-            placeholder="15"
-            className="w-full bg-white border-2 border-[#D4AF37] text-black px-4 py-3 text-sm focus:border-[#B89129] focus:outline-none transition-colors rounded font-semibold"
-          />
-        </div>
-
-        {/* Roof Width */}
-        <div className="group">
-          <label className="block text-black text-sm mb-3 flex items-center gap-2 font-bold">
-            {t.inputRoofWidth}
-            <span 
-              className="text-xs text-black cursor-help font-semibold" 
-              title={t.tooltipRoofWidth}
-            >
-              ⓘ
-            </span>
-          </label>
-          <input
-            type="number"
-            value={roofWidth || ''}
-            onChange={(e) => setRoofWidth(Number(e.target.value))}
-            placeholder="10"
-            className="w-full bg-white border-2 border-[#D4AF37] text-black px-4 py-3 text-sm focus:border-[#B89129] focus:outline-none transition-colors rounded font-semibold"
-          />
-        </div>
-      </div>
-
-      {/* Calculated Area Display */}
-      {(roofLength > 0 && roofWidth > 0) && (
-        <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
-          <span className="text-blue-800 font-semibold">
-            {t.inputRoof}: <strong>{formatNumber(roofArea)} m²</strong> ({roofLength}m × {roofWidth}m)
-          </span>
-        </div>
-      )}
-
-      {/* Buttons */}
-      <div className="flex gap-4 mb-8">
-        <button
-          onClick={handleCalculate}
-          disabled={monthlyBill === 0 || roofArea === 0}
-          className="flex-1 bg-[#D4AF37] text-white px-6 py-4 text-sm font-bold tracking-wide hover:bg-[#B89129] transition-colors disabled:opacity-30 disabled:cursor-not-allowed rounded-lg shadow-lg"
-        >
-          {t.calculate}
-        </button>
-        <button
-          onClick={handleReset}
-          className="px-6 py-4 text-sm font-bold text-white bg-[#D4AF37] border-2 border-[#D4AF37] hover:bg-[#B89129] hover:border-[#B89129] transition-colors rounded-lg shadow-lg"
-        >
-          {t.reset}
-        </button>
-        <button
-          onClick={() => setShowFormula(!showFormula)}
-          className="px-6 py-4 text-sm font-bold text-white bg-[#D4AF37] border-2 border-[#D4AF37] hover:bg-[#B89129] hover:border-[#B89129] transition-colors rounded-lg shadow-lg"
-          title={t.formulaTitle}
-        >
-          ⓘ
-        </button>
-      </div>
-
-      {/* Formula Display */}
-      {showFormula && (
-        <div className="mb-8 p-4 bg-white/5 border border-gray-10">
-          <h3 className="text-black text-sm font-bold mb-3">{t.formulaTitle}</h3>
-          <div className="space-y-2 text-xs text-black font-mono font-semibold">
-            <p>{t.formulaStep1}</p>
-            <p>{t.formulaStep2}</p>
-            <p>{t.formulaStep3}</p>
-            <p>{t.formulaStep4}</p>
-            {'formulaStep5' in t && <p>{t.formulaStep5}</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Results */}
-      {showResults && (
-        <div className="border-t border-gray-10 pt-8">
-          <h3 className="text-2xl text-black font-bold mb-6 text-center">
-            {t.results}
-          </h3>
-
-          {/* Warning Message if Roof is Insufficient */}
-          {areaInsufficient && (
-            <div className="mb-6 p-6 bg-red-50 border-2 border-red-300 rounded-lg">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div className="flex-1">
-                  <h4 className="text-lg font-bold text-red-700 mb-2">Diện tích mái không đủ!</h4>
-                  <p className="text-sm text-red-800 mb-3">
-                    <strong>{t.suggestionInsufficientRoof} {displayCapacityKW.toFixed(2)} kW</strong> ({panelCount} tấm × {selectedPanel.wattage}W)
-                  </p>
-                  <p className="text-sm text-red-800 mb-3">
-                    {t.suggestionInsufficientRoof2} <strong>{capacityKW.toFixed(2)} kW</strong> ({t.coveragePercent} <strong>{((displayCapacityKW/capacityKW)*100).toFixed(0)}%</strong> nhu cầu):
-                  </p>
-                  <ul className="text-sm text-red-800 space-y-1 ml-4">
-                    <li>{t.suggestionOption1} <strong>{idealRequiredArea.toFixed(1)} m²</strong> (hiện tại: {roofArea} m²)</li>
-                    <li>{t.suggestionOption2}</li>
-                    <li>{t.suggestionOption3}</li>
-                  </ul>
-                </div>
-              </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t.systemTypeLabel}
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  value="grid-tied"
+                  checked={systemType === 'grid-tied'}
+                  onChange={(e) => setSystemType(e.target.value as 'grid-tied')}
+                  className="mr-2"
+                />
+                <span className="text-sm">{t.gridTied}</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  value="hybrid"
+                  checked={systemType === 'hybrid'}
+                  onChange={(e) => setSystemType(e.target.value as 'hybrid')}
+                  className="mr-2"
+                />
+                <span className="text-sm">{t.hybrid}</span>
+              </label>
             </div>
-          )}
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            {/* Capacity */}
-            <div className="bg-white p-5 text-center border-2 border-[#D4AF37] rounded-lg shadow-lg">
-              <div className="text-black text-xs uppercase tracking-wider mb-2 font-bold">
-                {areaInsufficient ? t.actualCapacity : t.capacity}
+        {/* Calculate Button */}
+        <div className="mt-6">
+          <button
+            onClick={handleCalculate}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? t.loadingText : t.calculateButton}
+          </button>
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <h3 className="text-red-800 font-semibold mb-1">{t.errorTitle}</h3>
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Fallback Message (for edge cases) */}
+      {result?.fallbackMessage && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+          <h3 className="text-orange-800 font-semibold mb-1">{t.fallbackTitle}</h3>
+          <p className="text-orange-700 text-sm">{result.fallbackMessage}</p>
+        </div>
+      )}
+
+      {/* Results Section */}
+      {result && !result.fallbackMessage && (
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">{t.resultsTitle}</h3>
+
+          {/* Financial Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-blue-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-blue-600">
+                {result.systemSize.toFixed(1)}
               </div>
-              <div className="text-black text-2xl font-bold">
-                {displayCapacityKW.toFixed(2)} <span className="text-sm">kW</span>
+              <div className="text-sm text-gray-600 mt-1">kWp</div>
+              <div className="text-xs text-gray-500 mt-1">{t.systemSize}</div>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-green-600">
+                {result.monthlyProduction.toFixed(0)}
               </div>
-              {areaInsufficient && (
-                <div className="text-xs text-red-600 mt-1">
-                  {t.roofLimitation}
-                </div>
+              <div className="text-sm text-gray-600 mt-1">kWh</div>
+              <div className="text-xs text-gray-500 mt-1">{t.monthlyProduction}</div>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 text-center">
+              <div className="text-xl font-bold text-yellow-600">
+                {formatVND(result.monthlySavings)}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">{t.monthlySavings}</div>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-purple-600">
+                {result.paybackPeriod.toFixed(1)}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">{t.years}</div>
+              <div className="text-xs text-gray-500 mt-1">{t.paybackPeriod}</div>
+            </div>
+          </div>
+
+          {/* Total Investment Banner */}
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 mb-8 text-center">
+            <div className="text-white text-sm font-medium mb-1">{t.totalInvestment}</div>
+            <div className="text-white text-4xl font-bold">
+              {formatVND(result.totalInvestment)}
+            </div>
+          </div>
+
+          {/* Recommended Products */}
+          <div className="mb-8">
+            <h4 className="text-xl font-bold text-gray-900 mb-4">{t.recommendedProducts}</h4>
+            <div className="space-y-4">
+              {result.products.inverter && (
+                <ProductCard
+                  title={t.inverter}
+                  icon="🔌"
+                  product={result.products.inverter}
+                  locale={locale}
+                />
+              )}
+              {result.products.panels && (
+                <ProductCard
+                  title={t.solarPanels}
+                  icon="☀️"
+                  product={result.products.panels}
+                  locale={locale}
+                />
+              )}
+              {result.products.battery && (
+                <ProductCard
+                  title={t.battery}
+                  icon="🔋"
+                  product={result.products.battery}
+                  locale={locale}
+                />
               )}
             </div>
-
-            {/* Panel Count */}
-            <div className="bg-white p-5 text-center border-2 border-[#D4AF37] rounded-lg shadow-lg">
-              <div className="text-black text-xs uppercase tracking-wider mb-2 font-bold">
-                {t.panelCount}
-              </div>
-              <div className="text-black text-2xl font-bold">
-                {formatNumber(panelCount)} <span className="text-sm">{locale === 'vi' ? 'tấm' : locale === 'zh' ? '块' : 'pcs'}</span>
-              </div>
-            </div>
-
-            {/* Required Area */}
-            <div className={`${areaInsufficient ? 'bg-red-100 border-red-500' : 'bg-white border-[#D4AF37]'} p-5 text-center border-2 rounded-lg shadow-lg`}>
-              <div className="text-black text-xs uppercase tracking-wider mb-2 font-bold">
-                {t.requiredArea}
-              </div>
-              <div className="text-black text-2xl font-bold">
-                {formatNumber(requiredArea)} <span className="text-sm">m²</span>
-              </div>
-              <div className={`text-xs mt-1 font-semibold ${areaInsufficient ? 'text-red-600' : 'text-green-600'}`}>
-                {areaInsufficient ? (
-                  <>
-                    <div>{t.areaWarningDetail}</div>
-                    <div className="mt-1">{formatNumber(roofArea)} / {formatNumber(idealRequiredArea)} m²</div>
-                  </>
-                ) : (
-                  t.areaOk
-                )}
-              </div>
-            </div>
-
-            {/* Total Weight */}
-            <div className="bg-white p-5 text-center border-2 border-[#D4AF37] rounded-lg shadow-lg">
-              <div className="text-black text-xs uppercase tracking-wider mb-2 font-bold">
-                {t.totalWeight}
-              </div>
-              <div className="text-black text-2xl font-bold">
-                {formatNumber(totalWeight)} <span className="text-sm">kg</span>
-              </div>
-            </div>
           </div>
 
-          {/* Inverter Recommendation Section */}
-          <div className="mb-6 p-6 bg-gradient-to-br from-green-50 to-white border-2 border-green-200 rounded-lg shadow-lg">
-            <h4 className="text-xl text-black font-bold mb-4 flex items-center gap-2">
-              ⚡ {t.inverterTitle}
-            </h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Inverter Type */}
-              <div>
-                <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterRecommended}:</div>
-                <div className="text-xl text-black font-bold mb-2">{getInverterLabel(recommendedInverter)}</div>
-                
-                <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterCapacity}:</div>
-                <div className="text-lg text-green-700 font-bold mb-3">
-                  {displayCapacityKW < recommendedInverter.minCapacityKW 
-                    ? recommendedInverter.minCapacityKW 
-                    : Math.ceil(displayCapacityKW * 1.05)} kW
-                </div>
-                <p className="text-xs text-gray-600 mt-1">
-                  (Dựa trên công suất có thể lắp: {displayCapacityKW.toFixed(2)} kW + 5% dự phòng)
-                </p>
-
-                <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterBrands}:</div>
-                <div className="flex flex-wrap gap-2">
-                  {recommendedInverter.brands.map((brand, i) => (
-                    <span key={i} className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded font-semibold">
-                      {brand}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Inverter Reason & Features */}
-              <div>
-                <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterReason}:</div>
-                <p className="text-sm text-black mb-3 leading-relaxed">
-                  {getInverterReason(recommendedInverter)}
-                </p>
-                
-                <div className="text-sm text-gray-600 font-semibold mb-1">{t.inverterFeatures}:</div>
-                <ul className="text-sm text-black space-y-1">
-                  {getInverterFeatures(recommendedInverter).map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual Diagram */}
-          <div className="mb-6 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="text-sm text-gray-600 font-semibold mb-3 text-center">
-              {locale === 'vi' ? 'Bố trí tấm pin (mô phỏng)' : locale === 'zh' ? '面板布局（模拟）' : 'Panel Layout (Simulation)'}
-            </div>
-            <div className="grid grid-cols-10 gap-1">
-              {Array.from({ length: Math.min(panelCount, 40) }).map((_, i) => (
-                <div 
-                  key={i} 
-                  className="aspect-[3/4] bg-blue-100 border border-blue-300 rounded"
-                  title={`${locale === 'vi' ? 'Tấm' : locale === 'zh' ? '面板' : 'Panel'} ${i + 1}`}
-                />
-              ))}
-            </div>
-            {panelCount > 40 && (
-              <p className="text-xs text-gray-600 text-center mt-3">
-                {locale === 'vi' ? `... và ${panelCount - 40} tấm nữa` : 
-                 locale === 'zh' ? `... 还有 ${panelCount - 40} 块` : 
-                 `... and ${panelCount - 40} more panels`}
-              </p>
-            )}
-          </div>
-
-          {/* Disclaimer */}
-          <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-lg">
-            <p className="text-xs text-yellow-800 leading-relaxed font-semibold">
-              ⚠️ {t.disclaimer}
-            </p>
-          </div>
-
-          {/* CTA */}
+          {/* Contact CTA */}
           <div className="text-center">
-            <a
-              href={`/${locale}/contact`}
-              className="inline-block bg-[#D4AF37] text-white px-8 py-3 text-sm font-bold tracking-wide hover:bg-[#B89129] transition-colors rounded-lg shadow-lg"
+            <button
+              onClick={handleContactClick}
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-green-600 hover:to-green-700 transition-colors shadow-lg"
             >
-              {t.contactExpert}
-            </a>
+              {t.contactButton}
+            </button>
+            <p className="text-sm text-gray-500 mt-3">
+              Hotline: 0333 314 288 | 0903 117 277
+            </p>
           </div>
         </div>
       )}
