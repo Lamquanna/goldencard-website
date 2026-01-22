@@ -132,7 +132,7 @@ const organizationStructuredData = {
   name: SITE_CONFIG.name,
   alternateName: "GoldenEnergy",
   url: SITE_CONFIG.url,
-  logo: `${SITE_CONFIG.url}/images/logo.png`,
+  logo: `${SITE_CONFIG.url}/logo-goldenenergy.png`,
   description: "Công ty năng lượng tái tạo hàng đầu Việt Nam - Điện mặt trời, điện gió, IoT thông minh",
   email: SITE_CONFIG.email,
   telephone: SITE_CONFIG.phone,
