@@ -355,7 +355,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {/* Head Office */}
               <RevealOnScroll >
-                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500">
+                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500 min-h-[280px] flex flex-col">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="text-4xl">🏢</div>
                     <div>
@@ -367,7 +367,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-3 text-gray-900 font-medium">
+                  <div className="space-y-3 text-gray-900 font-medium mt-auto">
                     <div className="flex items-center gap-3">
                       <span>📞</span>
                       <span>03333 142 88 / 0903 117 277</span>
@@ -386,7 +386,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
               {/* Representative Office */}
               <RevealOnScroll  delay={0.1}>
-                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500">
+                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500 min-h-[280px] flex flex-col">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="text-4xl">🏬</div>
                     <div>
@@ -398,7 +398,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-3 text-gray-900 font-medium">
+                  <div className="space-y-3 text-gray-900 font-medium mt-auto">
                     <div className="flex items-center gap-3">
                       <span>📞</span>
                       <span>03333 142 88 / 0903 117 277</span>
@@ -413,7 +413,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
               {/* Warehouse */}
               <RevealOnScroll  delay={0.2}>
-                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500">
+                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500 min-h-[280px] flex flex-col">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="text-4xl">📦</div>
                     <div>
@@ -425,7 +425,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-3 text-gray-900 font-medium">
+                  <div className="space-y-3 text-gray-900 font-medium mt-auto">
                     <div className="flex items-center gap-3">
                       <span>📦</span>
                       <span>{locale === "vi" ? "Kho vật tư năng lượng" : locale === "zh" ? "能源设备仓库" : "Energy equipment warehouse"}</span>
@@ -440,7 +440,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
               {/* Contact Hotline */}
               <RevealOnScroll  delay={0.3}>
-                <div className="bg-gradient-to-br from-[#D4AF37]/10 to-[#008B8B]/10 border-2 border-[#D4AF37] p-8 rounded-2xl">
+                <div className="bg-gradient-to-br from-[#D4AF37]/10 to-[#008B8B]/10 border-2 border-[#D4AF37] p-8 rounded-2xl min-h-[280px] flex flex-col justify-center">
                   <div className="text-center">
                     <div className="text-4xl mb-4">📞</div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">
