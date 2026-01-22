@@ -147,7 +147,7 @@ async function queryProducts(
       "efficiency": techSpecs.efficiency,
       "warranty": techSpecs.warrantyYears,
       price,
-      "imageUrl": mainImage.asset->url
+      "imageUrl": coalesce(mainImage.asset->url, image.asset->url)
     }`;
 
     const inverter = await client.fetch(inverterQuery, { systemSize: systemSizeWatts });
@@ -168,7 +168,7 @@ async function queryProducts(
       "efficiency": techSpecs.efficiency,
       "warranty": techSpecs.warrantyYears,
       price,
-      "imageUrl": mainImage.asset->url
+      "imageUrl": coalesce(mainImage.asset->url, image.asset->url)
     }`;
 
     const panel = await client.fetch(panelQuery);
@@ -203,7 +203,7 @@ async function queryProducts(
         "capacity": techSpecs.capacity,
         "warranty": techSpecs.warrantyYears,
         price,
-        "imageUrl": mainImage.asset->url
+        "imageUrl": coalesce(mainImage.asset->url, image.asset->url)
       }`;
 
       battery = await client.fetch(batteryQuery, {

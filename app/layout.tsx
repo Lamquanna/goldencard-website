@@ -61,12 +61,24 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/logo-goldenenergy.png',
+        type: 'image/png',
+        sizes: '512x512',
+      },
+      {
+        url: '/favicon.ico',
+        sizes: '32x32',
       },
     ],
-    shortcut: '/icon.svg',
-    apple: '/apple-icon.png',
+    shortcut: '/logo-goldenenergy.png',
+    apple: '/logo-goldenenergy.png',
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/logo.svg',
+        color: '#ED683C',
+      },
+    ],
   },
   openGraph: {
     title: "Golden Energy Vietnam - Giải Pháp Năng Lượng Tái Tạo Hàng Đầu",
