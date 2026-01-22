@@ -440,28 +440,30 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
               {/* Contact Hotline */}
               <RevealOnScroll  delay={0.3}>
-                <div className="bg-gradient-to-br from-[#D4AF37]/10 to-[#008B8B]/10 border-2 border-[#D4AF37] p-8 rounded-2xl min-h-[280px] flex flex-col justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl mb-4">📞</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      {locale === "vi" ? "Liên Hệ Tổng Đài" : locale === "zh" ? "联系总机" : "Contact Hotline"}
-                    </h3>
-                    <div className="space-y-3 text-gray-900 font-medium">
-                      <div className="text-2xl font-semibold text-[#D4AF37]">
-                        03333 142 88
-                      </div>
-                      <div className="text-lg">
-                        0903 117 277
-                      </div>
-                      <div className="flex items-center justify-center gap-2 text-base">
-                        <span>📧</span>
-                        <span>sales@goldenenergy.vn</span>
-                      </div>
-                      <div className="pt-3 border-t border-gray-300">
-                        <span className="text-sm">
-                          {locale === "vi" ? "Giờ làm việc: 8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "工作时间：8:00 - 17:30（周一至周六）" : "Working hours: 8:00 AM - 5:30 PM (Mon - Sat)"}
-                        </span>
-                      </div>
+                <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl hover:border-gray-300 hover:shadow-lg transition-all duration-500 min-h-[280px] flex flex-col">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="text-4xl">📞</div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {locale === "vi" ? "Liên Hệ Tổng Đài" : locale === "zh" ? "联系总机" : "Contact Hotline"}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-gray-900 font-medium mt-auto">
+                    <div className="text-2xl font-semibold text-[#D4AF37]">
+                      03333 142 88
+                    </div>
+                    <div className="text-lg">
+                      0903 117 277
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <span>📧</span>
+                      <span>sales@goldenenergy.vn</span>
+                    </div>
+                    <div className="pt-3 border-t border-gray-300">
+                      <span className="text-sm">
+                        {locale === "vi" ? "Giờ làm việc: 8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "工作时间：8:00 - 17:30（周一至周六）" : "Working hours: 8:00 AM - 5:30 PM (Mon - Sat)"}
+                      </span>
                     </div>
                   </div>
                 </div>

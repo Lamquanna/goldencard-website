@@ -305,7 +305,7 @@ export default function CalculatorPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-20">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-32 pb-20">
       <Container>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -588,6 +588,55 @@ export default function CalculatorPage() {
                       </div>
                       <div className="text-sm text-gray-600">{t.results.env.trees}</div>
                     </div>
+                  </div>
+                </div>
+                
+                {/* Recommended System Configuration */}
+                <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-white">
+                  <h3 className="text-2xl font-bold mb-4">
+                    {locale === 'vi' ? '🎯 Hệ Thống Đề Xuất' : locale === 'zh' ? '🎯 推荐系统' : '🎯 Recommended System'}
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                      <div className="text-sm opacity-90 mb-1">
+                        {locale === 'vi' ? 'Tấm pin mặt trời' : locale === 'zh' ? '太阳能板' : 'Solar Panels'}
+                      </div>
+                      <div className="text-lg font-bold">Longi Hi-MO 6 450W × {result.systemSpecs.panelCount}</div>
+                      <div className="text-sm opacity-80 mt-1">
+                        {locale === 'vi' ? '✅ Có sẵn trong kho' : locale === 'zh' ? '✅ 库存充足' : '✅ In Stock'}
+                      </div>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                      <div className="text-sm opacity-90 mb-1">
+                        {locale === 'vi' ? 'Biến tần (Inverter)' : locale === 'zh' ? '逆变器' : 'Inverter'}
+                      </div>
+                      <div className="text-lg font-bold">
+                        Huawei SUN2000-{result.systemSpecs.inverterCapacity}KTL-L1
+                      </div>
+                      <div className="text-sm opacity-80 mt-1">
+                        {locale === 'vi' ? '✅ Có sẵn trong kho' : locale === 'zh' ? '✅ 库存充足' : '✅ In Stock'}
+                      </div>
+                    </div>
+                    {result.systemSpecs.batteryCapacity && (
+                      <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                        <div className="text-sm opacity-90 mb-1">
+                          {locale === 'vi' ? 'Pin lưu trữ (Battery)' : locale === 'zh' ? '储能电池' : 'Battery Storage'}
+                        </div>
+                        <div className="text-lg font-bold">
+                          UFO Powerwall {result.systemSpecs.batteryCapacity}kWh
+                        </div>
+                        <div className="text-sm opacity-80 mt-1">
+                          {locale === 'vi' ? '✅ Có sẵn trong kho' : locale === 'zh' ? '✅ 库存充足' : '✅ In Stock'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-6 text-center text-sm opacity-90">
+                    {locale === 'vi' 
+                      ? '💡 Sản phẩm chính hãng, bảo hành 25 năm, lắp đặt trong 1-2 ngày' 
+                      : locale === 'zh' 
+                      ? '💡 原装产品，25年质保，1-2天内安装' 
+                      : '💡 Genuine products, 25-year warranty, installation in 1-2 days'}
                   </div>
                 </div>
               </div>

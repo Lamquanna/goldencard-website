@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Minimize2, Sparkles, GripVertical, User, Phone, AlertTriangle } from 'lucide-react';
+import { Send, Minimize2, Sparkles, GripVertical, User, Phone, AlertTriangle, X } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -30,6 +30,7 @@ export function CozeChatWidget({
   defaultOpen = false,
 }: CozeChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isVisible, setIsVisible] = useState(false); // Scroll trigger visibility
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -62,11 +63,6 @@ export function CozeChatWidget({
     'Tư vấn giải pháp phù hợp cho tôi',
     'Liên hệ để được khảo sát miễn phí',
   ];
-  
-  // Draggable state
-  const [widgetPosition, setWidgetPosition] = useState({ x: 24, y: 24 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // Anti-spam settings (ENHANCED)
   const MIN_MESSAGE_INTERVAL = 5000; // 5 seconds between messages
@@ -75,6 +71,18 @@ export function CozeChatWidget({
   const LONG_COOLDOWN_DURATION = 10 * 60; // 10 minutes in seconds
   const SPAM_THRESHOLD = 3; // Flag as spam after 3 rapid attempts
   const MAX_QUESTIONS_BEFORE_CONTACT = 0; // Require login IMMEDIATELY
+
+  // Scroll trigger effect - Show after 300px scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsVisible(scrollY > 300);
+    };
+
+    handleScroll(); // Check initial position
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,58 +111,6 @@ export function CozeChatWidget({
       return () => clearTimeout(timer);
     }
   }, [cooldownSeconds, isLongCooldown]);
-
-  // Handle drag start
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    
-    dragRef.current = {
-      startX: clientX,
-      startY: clientY,
-      startPosX: widgetPosition.x,
-      startPosY: widgetPosition.y,
-    };
-    setIsDragging(true);
-  };
-
-  // Handle drag move
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-      if (!isDragging || !dragRef.current) return;
-      
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      
-      const deltaX = dragRef.current.startX - clientX;
-      const deltaY = dragRef.current.startY - clientY;
-      
-      const newX = Math.max(10, Math.min(window.innerWidth - 420, dragRef.current.startPosX + deltaX));
-      const newY = Math.max(10, Math.min(window.innerHeight - 650, dragRef.current.startPosY + deltaY));
-      
-      setWidgetPosition({ x: newX, y: newY });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      dragRef.current = null;
-    };
-
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleMouseMove);
-      window.addEventListener('touchend', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleMouseMove);
-      window.removeEventListener('touchend', handleMouseUp);
-    };
-  }, [isDragging]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -405,102 +361,114 @@ export function CozeChatWidget({
   };
 
   // Dynamic positioning based on drag
-  const positionStyle = {
-    right: `${widgetPosition.x}px`,
-    bottom: `${widgetPosition.y}px`,
-  };
+  const positionStyle = position === 'bottom-right'
+    ? { right: '20px', bottom: '20px' }
+    : { left: '20px', bottom: '20px' };
+
+  // Smooth fade-in animation
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed z-50" style={positionStyle}>
-      {/* Chat Button */}
+    <div 
+      className="fixed z-[9999] transition-all duration-500 ease-in-out"
+      style={{
+        ...positionStyle,
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+      }}
+    >
+      {/* Chat Button - Circular Professional Design */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="relative bg-gradient-to-br from-orange-500 to-blue-600 text-white rounded-full p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 group"
-          aria-label="Open Golden Energy AI"
+          className="group relative w-16 h-16 bg-gradient-to-br from-yellow-400 via-orange-500 to-orange-600 text-white rounded-full shadow-2xl hover:shadow-[0_20px_60px_rgba(251,146,60,0.5)] transition-all duration-300 hover:scale-110 flex items-center justify-center"
+          aria-label="Chat với Golden Energy AI"
         >
-          {/* Animated glow effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-blue-600 opacity-75 blur-md group-hover:opacity-100 animate-pulse"></div>
+          {/* Pulsing glow ring */}
+          <div className="absolute inset-0 rounded-full bg-orange-400 opacity-75 blur-xl group-hover:opacity-100 animate-pulse"></div>
           
-          {/* AI Sparkle Icon */}
-          <Sparkles className="w-7 h-7 relative z-10 animate-pulse" />
+          {/* Icon với animation */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            <Sparkles className="w-7 h-7 mb-0.5 animate-pulse" strokeWidth={2.5} />
+            <span className="text-[9px] font-bold tracking-wider uppercase">Chat AI</span>
+          </div>
           
-          {/* Badge */}
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg">
-            AI
+          {/* Badge indicator */}
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-lg animate-bounce">
+            ✓
           </span>
+          
+          {/* Ripple effect */}
+          <span className="absolute inset-0 rounded-full border-2 border-orange-400 opacity-75 animate-ping"></span>
         </button>
       )}
 
-      {/* Chat Window */}
+      {/* Chat Window - Professional Design */}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-2xl w-96 h-[600px] flex flex-col">
-          {/* Header - Draggable */}
-          <div 
-            className={`bg-gradient-to-r from-orange-500 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            onMouseDown={handleDragStart}
-            onTouchStart={handleDragStart}
-          >
+        <div className="bg-white rounded-2xl shadow-2xl w-[400px] h-[650px] flex flex-col overflow-hidden border border-gray-200 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {/* Header - Modern Gradient with Close Button */}
+          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-orange-600 text-white p-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <GripVertical className="w-4 h-4 opacity-50" />
               <div className="relative">
-                <Sparkles className="w-6 h-6 animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-ping"></div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full"></div>
+                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Sparkles className="w-6 h-6" strokeWidth={2.5} />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
               </div>
               <div>
                 <h3 className="font-bold text-lg">Tư Vấn Năng Lượng</h3>
-                <p className="text-xs opacity-90">Golden Energy • Trực tuyến</p>
+                <p className="text-xs opacity-90 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  Golden Energy • Trực tuyến
+                </p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20 rounded p-1 transition-colors"
-              aria-label="Minimize chat"
+              className="hover:bg-white/20 rounded-lg p-2 transition-colors group"
+              aria-label="Đóng chat"
             >
-              <Minimize2 className="w-5 h-5" />
+              <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-orange-50/30 to-white">
-            {/* Session status - Hidden from customers */}
-            
+          {/* Messages - Modern Clean Design */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-gray-50 to-white">
             {/* Login Form - REQUIRED */}
             {showContactForm && (
-              <div className="bg-gradient-to-br from-orange-50 to-blue-50 border-2 border-orange-400 rounded-lg p-4 space-y-3">
-                <div className="flex items-center gap-2 text-orange-700 font-semibold">
-                  <User className="w-5 h-5" />
+              <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-50 border-2 border-orange-300 rounded-xl p-5 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 text-orange-700 font-bold text-lg">
+                  <User className="w-6 h-6" />
                   <span>Đăng nhập để sử dụng AI</span>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Để trải nghiệm tốt nhất, Anh/Chị vui lòng cung cấp số điện thoại và thông tin để bên em liên hệ.
                 </p>
-                <p className="text-xs text-gray-600">
-                  Kết hợp cùng bộ tính toán lắp đặt năng lượng mặt trời thông minh, em sẽ tư vấn giải pháp phù hợp nhất cho Anh/Chị.
+                <p className="text-xs text-gray-600 bg-white/70 rounded-lg p-3 border border-orange-200">
+                  💡 <strong>Kết hợp cùng bộ tính toán năng lượng mặt trời thông minh</strong>, em sẽ tư vấn giải pháp phù hợp nhất cho Anh/Chị.
                 </p>
                 <input
                   type="text"
                   placeholder="Họ và tên *"
                   value={userInfo?.name || ''}
                   onChange={e => setUserInfo(prev => ({ ...prev!, name: e.target.value }))}
-                  className="w-full border-2 border-orange-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full border-2 border-orange-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                 />
                 <input
                   type="tel"
                   placeholder="Số điện thoại (10 chữ số) *"
                   value={userInfo?.phone || ''}
                   onChange={e => setUserInfo(prev => ({ ...prev!, phone: e.target.value }))}
-                  className="w-full border-2 border-orange-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full border-2 border-orange-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                 />
                 <button
                   onClick={handleContactSubmit}
-                  className="w-full bg-gradient-to-r from-orange-500 to-blue-600 text-white font-semibold py-2 rounded-lg hover:from-orange-600 hover:to-blue-700 transition-all"
+                  className="w-full bg-gradient-to-r from-yellow-400 via-orange-500 to-orange-600 text-white font-bold py-3 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
                 >
-                  Xác nhận và tiếp tục
+                  ✓ Xác nhận và tiếp tục
                 </button>
                 <p className="text-xs text-gray-500 text-center">
-                  Thông tin được bảo mật theo chính sách của Golden Energy
+                  🔒 Thông tin được bảo mật theo chính sách của Golden Energy
                 </p>
               </div>
             )}
@@ -511,14 +479,14 @@ export function CozeChatWidget({
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
+                      : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className="text-xs mt-1 opacity-70">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <p className={`text-xs mt-2 ${message.role === 'user' ? 'text-orange-100' : 'text-gray-400'}`}>
                     {message.timestamp.toLocaleTimeString('vi-VN', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -530,11 +498,11 @@ export function CozeChatWidget({
             
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-lg p-3">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2.5 h-2.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2.5 h-2.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -543,12 +511,12 @@ export function CozeChatWidget({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-4 border-t bg-gradient-to-r from-orange-50 to-yellow-50">
-            {/* Quick Questions - Show only if not logged in or on first message */}
+          {/* Input - Modern Clean Design */}
+          <div className="p-5 border-t bg-white">
+            {/* Quick Questions */}
             {showQuickQuestions && !userInfo && (
-              <div className="mb-3">
-                <p className="text-xs text-gray-600 mb-2">Gợi ý câu hỏi:</p>
+              <div className="mb-4">
+                <p className="text-xs text-gray-500 mb-2 font-medium">💬 Gợi ý câu hỏi:</p>
                 <div className="grid grid-cols-1 gap-2">
                   {quickQuestions.map((q, idx) => (
                     <button
@@ -557,7 +525,7 @@ export function CozeChatWidget({
                         setShowContactForm(true);
                         setInput(q);
                       }}
-                      className="text-left text-xs bg-white border border-orange-200 hover:border-orange-400 hover:bg-orange-50 rounded-lg px-3 py-2 transition-all"
+                      className="text-left text-xs bg-gray-50 border border-gray-200 hover:border-orange-400 hover:bg-orange-50 rounded-lg px-3 py-2.5 transition-all hover:shadow-sm"
                     >
                       {q}
                     </button>
@@ -566,51 +534,51 @@ export function CozeChatWidget({
               </div>
             )}
             
-            {/* Cooldown warning - Enhanced */}
+            {/* Cooldown warning */}
             {cooldownSeconds > 0 && (
-              <div className={`mb-2 border text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+              <div className={`mb-3 border text-xs px-3 py-2.5 rounded-xl flex items-center gap-2 ${
                 isLongCooldown 
-                  ? 'bg-red-100 border-red-400 text-red-800' 
-                  : 'bg-yellow-100 border-yellow-300 text-yellow-800'
+                  ? 'bg-red-50 border-red-300 text-red-800' 
+                  : 'bg-yellow-50 border-yellow-300 text-yellow-800'
               }`}>
-                <AlertTriangle className="w-4 h-4 animate-pulse" />
+                <AlertTriangle className="w-4 h-4 animate-pulse flex-shrink-0" />
                 <div className="flex-1">
                   {isLongCooldown ? (
                     <div>
-                      <p className="font-medium">Để được hỗ trợ tốt hơn, Anh/Chị vui lòng liên hệ:</p>
-                      <p className="text-[10px] mt-1">• 0903 117 277 hoặc • 0333 314 288</p>
+                      <p className="font-semibold">Để được hỗ trợ tốt hơn, Anh/Chị vui lòng liên hệ:</p>
+                      <p className="text-[11px] mt-1">📞 0903 117 277 hoặc 0333 314 288</p>
                     </div>
                   ) : (
-                    <span>Vui lòng đợi {cooldownSeconds}s...</span>
+                    <span className="font-medium">Vui lòng đợi {cooldownSeconds}s...</span>
                   )}
                 </div>
               </div>
             )}
             
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               <input
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={cooldownSeconds > 0 ? `Đợi ${cooldownSeconds}s...` : "Nhập câu hỏi của bạn..."}
+                placeholder={cooldownSeconds > 0 ? `Đợi ${cooldownSeconds}s...` : "Nhập câu hỏi..."}
                 disabled={isLoading || cooldownSeconds > 0}
-                className="flex-1 border-2 border-orange-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:bg-gray-100"
+                className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-gray-50 transition-all"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading || cooldownSeconds > 0}
-                className="bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-lg px-4 py-2 hover:from-orange-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
-                aria-label="Send message"
+                className="bg-gradient-to-r from-yellow-400 via-orange-500 to-orange-600 text-white rounded-xl px-5 py-3 hover:shadow-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all transform hover:scale-105"
+                aria-label="Gửi tin nhắn"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="mt-2 flex items-center justify-center text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-orange-500" />
-                Golden Energy AI
+            <div className="mt-3 flex items-center justify-center text-xs text-gray-400">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                <span className="font-medium">Golden Energy AI</span>
               </span>
             </div>
           </div>
