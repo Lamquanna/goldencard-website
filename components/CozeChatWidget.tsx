@@ -140,7 +140,7 @@ export function CozeChatWidget({
       const limitMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `Để phục vụ Anh/Chị tốt hơn, em xin mời Anh/Chị liên hệ trực tiếp hotline:\n• 0903 117 277\n• 0333 314 288\nĐể được tư vấn chi tiết. Cảm ơn Anh/Chị!`,
+        content: `Để phục vụ Anh/Chị tốt hơn, em xin mời Anh/Chị liên hệ trực tiếp hotline: 0333 314 288 để được tư vấn chi tiết. Cảm ơn Anh/Chị!`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, limitMessage]);
@@ -175,7 +175,7 @@ export function CozeChatWidget({
         const spamMessage: Message = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `Để đảm bảo chất lượng dịch vụ, Anh/Chị vui lòng liên hệ hotline:\n• 0903 117 277\n• 0333 314 288\nĐược chuyên viên hỗ trợ trực tiếp. Em xin cảm ơn!`,
+          content: `Để đảm bảo chất lượng dịch vụ, Anh/Chị vui lòng liên hệ hotline: 0333 314 288 để được chuyên viên hỗ trợ trực tiếp. Em xin cảm ơn!`,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, spamMessage]);
@@ -221,7 +221,7 @@ export function CozeChatWidget({
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: data.error || 'AI Chat đang được bảo trì. Vui lòng thử lại sau hoặc liên hệ qua hotline: 0901 234 567',
+          content: data.error || 'AI Chat đang được bảo trì. Vui lòng thử lại sau hoặc liên hệ qua hotline: 0333 314 288',
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, errorMessage]);
