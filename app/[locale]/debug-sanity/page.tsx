@@ -114,16 +114,19 @@ export default async function DebugSanityPage() {
       <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
         <h2 className="text-xl font-bold text-yellow-900 mb-4">🔍 Category Breakdown</h2>
         <div className="space-y-2">
-          {Array.from(new Set(allProducts.map((p: any) => p.category))).map((cat) => (
-            <div key={cat} className="flex justify-between items-center p-3 bg-white rounded border">
-              <span className="font-mono text-sm">
-                category == "<span className="text-red-600 font-bold">{cat || 'NULL'}</span>"
-              </span>
-              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                {allProducts.filter((p: any) => p.category === cat).length} products
-              </span>
-            </div>
-          ))}
+          {Array.from(new Set(allProducts.map((p: any) => p.category))).map((cat: unknown) => {
+            const categoryStr = String(cat)
+            return (
+              <div key={categoryStr || 'unknown'} className="flex justify-between items-center p-3 bg-white rounded border">
+                <span className="font-mono text-sm">
+                  category == "<span className="text-red-600 font-bold">{categoryStr || 'NULL'}</span>"
+                </span>
+                <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  {allProducts.filter((p: any) => p.category === cat).length} products
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
