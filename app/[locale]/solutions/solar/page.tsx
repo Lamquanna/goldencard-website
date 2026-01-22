@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import Section from "@/components/Cinematic/Section";
 import RevealOnScroll from "@/components/Cinematic/RevealOnScroll";
-import SolarCalculator from "@/components/SolarCalculator";
 import { isLocale, type Locale } from "@/lib/i18n";
 
 interface SolarPageProps {
@@ -370,17 +369,25 @@ export default async function SolarPage({ params }: SolarPageProps) {
         </div>
       </Section>
 
-      {/* Solar Calculator */}
+      {/* Calculator CTA */}
       <Section
         title={content.calculator.title}
-        backgroundColor="bg-white"
+        backgroundColor="bg-gradient-to-br from-yellow-50 to-orange-50"
       >
         <RevealOnScroll delay={0.1}>
-          <div className="max-w-4xl mx-auto">
-            <p className="text-center text-gray-400 mb-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-xl text-gray-700 mb-8">
               {content.calculator.description}
             </p>
-            <SolarCalculator locale={locale} />
+            <Link
+              href={`/${locale}/tinh-toan`}
+              className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-10 py-5 rounded-xl font-bold text-xl hover:from-yellow-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              {locale === 'vi' ? '🧮 Tính toán ngay →' : locale === 'en' ? '🧮 Calculate Now →' : locale === 'zh' ? '🧮 立即计算 →' : '🧮 Hitung Sekarang →'}
+            </Link>
+            <p className="text-sm text-gray-600 mt-4">
+              {locale === 'vi' ? 'Nhận báo giá chi tiết và gợi ý sản phẩm trong 2 phút' : locale === 'en' ? 'Get detailed quote and product recommendations in 2 minutes' : locale === 'zh' ? '2分钟内获取详细报价和产品推荐' : 'Dapatkan penawaran terperinci dan rekomendasi produk dalam 2 menit'}
+            </p>
           </div>
         </RevealOnScroll>
       </Section>
