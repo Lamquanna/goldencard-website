@@ -66,10 +66,10 @@ export default function Footer({ navItems, locale, siteData }: FooterProps) {
 
   return (
     <footer className="relative bg-[#0A0A0A] border-t border-gray-20 py-20 md:py-28 overflow-hidden">
-      {/* Green Leaves Background Image */}
+      {/* Green Leaves Background Image - Using local file */}
       <div className="absolute inset-0 w-full h-full">
         <Image
-          src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=2400&auto=format&fit=crop"
+          src="/images/tropical-leaves-footer.jpg"
           alt="Tropical leaves background"
           fill
           sizes="100vw"

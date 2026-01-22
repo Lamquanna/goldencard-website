@@ -29,18 +29,18 @@ export const SITE_CONFIG = {
   // Contact
   email: 'sales@goldenenergy.vn',
   emailCEO: 'jimmyha@goldencard.vn',
-  phone: '0903 117 277',
-  phoneSecondary: '03333 142 88',
+  phone: '0333 314 288',
+  phoneSecondary: '0903 117 277',
   address: {
-    street: 'Sunrise Riverside',
-    district: 'Nhà Bè',
+    street: 'A2206-A2207 Tháp A, Sunrise Riverside',
+    district: 'Phường Phước Kiển, Huyện Nhà Bè',
     city: 'TP. Hồ Chí Minh',
     country: 'Việt Nam',
-    full: 'Sunrise Riverside, Nhà Bè, TP. Hồ Chí Minh',
+    full: 'A2206-A2207 Tháp A, Sunrise Riverside, Phường Phước Kiển, Nhà Bè, TP. Hồ Chí Minh',
     postalCode: '70000',
   },
-  officeRepresentative: 'Sunrise Riverside, Phường Phước Kiển, Nhà Bè, TP.HCM',
-  warehouse: 'Kho GoldenCard, TP.HCM',
+  officeRepresentative: '625 Đường Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP.HCM',
+  warehouse: '354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, Quận 7, TP.HCM',
   workHours: '8:00 - 17:30 (T2 - T7)',
   
   // Company Values
