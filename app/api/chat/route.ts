@@ -173,24 +173,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-      const fallbackResponse = FAQ_RESPONSES[questionType];
-      
-      console.log('⚠️ Gemini quota exceeded, using fallback response:', questionType);
-      
-      return NextResponse.json({
-        response: fallbackResponse,
-        timestamp: new Date().toISOString(),
-        fallback: true, // Đánh dấu đây là fallback response
-      });
-    }
-    
-    // Các lỗi khác
-    return NextResponse.json(
-      {
-        error: 'Xin lỗi, hệ thống đang bận. Vui lòng gọi hotline 03333 142 88 để được hỗ trợ ngay.',
-        details: error.message,
-      },
-      { status: 500 }
-    );
-  }
-}
