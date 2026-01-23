@@ -130,19 +130,25 @@ function translateTitle(viTitle, targetLang) {
 
 // Translate location
 function translateLocation(viLocation, targetLang) {
+  // Handle null/undefined
+  if (!viLocation) return null
+  
+  // Convert object to string if needed
+  const locationStr = typeof viLocation === 'string' ? viLocation : String(viLocation)
+  
   // Direct mapping
-  if (translations.locations[viLocation]) {
-    return translations.locations[viLocation][targetLang] || viLocation
+  if (translations.locations[locationStr]) {
+    return translations.locations[locationStr][targetLang] || locationStr
   }
   
   // Partial mapping
   for (const [viKey, trans] of Object.entries(translations.locations)) {
-    if (viLocation.includes(viKey)) {
-      return viLocation.replace(viKey, trans[targetLang] || viKey)
+    if (locationStr.includes(viKey)) {
+      return locationStr.replace(viKey, trans[targetLang] || viKey)
     }
   }
   
-  return viLocation // Fallback
+  return locationStr // Fallback
 }
 
 // Translate description

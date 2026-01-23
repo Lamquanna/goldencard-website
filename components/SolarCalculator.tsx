@@ -368,6 +368,12 @@ export default function SolarCalculator({ locale = 'vi' }: SolarCalculatorProps)
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h2>
         <p className="text-gray-600">{t.subtitle}</p>
+        <a 
+          href={`/${locale}/tinh-toan`}
+          className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-medium"
+        >
+          {locale === 'vi' ? '🔍 Tính toán chi tiết (Mái nhà, Diện tích, Địa điểm) →' : '🔍 View detailed calculator (Roof, Area, Location) →'}
+        </a>
       </div>
 
       {/* Input Form */}

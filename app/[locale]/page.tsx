@@ -11,6 +11,7 @@ import TiltCard from "@/components/ui/TiltCard";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import SectionDivider from "@/components/ui/SectionDivider";
 import { RevenueStats } from "@/components/RevenueStats";
+import SolarCalculator from "@/components/SolarCalculator";
 
 import { isLocale, type Locale } from "@/lib/i18n";
 import goldenEnergyContent from "@/lib/content-goldenenergy.json";
@@ -135,6 +136,45 @@ export default async function HomePage({ params }: HomePageProps) {
 
       {/* Wave Divider after Hero */}
       <SectionDivider variant="wave" fillColor="#ffffff" height={60} />
+
+      {/* ============================================ */}
+      {/* SOLAR CALCULATOR - PROMINENT POSITION */}
+      {/* ============================================ */}
+      <Section
+        title={locale === 'vi' ? 'Tính Toán Hệ Thống Điện Mặt Trời' : 
+               locale === 'zh' ? '太阳能系统计算器' :
+               locale === 'id' ? 'Kalkulator Sistem Tenaga Surya' :
+               'Solar System Calculator'}
+        subtitle={locale === 'vi' ? 'Nhập hóa đơn điện để nhận gợi ý sản phẩm thực tế từ kho hàng' :
+                  locale === 'zh' ? '输入电费单获取库存产品推荐' :
+                  locale === 'id' ? 'Masukkan tagihan listrik untuk rekomendasi produk dari stok' :
+                  'Enter your electricity bill to get product recommendations from our inventory'}
+        backgroundColor="bg-gradient-to-br from-yellow-50 via-white to-blue-50"
+      >
+        <RevealOnScroll delay={0.1}>
+          <div className="max-w-5xl mx-auto">
+            <SolarCalculator locale={locale} />
+          </div>
+        </RevealOnScroll>
+
+        {/* Quick Link to Full Calculator Page */}
+        <RevealOnScroll delay={0.2}>
+          <div className="text-center mt-8">
+            <Link
+              href={`/${locale}/tinh-toan`}
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            >
+              <span>{locale === 'vi' ? 'Xem công cụ tính toán chi tiết' : 
+                      locale === 'zh' ? '查看详细计算工具' :
+                      locale === 'id' ? 'Lihat kalkulator lengkap' :
+                      'View detailed calculator'}</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+          </div>
+        </RevealOnScroll>
+      </Section>
 
       {/* Origin Section with Goldencard mention */}
       <Section

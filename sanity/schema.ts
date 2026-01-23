@@ -139,6 +139,28 @@ const product = {
       type: 'string',
     },
     {
+      name: 'tier',
+      title: 'Product Tier',
+      type: 'string',
+      options: {
+        list: [
+          { title: '💰 Budget (Giá rẻ - Tiết kiệm)', value: 'budget' },
+          { title: '⭐ Standard (Phổ thông - Tin cậy)', value: 'standard' },
+          { title: '👑 Premium (VIP - Cao cấp)', value: 'premium' },
+        ],
+        layout: 'dropdown',
+      },
+      description: 'Phân khúc sản phẩm cho Calculator 3 Bát Phở',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'brandOrigin',
+      title: 'Brand Origin',
+      type: 'string',
+      description: 'Xuất xứ thương hiệu (VD: "China", "Germany", "Vietnam", "USA", "Japan")',
+      placeholder: 'China',
+    },
+    {
       name: 'techSpecs',
       title: 'Technical Specifications',
       type: 'object',
@@ -755,6 +777,153 @@ const solution = {
   },
 }
 
+const warranty = {
+  name: 'warranty',
+  title: 'Warranty Records',
+  type: 'document',
+  fields: [
+    {
+      name: 'customerName',
+      title: 'Customer Name',
+      type: 'string',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'customerPhone',
+      title: 'Customer Phone',
+      type: 'string',
+      description: 'Format: 0333314288 (no spaces)',
+      validation: (Rule: any) => Rule.required().regex(/^[0-9]{10}$/),
+    },
+    {
+      name: 'productName',
+      title: 'Product Name',
+      type: 'string',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'productCategory',
+      title: 'Product Category',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Solar Panel', value: 'solar-panel' },
+          { title: 'Inverter', value: 'inverter' },
+          { title: 'Battery', value: 'battery' },
+          { title: 'Accessory', value: 'accessory' },
+          { title: 'Complete System', value: 'system' },
+        ],
+        layout: 'dropdown',
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'serialNumber',
+      title: 'Serial Number',
+      type: 'string',
+      description: 'Product serial number for warranty tracking',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'purchaseDate',
+      title: 'Purchase Date',
+      type: 'date',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'warrantyPeriod',
+      title: 'Warranty Period (Years)',
+      type: 'number',
+      initialValue: 10,
+      validation: (Rule: any) => Rule.required().positive(),
+    },
+    {
+      name: 'warrantyEndDate',
+      title: 'Warranty End Date',
+      type: 'date',
+      description: 'Auto-calculated from purchase date + warranty period',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'status',
+      title: 'Warranty Status',
+      type: 'string',
+      options: {
+        list: [
+          { title: '✅ Active', value: 'active' },
+          { title: '⏰ Expiring Soon (< 6 months)', value: 'expiring' },
+          { title: '❌ Expired', value: 'expired' },
+          { title: '🔧 Claimed', value: 'claimed' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'active',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'installationAddress',
+      title: 'Installation Address',
+      type: 'text',
+      rows: 2,
+    },
+    {
+      name: 'notes',
+      title: 'Internal Notes',
+      type: 'text',
+      rows: 3,
+      description: 'Private notes, not visible to customers',
+    },
+    {
+      name: 'claimHistory',
+      title: 'Claim History',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'claimDate',
+              title: 'Claim Date',
+              type: 'date',
+            },
+            {
+              name: 'issueDescription',
+              title: 'Issue Description',
+              type: 'text',
+            },
+            {
+              name: 'resolution',
+              title: 'Resolution',
+              type: 'text',
+            },
+            {
+              name: 'resolvedDate',
+              title: 'Resolved Date',
+              type: 'date',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  preview: {
+    select: {
+      title: 'customerName',
+      subtitle: 'productName',
+      phone: 'customerPhone',
+      status: 'status',
+    },
+    prepare(selection: any) {
+      const { title, subtitle, phone, status } = selection;
+      const statusIcon = status === 'active' ? '✅' : status === 'expired' ? '❌' : status === 'claimed' ? '🔧' : '⏰';
+      return {
+        title: `${title} (${phone})`,
+        subtitle: `${statusIcon} ${subtitle}`,
+      };
+    },
+  },
+}
+
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [siteSettings, product, project, post, solution],
+  types: [siteSettings, product, project, post, solution, warranty],
 }

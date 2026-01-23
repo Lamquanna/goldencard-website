@@ -4,6 +4,7 @@ import "./globals.css";
 import { AnalyticsProvider, GTMNoScript } from "@/components/analytics/AnalyticsProvider";
 import { BreadcrumbSchema } from "@/components/BreadcrumbSchema";
 import { SITE_CONFIG } from "@/lib/config/site";
+import { GeminiChat } from "@/components/GeminiChat";
 // import DevTools from "@/components/DevTools"; // Disabled to fix infinite loop error
 
 // Critical CSS for above-the-fold content - inlined for faster FCP
@@ -268,7 +269,7 @@ export default function RootLayout({
         >
           {children}
           <BreadcrumbSchema />
-          {/* AI Chatbot moved to app/[locale]/layout.tsx for proper locale support */}
+          <GeminiChat />
         </AnalyticsProvider>
         {/* DevTools disabled - causing infinite loop */}
         {/* <DevTools /> */}

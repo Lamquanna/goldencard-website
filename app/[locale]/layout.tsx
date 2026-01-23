@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
-import { CozeChatWidget } from "@/components/CozeChatWidget";
 import Footer from "@/components/Cinematic/Footer";
 import LoadingScreen from "@/components/Cinematic/LoadingScreen";
 import { LocaleLangSetter } from "@/components/locale-lang-setter";
@@ -73,12 +72,6 @@ export default async function LocaleLayout({
           <Footer locale={locale} navItems={navItems} siteData={siteData} />
         </div>
       </PageTransition>
-      <CozeChatWidget 
-        userId="golden-energy-visitor"
-        botId={process.env.NEXT_PUBLIC_COZE_BOT_ID}
-        position="bottom-right"
-        defaultOpen={false}
-      />
     </>
   );
 }

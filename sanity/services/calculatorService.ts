@@ -135,7 +135,7 @@ async function queryProducts(
     // Query 1: Find suitable inverter (smallest capacity >= system size)
     const inverterQuery = `*[
       _type == "product" && 
-      category == "inverter" && 
+      (category == "inverter" || category == "inverters") && 
       techSpecs.capacity >= $systemSize &&
       inStock == true
     ] | order(techSpecs.capacity asc) [0] {
@@ -157,7 +157,7 @@ async function queryProducts(
     // Query 2: Find solar panels (most popular, highest efficiency)
     const panelQuery = `*[
       _type == "product" && 
-      category == "solar-panel" && 
+      (category == "solar-panel" || category == "panels") && 
       inStock == true
     ] | order(techSpecs.efficiency desc) [0] {
       _id,
@@ -192,7 +192,7 @@ async function queryProducts(
 
       const batteryQuery = `*[
         _type == "product" && 
-        category == "battery" && 
+        (category == "battery" || category == "batteries") && 
         techSpecs.capacity >= $minCapacity &&
         inStock == true
       ] | order(techSpecs.capacity asc) [0] {
