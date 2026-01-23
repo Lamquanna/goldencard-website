@@ -94,10 +94,96 @@ const SYSTEM_PROMPT = `Bạn là AI hỗ trợ khách hàng của Golden Energy 
 - Nếu không biết câu trả lời → Xin Zalo để chuyên gia tư vấn
 - Không hứa hẹn về giá cụ thể, luôn nói "tùy thiết bị" và xin Zalo`;
 
-export async function POST(request: NextRequest) {
-  try {
-    const { message, conversationHistory = [], pageContext } = await request.json();
+// ============================================
+// FALLBACK RESPONSES - Dùng khi Gemini hết quota
+// ============================================
+const FAQ_RESPONSES: Record<string, string> = {
+  price: 'Dạ giá từ 45-65 triệu cho hệ thống 5kW hộ gia đình nhé anh 💰 Tùy thiết bị anh chọn. Cho em xin số Zalo để gửi báo giá chi tiết 3 gói: Tiết kiệm, Phổ thông và VIP ạ 📱',
+  
+  capacity: 'Dạ hóa đơn 2 triệu thì hệ thống 4-5kW là vừa anh nhé ⚡ Web em có Calculator tính miễn phí tại goldenenergy.vn/vi/tinh-toan, hoặc cho em xin Zalo để em tư vấn chi tiết hơn ạ 📊',
+  
+  brand: 'Dạ em có 3 phân khúc nhé anh:\n💰 Tiết kiệm: Risen, JA Solar, LuxPower\n⭐ Phổ thông: Longi, Canadian Solar, Huawei, GoodWe\n👑 VIP: Panasonic, SolarEdge, Enphase, Tesla\nAnh cho em xin Zalo để gửi catalog chi tiết nhé 📋',
+  
+  warranty: 'Dạ bảo hành rất dài nhé anh ✅\n- Tấm pin: 25 năm\n- Inverter: 10-12 năm tùy hãng\n- Miễn phí bảo trì 2 năm đầu\nAnh yên tâm nhé, em có đội kỹ thuật hỗ trợ 24/7 ạ 🔧',
+  
+  installation: 'Dạ sau khi khảo sát xong khoảng 3-5 ngày là lắp xong nhé anh ⚡ Nhà dưới 10kW thường 1-2 ngày là xong. Em sẽ báo lịch cụ thể sau khi khảo sát ạ 📅',
+  
+  payback: 'Dạ trung bình 5-7 năm là hoàn vốn nhé anh 💰 Tấm pin dùng được 25-30 năm nên sau khi hoàn vốn là lãi ròng. Cho em xin Zalo để gửi bảng tính ROI chi tiết ạ 📊',
+  
+  loan: 'Dạ có hỗ trợ vay ngân hàng nhé anh 💳 Lãi suất ưu đãi 7-9%/năm, trả góp 3-5 năm. Em sẽ hỗ trợ làm hồ sơ vay luôn ạ. Cho em xin Zalo để tư vấn thêm nhé 📱',
+  
+  compare: 'Dạ khác nhau chủ yếu về thương hiệu và hiệu suất nhé anh:\n💰 Tiết kiệm: Hiệu suất 95-96%, bảo hành 5-10 năm, giá rẻ nhất\n👑 VIP: Hiệu suất 98-99%, bảo hành 12-25 năm, thương hiệu Mỹ/Nhật\nCho em xin Zalo để gửi bảng so sánh chi tiết 3 gói nhé ạ 📋',
+  
+  maintenance: 'Dạ tấm pin tự làm sạch khi mưa nên ít phải bảo trì lắm anh 🌧️ Khoảng 6 tháng kiểm tra 1 lần là ok. Em có gói bảo trì trọn đời với giá ưu đãi nữa ạ 🔧',
+  
+  survey: 'Dạ khảo sát hoàn toàn miễn phí nhé anh 🏠 Em sẽ đến tận nhà đo mái, tính toán và tư vấn chi tiết. Cho em xin địa chỉ và số Zalo để hẹn lịch ạ 📅',
+  
+  default: 'Dạ em là AI hỗ trợ của Golden Energy ạ 🌞 Em có thể tư vấn về:\n💰 Giá và gói sản phẩm\n⚡ Công suất phù hợp\n✅ Bảo hành và bảo trì\n🏠 Khảo sát miễn phí\n\nAnh cho em xin số Zalo để chuyên gia tư vấn chi tiết hơn nhé 📱 Hotline: 03333 142 88'
+};
 
+function detectQuestionType(message: string): string {
+  const lowerMsg = message.toLowerCase().trim();
+  
+  // Hỏi về giá
+  if (/\b(giá|bao nhiêu|chi phí|tiền|price|cost)\b/.test(lowerMsg)) {
+    return 'price';
+  }
+  
+  // Hỏi công suất
+  if (/\b(công suất|kw|kilowatt|hóa đơn|điện|capacity)\b/.test(lowerMsg) && 
+      !/\b(bảo hành|warranty)\b/.test(lowerMsg)) {
+    return 'capacity';
+  }
+  
+  // Hỏi thương hiệu
+  if (/\b(thương hiệu|hãng|brand|nhãn|panel|tấm pin|inverter|biến tần)\b/.test(lowerMsg)) {
+    return 'brand';
+  }
+  
+  // Hỏi bảo hành
+  if (/\b(bảo hành|warranty|đảm bảo|cam kết)\b/.test(lowerMsg)) {
+    return 'warranty';
+  }
+  
+  // Hỏi thời gian lắp
+  if (/\b(lắp|cài đặt|thi công|xây dựng|install|mất bao lâu)\b/.test(lowerMsg)) {
+    return 'installation';
+  }
+  
+  // Hỏi hoàn vốn
+  if (/\b(hoàn vốn|thu hồi|roi|lợi nhuận|payback)\b/.test(lowerMsg)) {
+    return 'payback';
+  }
+  
+  // Hỏi trả góp
+  if (/\b(trả góp|vay|tín dụng|ngân hàng|loan|finance)\b/.test(lowerMsg)) {
+    return 'loan';
+  }
+  
+  // So sánh gói
+  if (/\b(so sánh|khác nhau|compare|difference|gói)\b/.test(lowerMsg)) {
+    return 'compare';
+  }
+  
+  // Bảo trì
+  if (/\b(bảo trì|bảo dưỡng|maintenance|vệ sinh|làm sạch)\b/.test(lowerMsg)) {
+    return 'maintenance';
+  }
+  
+  // Khảo sát
+  if (/\b(khảo sát|survey|đo|kiểm tra|tư vấn|visit)\b/.test(lowerMsg)) {
+    return 'survey';
+  }
+  
+  return 'default';
+}
+
+export async function POST(request: NextRequest) {
+  // Parse request body once
+  const body = await request.json();
+  const { message, conversationHistory = [], pageContext } = body;
+
+  try {
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
@@ -148,6 +234,26 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('❌ Gemini API Error:', error);
+    
+    // ============================================
+    // FALLBACK: Dùng pre-defined responses khi hết quota
+    // ============================================
+    const isQuotaError = error?.status === 429 || error?.message?.includes('quota') || error?.message?.includes('Too Many Requests');
+    
+    if (isQuotaError) {
+      const questionType = detectQuestionType(message);
+      const fallbackResponse = FAQ_RESPONSES[questionType];
+      
+      console.log('⚠️ Gemini quota exceeded, using fallback response:', questionType);
+      
+      return NextResponse.json({
+        response: fallbackResponse,
+        timestamp: new Date().toISOString(),
+        fallback: true, // Đánh dấu đây là fallback response
+      });
+    }
+    
+    // Các lỗi khác
     return NextResponse.json(
       {
         error: 'Xin lỗi, hệ thống đang bận. Vui lòng gọi hotline 03333 142 88 để được hỗ trợ ngay.',
