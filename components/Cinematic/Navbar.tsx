@@ -103,7 +103,7 @@ export default function Navbar({ navItems, locale }: NavbarProps) {
           </Link>
 
           {/* Navigation Links */}
-          <ul className="hidden md:flex items-center space-x-6 lg:space-x-10">
+          <ul className="hidden md:flex items-center space-x-3 lg:space-x-5">
             {navItems.map((item) => (
               <li key={item.href} className="relative group/nav">
                 {item.children ? (

@@ -1,14 +1,14 @@
 import type { Locale } from "@/lib/i18n";
 
-const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "products" | "projects" | "innovation" | "blog" | "contact", string>> = {
+const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "products" | "projects" | "blog" | "warranty" | "contact", string>> = {
   vi: {
     home: "Trang chủ",
     about: "Giới thiệu",
     solutions: "Giải pháp",
     products: "Sản phẩm",
     projects: "Dự án",
-    innovation: "R&D Lab",
-    blog: "Kiến thức",
+    blog: "Tin tức",
+    warranty: "Tra cứu BH",
     contact: "Liên hệ",
   },
   en: {
@@ -17,8 +17,8 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "product
     solutions: "Solutions",
     products: "Products",
     projects: "Projects",
-    innovation: "Innovation",
-    blog: "Knowledge",
+    blog: "News",
+    warranty: "Warranty",
     contact: "Contact",
   },
   zh: {
@@ -27,8 +27,8 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "product
     solutions: "解决方案",
     products: "产品",
     projects: "项目",
-    innovation: "研发实验室",
-    blog: "知识",
+    blog: "新闻",
+    warranty: "保修查询",
     contact: "联系",
   },
   id: {
@@ -37,8 +37,8 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "product
     solutions: "Solusi",
     products: "Produk",
     projects: "Proyek",
-    innovation: "R&D Lab",
-    blog: "Pengetahuan",
+    blog: "Berita",
+    warranty: "Garansi",
     contact: "Kontak",
   },
 };
@@ -57,30 +57,26 @@ export function getPrimaryNavigation(locale: Locale): NavItem[] {
     { label: labels.about, href: `/${locale}/about` },
     { 
       label: labels.solutions, 
-      href: `/${locale}/solutions/solar`,
+      href: `/${locale}/giai-phap/dien-mat-troi-ho-gia-dinh`,
       children: [
         { 
-          label: locale === "vi" ? "Solar" : locale === "zh" ? "太阳能" : "Solar", 
-          href: `/${locale}/solutions/solar` 
+          label: locale === "vi" ? "Hộ gia đình" : locale === "zh" ? "家用" : "Residential", 
+          href: `/${locale}/giai-phap/dien-mat-troi-ho-gia-dinh` 
         },
         { 
-          label: locale === "vi" ? "Wind" : locale === "zh" ? "风能" : "Wind", 
-          href: `/${locale}/solutions/wind` 
+          label: locale === "vi" ? "Thương mại" : locale === "zh" ? "商用" : "Commercial", 
+          href: `/${locale}/giai-phap/dien-mat-troi-thuong-mai` 
         },
         { 
-          label: locale === "vi" ? "IoT" : locale === "zh" ? "物联网" : "IoT", 
-          href: `/${locale}/solutions/iot` 
-        },
-        { 
-          label: locale === "vi" ? "Hybrid" : locale === "zh" ? "混合系统" : "Hybrid", 
-          href: `/${locale}/solutions/hybrid` 
+          label: locale === "vi" ? "Công nghiệp" : locale === "zh" ? "工业" : "Industrial", 
+          href: `/${locale}/giai-phap/dien-mat-troi-cong-nghiep` 
         },
       ]
     },
     { label: labels.products, href: `/${locale}/san-pham` },
-    { label: labels.projects, href: `/${locale}/projects` },
-    { label: labels.innovation, href: `/${locale}/innovation` },
-    { label: labels.blog, href: `/${locale}/blog` },
-    { label: labels.contact, href: `/${locale}/contact` },
+    { label: labels.projects, href: `/${locale}/du-an` },
+    { label: labels.blog, href: `/${locale}/bai-viet` },
+    { label: labels.warranty, href: `/${locale}/tra-cuu-bao-hanh` },
+    { label: labels.contact, href: `/${locale}/lien-he` },
   ];
 }
