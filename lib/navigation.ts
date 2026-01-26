@@ -60,15 +60,15 @@ export function getPrimaryNavigation(locale: Locale): NavItem[] {
       href: `/${locale}/giai-phap/dien-mat-troi-ho-gia-dinh`,
       children: [
         { 
-          label: locale === "vi" ? "Hộ gia đình" : locale === "zh" ? "家用" : "Residential", 
+          label: locale === "vi" ? "Hộ gia đình" : locale === "zh" ? "家用" : locale === "id" ? "Residensial" : "Residential", 
           href: `/${locale}/giai-phap/dien-mat-troi-ho-gia-dinh` 
         },
         { 
-          label: locale === "vi" ? "Thương mại" : locale === "zh" ? "商用" : "Commercial", 
+          label: locale === "vi" ? "Thương mại" : locale === "zh" ? "商用" : locale === "id" ? "Komersial" : "Commercial", 
           href: `/${locale}/giai-phap/dien-mat-troi-thuong-mai` 
         },
         { 
-          label: locale === "vi" ? "Công nghiệp" : locale === "zh" ? "工业" : "Industrial", 
+          label: locale === "vi" ? "Công nghiệp" : locale === "zh" ? "工业" : locale === "id" ? "Industri" : "Industrial", 
           href: `/${locale}/giai-phap/dien-mat-troi-cong-nghiep` 
         },
       ]

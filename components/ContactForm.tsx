@@ -38,7 +38,7 @@ export function ContactForm({ locale, placeholders }: ContactFormProps) {
     
     if (!emailRegex.test(email)) {
       setStatus("error");
-      setErrorMessage(locale === "vi" ? "Email không hợp lệ" : locale === "zh" ? "电子邮件无效" : "Invalid email");
+      setErrorMessage(locale === "vi" ? "Email không hợp lệ" : locale === "zh" ? "电子邮件无效" : locale === "id" ? "Email tidak valid" : "Invalid email");
       return;
     }
 
@@ -148,7 +148,7 @@ export function ContactForm({ locale, placeholders }: ContactFormProps) {
           {status === "loading" ? (
             <>
               <span className="animate-spin">⏳</span>
-              {locale === "vi" ? "Đang gửi..." : locale === "zh" ? "发送中..." : "Sending..."}
+              {locale === "vi" ? "Đang gửi..." : locale === "zh" ? "发送中..." : locale === "id" ? "Mengirim..." : "Sending..."}
             </>
           ) : (
             <>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Container } from '@/components/Container'
 import { generateBreadcrumbSchema } from '@/lib/schema'
 import { SmartCTA } from '@/components/SmartCTA'
+import { getProjects, type Project } from '@/sanity/lib/client'
 
 interface PageProps {
   params: { locale: string }
@@ -443,8 +444,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function ProjectsPage({ params }: PageProps) {
+export default async function ProjectsPage({ params }: PageProps) {
   const { locale } = params
+  
+  // ✅ FETCH REAL PROJECTS FROM SANITY
+  const sanityProjects = await getProjects(locale, 100)
+  
+  console.log('📊 [Projects Page] Fetched projects:', sanityProjects.length)
+  
+  // Fallback stats if no projects
+  const stats = {
+    totalProjects: sanityProjects.length || 500,
+    totalCapacity: sanityProjects.reduce((sum, p) => sum + (p.capacity || 0), 0) || 200,
+    satisfaction: 95,
+    residential: sanityProjects.filter(p => p.systemType === 'residential').length || 200,
+    commercial: sanityProjects.filter(p => p.systemType === 'commercial').length || 180,
+    industrial: sanityProjects.filter(p => p.systemType === 'industrial').length || 120
+  }
   
   // Organization Schema
   const organizationSchema = {
@@ -467,38 +483,44 @@ export default function ProjectsPage({ params }: PageProps) {
   const itemListSchema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: projects.map((project, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Product',
-        name: project.title[locale as keyof typeof project.title],
-        description: project.description[locale as keyof typeof project.description],
-        category: project.type === 'residential' ? 'Residential Solar' : project.type === 'commercial' ? 'Commercial Solar' : 'Industrial Solar',
-        additionalProperty: [
-          {
-            '@type': 'PropertyValue',
-            name: 'Capacity',
-            value: `${project.capacity}kW`
-          },
-          {
-            '@type': 'PropertyValue',
-            name: 'Savings',
-            value: `${project.savings}%`
-          },
-          {
-            '@type': 'PropertyValue',
-            name: 'Payback Period',
-            value: `${project.payback} years`
-          },
-          {
-            '@type': 'PropertyValue',
-            name: 'Location',
-            value: project.location[locale as keyof typeof project.location]
-          }
-        ]
+    numberOfItems: sanityProjects.length,
+    itemListElement: sanityProjects.slice(0, 20).map((project, index) => {
+      const slugString = typeof project.slug === 'string' ? project.slug : project.slug?.current || project._id
+      
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Product',
+          '@id': `https://goldenenergy.com.vn/${locale}/du-an/${slugString}`,
+          name: project.title,
+          description: project.shortDescription || '',
+          category: project.systemType === 'residential' ? 'Residential Solar' : project.systemType === 'commercial' ? 'Commercial Solar' : 'Industrial Solar',
+          additionalProperty: [
+            {
+              '@type': 'PropertyValue',
+              name: 'Capacity',
+              value: `${project.capacity}kW`
+            },
+            project.savings && {
+              '@type': 'PropertyValue',
+              name: 'Savings',
+              value: `${project.savings}%`
+            },
+            project.paybackPeriod && {
+              '@type': 'PropertyValue',
+              name: 'Payback Period',
+              value: `${project.paybackPeriod} years`
+            },
+            {
+              '@type': 'PropertyValue',
+              name: 'Location',
+              value: typeof project.location === 'string' ? project.location : project.location?.city || ''
+            }
+          ].filter(Boolean)
+        }
       }
-    }))
+    })
   }
   
   const breadcrumbPath = `/${locale}/du-an`
@@ -611,28 +633,47 @@ export default function ProjectsPage({ params }: PageProps) {
           
           {/* Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project) => {
+            {sanityProjects.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500 text-lg">
+                  {locale === 'vi' ? 'Chưa có dự án nào' : locale === 'zh' ? '暂无项目' : locale === 'id' ? 'Belum ada proyek' : 'No projects yet'}
+                </p>
+              </div>
+            ) : (
+              sanityProjects.map((project) => {
               const typeColors = {
                 residential: 'bg-blue-100 text-blue-800',
                 commercial: 'bg-indigo-100 text-indigo-800',
                 industrial: 'bg-teal-100 text-teal-800'
               }
               
+              const slugString = typeof project.slug === 'string' ? project.slug : project.slug?.current || project._id
+              
               return (
-                <div
-                  key={project.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                <Link
+                  key={project._id}
+                  href={`/${locale}/du-an/${slugString}`}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 block"
                 >
                   {/* Project Image */}
                   <div className="relative h-56 bg-gradient-to-br from-gray-200 to-gray-300">
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                      📸 {project.title[locale as keyof typeof project.title]}
-                    </div>
+                    {project.imageUrl ? (
+                      <Image
+                        src={project.imageUrl}
+                        alt={project.title}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                        📸 {project.title}
+                      </div>
+                    )}
                     
                     {/* Type Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${typeColors[project.type]}`}>
-                        {t(project.type, locale)}
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${typeColors[project.systemType]}`}>
+                        {t(project.systemType, locale)}
                       </span>
                     </div>
                   </div>
@@ -640,15 +681,15 @@ export default function ProjectsPage({ params }: PageProps) {
                   {/* Project Info */}
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {project.title[locale as keyof typeof project.title]}
+                      {project.title}
                     </h3>
                     
                     <p className="text-gray-600 mb-4">
-                      📍 {project.location[locale as keyof typeof project.location]}
+                      📍 {typeof project.location === 'string' ? project.location : project.location?.city || project.location?.address || ''}
                     </p>
                     
                     <p className="text-gray-600 mb-6 line-clamp-2">
-                      {project.description[locale as keyof typeof project.description]}
+                      {project.shortDescription || ''}
                     </p>
                     
                     {/* Stats */}
@@ -664,7 +705,7 @@ export default function ProjectsPage({ params }: PageProps) {
                       
                       <div>
                         <div className="text-2xl font-bold text-green-600">
-                          {project.savings}%
+                          {project.savings || 0}%
                         </div>
                         <div className="text-xs text-gray-500">
                           {t('savings', locale)}
@@ -673,7 +714,7 @@ export default function ProjectsPage({ params }: PageProps) {
                       
                       <div>
                         <div className="text-2xl font-bold text-green-600">
-                          {project.payback}
+                          {project.paybackPeriod || 0}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t('payback', locale)} ({t('years', locale)})
@@ -681,17 +722,14 @@ export default function ProjectsPage({ params }: PageProps) {
                       </div>
                     </div>
                     
-                    {/* CTA */}
-                    <Link
-                      href={`/${locale}/du-an/${project.id}`}
-                      className="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
-                    >
+                    {/* CTA - Already in Link wrapper above */}
+                    <div className="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors">
                       {t('viewDetails', locale)} →
-                    </Link>
+                    </div>
                   </div>
-                </div>
+                </Link>
               )
-            })}
+            }))}
           </div>
         </Container>
       </section>

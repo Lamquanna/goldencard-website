@@ -19,6 +19,7 @@ interface PartnerGridProps {
 
 export function PartnerGrid({ locale: rawLocale, category }: PartnerGridProps) {
   const locale = (rawLocale === 'id' ? 'en' : rawLocale) as 'vi' | 'en' | 'zh';
+  const displayLocale = rawLocale; // For display text that needs Indonesian
   // Partners for Cards business
   const cardPartners: Partner[] = [
     { id: "15", name: "Partner 1", image: "/partners/Cards/15.png", category: "cards" },
@@ -76,7 +77,7 @@ export function PartnerGrid({ locale: rawLocale, category }: PartnerGridProps) {
             >
               <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse" />
               <span className="text-sm font-semibold text-neutral-800">
-                {locale === "vi" ? "Đối tác tin cậy" : locale === "zh" ? "可信赖的合作伙伴" : "Trusted Partners"}
+                {displayLocale === "vi" ? "Đối tác tin cậy" : displayLocale === "zh" ? "可信赖的合作伙伴" : displayLocale === "id" ? "Mitra Terpercaya" : "Trusted Partners"}
               </span>
             </motion.div>
             
@@ -150,7 +151,7 @@ export function PartnerGrid({ locale: rawLocale, category }: PartnerGridProps) {
                   {partners.length}+
                 </div>
                 <div className="text-sm text-neutral-700 font-medium">
-                  {locale === "vi" ? "Đối tác chiến lược" : locale === "zh" ? "战略合作伙伴" : "Strategic Partners"}
+                  {displayLocale === "vi" ? "Đối tác chiến lược" : displayLocale === "zh" ? "战略合作伙伴" : displayLocale === "id" ? "Mitra Strategis" : "Strategic Partners"}
                 </div>
               </div>
             </div>

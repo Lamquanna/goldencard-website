@@ -238,7 +238,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
         <div className="relative bg-gradient-to-b from-gray-900 to-gray-800 py-16">
           <div className="container mx-auto px-6 md:px-12 lg:px-24 text-center max-w-[1200px]">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-wide">
-              {hero?.headline ?? (locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : "Contact")}
+              {hero?.headline ?? (locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : locale === "id" ? "Kontak" : "Contact")}
             </h1>
             <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto leading-relaxed font-medium">
               {hero?.subheadline ?? ""}
@@ -315,19 +315,19 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <RevealOnScroll >
               <div className="bg-white border-2 border-gray-200 p-10 md:p-12 rounded-2xl shadow-xl hover:border-gray-300 transition-all duration-500">
                 <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-8 tracking-wide">
-                  {formCopy?.description ?? (locale === "vi" ? "Gửi tin nhắn" : locale === "zh" ? "发送消息" : "Send message")}
+                  {formCopy?.description ?? (locale === "vi" ? "Gửi tin nhắn" : locale === "zh" ? "发送消息" : locale === "id" ? "Kirim pesan" : "Send message")}
                 </h3>
                 <ContactForm
                   locale={locale}
                   placeholders={{
-                    form_placeholder_name: formCopy?.field_labels?.name ?? (locale === "vi" ? "Họ và tên" : locale === "zh" ? "姓名" : "Full Name"),
+                    form_placeholder_name: formCopy?.field_labels?.name ?? (locale === "vi" ? "Họ và tên" : locale === "zh" ? "姓名" : locale === "id" ? "Nama Lengkap" : "Full Name"),
                     form_placeholder_email: formCopy?.field_labels?.email ?? "Email",
-                    form_placeholder_phone: formCopy?.field_labels?.phone ?? (locale === "vi" ? "Số điện thoại" : locale === "zh" ? "电话" : "Phone"),
-                    form_placeholder_company: formCopy?.field_labels?.company ?? (locale === "vi" ? "Công ty" : locale === "zh" ? "公司" : "Company"),
-                    form_placeholder_message: formCopy?.field_labels?.message ?? (locale === "vi" ? "Tin nhắn" : locale === "zh" ? "留言" : "Message"),
-                    button_submit_form: formCopy?.button_submit ?? (locale === "vi" ? "Gửi" : locale === "zh" ? "提交" : "Submit"),
-                    form_success_message: formCopy?.success_message ?? (locale === "vi" ? "Cảm ơn! Chúng tôi sẽ liên hệ sớm." : locale === "zh" ? "谢谢！我们会尽快联系您。" : "Thank you! We'll be in touch soon."),
-                    form_error_message: formCopy?.error_message ?? (locale === "vi" ? "Có lỗi xảy ra. Vui lòng thử lại." : locale === "zh" ? "出错了。请重试。" : "Something went wrong. Please try again."),
+                    form_placeholder_phone: formCopy?.field_labels?.phone ?? (locale === "vi" ? "Số điện thoại" : locale === "zh" ? "电话" : locale === "id" ? "Telepon" : "Phone"),
+                    form_placeholder_company: formCopy?.field_labels?.company ?? (locale === "vi" ? "Công ty" : locale === "zh" ? "公司" : locale === "id" ? "Perusahaan" : "Company"),
+                    form_placeholder_message: formCopy?.field_labels?.message ?? (locale === "vi" ? "Tin nhắn" : locale === "zh" ? "留言" : locale === "id" ? "Pesan" : "Message"),
+                    button_submit_form: formCopy?.button_submit ?? (locale === "vi" ? "Gửi" : locale === "zh" ? "提交" : locale === "id" ? "Kirim" : "Submit"),
+                    form_success_message: formCopy?.success_message ?? (locale === "vi" ? "Cảm ơn! Chúng tôi sẽ liên hệ sớm." : locale === "zh" ? "谢谢！我们会尽快联系您。" : locale === "id" ? "Terima kasih! Kami akan segera menghubungi Anda." : "Thank you! We'll be in touch soon."),
+                    form_error_message: formCopy?.error_message ?? (locale === "vi" ? "Có lỗi xảy ra. Vui lòng thử lại." : locale === "zh" ? "出错了。请重试。" : locale === "id" ? "Terjadi kesalahan. Silakan coba lagi." : "Something went wrong. Please try again."),
                   }}
                 />
                 {formCopy?.privacy_note && (
@@ -344,10 +344,10 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <div className="text-center mb-16">
               <RevealOnScroll >
                 <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4 tracking-wide">
-                  {locale === "vi" ? "Thông Tin Liên Hệ" : locale === "zh" ? "联系信息" : "Contact Information"}
+                  {locale === "vi" ? "Thông Tin Liên Hệ" : locale === "zh" ? "联系信息" : locale === "id" ? "Informasi Kontak" : "Contact Information"}
                 </h2>
                 <p className="text-lg text-gray-700 font-medium">
-                  {locale === "vi" ? "Văn phòng và kho hàng của chúng tôi" : locale === "zh" ? "我们的办公室和仓库" : "Our offices and warehouses"}
+                  {locale === "vi" ? "Văn phòng và kho hàng của chúng tôi" : locale === "zh" ? "我们的办公室和仓库" : locale === "id" ? "Kantor dan gudang kami" : "Our offices and warehouses"}
                 </p>
               </RevealOnScroll>
             </div>
@@ -360,7 +360,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">🏢</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : "Headquarters"}
+                        {locale === "vi" ? "Trụ Sở Chính" : locale === "zh" ? "总部" : locale === "id" ? "Kantor Pusat" : "Headquarters"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
                         A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP. Hồ Chí Minh
@@ -378,7 +378,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     </div>
                     <div className="flex items-center gap-3">
                       <span>🕐</span>
-                      <span>{locale === "vi" ? "8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "8:00 - 17:30（周一至周六）" : "8:00 AM - 5:30 PM (Mon - Sat)"}</span>
+                      <span>{locale === "vi" ? "8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "8:00 - 17:30（周一至周六）" : locale === "id" ? "8:00 - 17:30 (Sen - Sab)" : "8:00 AM - 5:30 PM (Mon - Sat)"}</span>
                     </div>
                   </div>
                 </div>
@@ -391,7 +391,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">🏬</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Văn Phòng Đại Diện" : locale === "zh" ? "代表处" : "Representative Office"}
+                        {locale === "vi" ? "Văn Phòng Đại Diện" : locale === "zh" ? "代表处" : locale === "id" ? "Kantor Perwakilan" : "Representative Office"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
                         625 Trần Xuân Soạn, Phường Tân Hưng, Quận 7, TP. Hồ Chí Minh
@@ -418,7 +418,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">📦</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Kho Hàng" : locale === "zh" ? "仓库" : "Warehouse"}
+                        {locale === "vi" ? "Kho Hàng" : locale === "zh" ? "仓库" : locale === "id" ? "Gudang" : "Warehouse"}
                       </h3>
                       <p className="text-gray-700 leading-relaxed font-medium">
                         354/2/3 Nguyễn Văn Linh, Phường Bình Thuận, TP. Hồ Chí Minh
@@ -428,11 +428,11 @@ export default async function ContactPage({ params }: ContactPageProps) {
                   <div className="space-y-3 text-gray-900 font-medium mt-auto">
                     <div className="flex items-center gap-3">
                       <span>📦</span>
-                      <span>{locale === "vi" ? "Kho vật tư năng lượng" : locale === "zh" ? "能源设备仓库" : "Energy equipment warehouse"}</span>
+                      <span>{locale === "vi" ? "Kho vật tư năng lượng" : locale === "zh" ? "能源设备仓库" : locale === "id" ? "Gudang peralatan energi" : "Energy equipment warehouse"}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span>🔧</span>
-                      <span>{locale === "vi" ? "Trung tâm phân phối" : locale === "zh" ? "配送中心" : "Distribution center"}</span>
+                      <span>{locale === "vi" ? "Trung tâm phân phối" : locale === "zh" ? "配送中心" : locale === "id" ? "Pusat distribusi" : "Distribution center"}</span>
                     </div>
                   </div>
                 </div>
@@ -445,7 +445,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <div className="text-4xl">📞</div>
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {locale === "vi" ? "Liên Hệ Tổng Đài" : locale === "zh" ? "联系总机" : "Contact Hotline"}
+                        {locale === "vi" ? "Liên Hệ Tổng Đài" : locale === "zh" ? "联系总机" : locale === "id" ? "Hotline Kontak" : "Contact Hotline"}
                       </h3>
                     </div>
                   </div>
@@ -462,7 +462,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     </div>
                     <div className="pt-3 border-t border-gray-300">
                       <span className="text-sm">
-                        {locale === "vi" ? "Giờ làm việc: 8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "工作时间：8:00 - 17:30（周一至周六）" : "Working hours: 8:00 AM - 5:30 PM (Mon - Sat)"}
+                        {locale === "vi" ? "Giờ làm việc: 8:00 - 17:30 (Thứ 2 - Thứ 7)" : locale === "zh" ? "工作时间：8:00 - 17:30（周一至周六）" : locale === "id" ? "Jam kerja: 8:00 - 17:30 (Sen - Sab)" : "Working hours: 8:00 AM - 5:30 PM (Mon - Sat)"}
                       </span>
                     </div>
                   </div>

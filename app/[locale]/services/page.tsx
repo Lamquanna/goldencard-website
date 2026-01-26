@@ -27,7 +27,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
   const servicesList = [
     {
       key: "solar",
-      title: highlights.solar_solutions?.headline ?? (locale === "vi" ? "Năng Lượng Mặt Trời" : locale === "zh" ? "太阳能" : "Solar Energy"),
+      title: highlights.solar_solutions?.headline ?? (locale === "vi" ? "Năng Lượng Mặt Trời" : locale === "zh" ? "太阳能" : locale === "id" ? "Energi Surya" : "Solar Energy"),
       subtitle: highlights.solar_solutions?.tagline ?? "",
       benefits: highlights.solar_solutions?.short_benefits ?? [],
       icon: "☀️",
@@ -35,7 +35,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
     },
     {
       key: "cards",
-      title: highlights.magnetic_cards?.headline ?? (locale === "vi" ? "Thẻ Từ Thông Minh" : locale === "zh" ? "智能卡" : "Smart Cards"),
+      title: highlights.magnetic_cards?.headline ?? (locale === "vi" ? "Thẻ Từ Thông Minh" : locale === "zh" ? "智能卡" : locale === "id" ? "Kartu Pintar" : "Smart Cards"),
       subtitle: highlights.magnetic_cards?.tagline ?? "",
       benefits: highlights.magnetic_cards?.short_benefits ?? [],
       icon: "💳",
@@ -43,7 +43,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
     },
     {
       key: "bank",
-      title: highlights.bank_cards?.headline ?? (locale === "vi" ? "Thẻ Ngân Hàng" : locale === "zh" ? "银行卡" : "Bank Cards"),
+      title: highlights.bank_cards?.headline ?? (locale === "vi" ? "Thẻ Ngân Hàng" : locale === "zh" ? "银行卡" : locale === "id" ? "Kartu Bank" : "Bank Cards"),
       subtitle: highlights.bank_cards?.tagline ?? "",
       benefits: highlights.bank_cards?.short_benefits ?? [],
       icon: "🏦",
@@ -51,7 +51,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
     },
     {
       key: "it",
-      title: highlights.it_services?.headline ?? (locale === "vi" ? "Công Nghệ Thông Tin" : locale === "zh" ? "信息技术" : "IT Services"),
+      title: highlights.it_services?.headline ?? (locale === "vi" ? "Công Nghệ Thông Tin" : locale === "zh" ? "信息技术" : locale === "id" ? "Layanan TI" : "IT Services"),
       subtitle: highlights.it_services?.tagline ?? "",
       benefits: highlights.it_services?.short_benefits ?? [],
       icon: "💻",
@@ -66,7 +66,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
       <main className="relative">
         {/* Hero Section */}
         <Hero
-          title={hero?.headline ?? (locale === "vi" ? "Dịch Vụ" : locale === "zh" ? "服务" : "Services")}
+          title={hero?.headline ?? (locale === "vi" ? "Dịch Vụ" : locale === "zh" ? "服务" : locale === "id" ? "Layanan" : "Services")}
           subtitle={hero?.subheadline ?? ""}
           description=""
           ctaText=""
@@ -137,16 +137,16 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <RevealOnScroll >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                {locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : "Contact"}
+                {locale === "vi" ? "Liên Hệ" : locale === "zh" ? "联系我们" : locale === "id" ? "Kontak" : "Contact"}
               </h2>
               <p className="text-xl mb-12 text-emerald-100">
-                {locale === "vi" ? "Bắt đầu dự án của bạn ngay hôm nay" : locale === "zh" ? "今天就开始您的项目" : "Start your project today"}
+                {locale === "vi" ? "Bắt đầu dự án của bạn ngay hôm nay" : locale === "zh" ? "今天就开始您的项目" : locale === "id" ? "Mulai proyek Anda hari ini" : "Start your project today"}
               </p>
               <a
                 href={`/${locale}/contact`}
                 className="inline-block px-12 py-4 bg-[#D4AF37] text-white font-semibold hover:bg-[#C19B2E] transition-all duration-300 shadow-xl"
               >
-                {locale === "vi" ? "Liên hệ ngay" : locale === "zh" ? "立即联系" : "Get in touch"}
+                {locale === "vi" ? "Liên hệ ngay" : locale === "zh" ? "立即联系" : locale === "id" ? "Hubungi sekarang" : "Get in touch"}
               </a>
             </RevealOnScroll>
           </div>

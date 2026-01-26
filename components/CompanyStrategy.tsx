@@ -11,6 +11,9 @@ interface CompanyStrategyProps {
 
 export function CompanyStrategy({ locale: rawLocale }: CompanyStrategyProps) {
   const locale = (rawLocale === 'id' ? 'en' : rawLocale) as 'vi' | 'en' | 'zh';
+  
+  // For display text that needs Indonesian, use rawLocale
+  const displayLocale = rawLocale;
   const strategies = [
     {
       number: "01",
@@ -117,7 +120,7 @@ export function CompanyStrategy({ locale: rawLocale }: CompanyStrategyProps) {
             >
               <span className="text-2xl">🎯</span>
               <span className="text-sm font-semibold text-neutral-800">
-                {locale === "vi" ? "Về chúng tôi" : locale === "zh" ? "关于我们" : "About Us"}
+                {displayLocale === "vi" ? "Về chúng tôi" : displayLocale === "zh" ? "关于我们" : displayLocale === "id" ? "Tentang Kami" : "About Us"}
               </span>
             </motion.div>
             
@@ -212,19 +215,19 @@ export function CompanyStrategy({ locale: rawLocale }: CompanyStrategyProps) {
               {[
                 { 
                   value: "15+", 
-                  label: locale === "vi" ? "Năm kinh nghiệm" : locale === "zh" ? "年经验" : "Years Experience"
+                  label: displayLocale === "vi" ? "Năm kinh nghiệm" : displayLocale === "zh" ? "年经验" : displayLocale === "id" ? "Tahun Pengalaman" : "Years Experience"
                 },
                 { 
                   value: "500+", 
-                  label: locale === "vi" ? "Dự án thành công" : locale === "zh" ? "成功项目" : "Successful Projects"
+                  label: displayLocale === "vi" ? "Dự án thành công" : displayLocale === "zh" ? "成功项目" : displayLocale === "id" ? "Proyek Sukses" : "Successful Projects"
                 },
                 { 
                   value: "100+", 
-                  label: locale === "vi" ? "Đối tác" : locale === "zh" ? "合作伙伴" : "Partners"
+                  label: displayLocale === "vi" ? "Đối tác" : displayLocale === "zh" ? "合作伙伴" : displayLocale === "id" ? "Mitra" : "Partners"
                 },
                 { 
                   value: "98%", 
-                  label: locale === "vi" ? "Hài lòng" : locale === "zh" ? "满意度" : "Satisfaction"
+                  label: displayLocale === "vi" ? "Hài lòng" : displayLocale === "zh" ? "满意度" : displayLocale === "id" ? "Kepuasan" : "Satisfaction"
                 },
               ].map((stat, index) => (
                 <div key={index} className="text-center">

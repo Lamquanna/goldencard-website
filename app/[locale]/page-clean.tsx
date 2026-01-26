@@ -81,7 +81,7 @@ export default async function HomePage({ params }: HomePageProps) {
         title="Golden Energy"
         subtitle="ENERGY SOLUTIONS"
         description={hero.tagline}
-        ctaText={locale === "vi" ? "Khám phá" : locale === "zh" ? "探索" : "Explore"}
+        ctaText={locale === "vi" ? "Khám phá" : locale === "zh" ? "探索" : locale === "id" ? "Jelajahi" : "Explore"}
         ctaLink={`/${locale}/services`}
       />
 
