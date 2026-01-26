@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { sanityClient } from '@/sanity/lib/client';
+import { client } from '@/sanity/lib/client';
 import { urlForImage } from '@/sanity/lib/image';
 
 interface Product {
@@ -120,7 +120,7 @@ export function ProductGrid({ locale, initialProducts }: ProductGridProps) {
 
   useEffect(() => {
     // Real-time subscription from Sanity
-    const subscription = sanityClient
+    const subscription = client
       .listen('*[_type == "product"]', {}, { includeResult: true })
       .subscribe((update) => {
         console.log('🔄 Real-time product update:', update);
@@ -143,7 +143,7 @@ export function ProductGrid({ locale, initialProducts }: ProductGridProps) {
           inStock
         }`;
 
-        sanityClient.fetch(query).then((data) => {
+        client.fetch(query).then((data) => {
           setProducts(data);
           setTimeout(() => setIsLive(false), 2000);
         });
