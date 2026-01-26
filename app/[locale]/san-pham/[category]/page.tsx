@@ -60,6 +60,19 @@ const categoryMapping: Record<string, string[]> = {
   'giam-sat': ['monitoring']
 }
 
+// Generate static params for all category pages
+export async function generateStaticParams() {
+  const locales = ['vi', 'en', 'zh', 'id']
+  const categories = ['tam-pin', 'bien-tan', 'pin-luu-tru', 'giam-sat']
+  
+  return locales.flatMap(locale => 
+    categories.map(category => ({
+      locale,
+      category
+    }))
+  )
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, category } = await params
   const categoryName = categoryNames[category]?.[locale] || category

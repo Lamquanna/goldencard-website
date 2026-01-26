@@ -231,6 +231,17 @@ const nextConfig: NextConfig = {
   // Do NOT add domain redirects here to avoid conflicts with Vercel's redirect handling
   async redirects() {
     return [
+      // Fix undefined locale in URLs (browser cache/old bookmarks)
+      {
+        source: '/:locale(en|vi|zh|id)/undefined/:path*',
+        destination: '/:locale/:path*',
+        permanent: false,
+      },
+      {
+        source: '/undefined/:path*',
+        destination: '/vi/:path*',
+        permanent: false,
+      },
       // CRM to ERP redirects (legacy URL support)
       {
         source: '/crm',
