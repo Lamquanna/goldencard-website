@@ -1,10 +1,11 @@
 import type { Locale } from "@/lib/i18n";
 
-const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "projects" | "innovation" | "blog" | "contact", string>> = {
+const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "products" | "projects" | "innovation" | "blog" | "contact", string>> = {
   vi: {
     home: "Trang chủ",
     about: "Giới thiệu",
     solutions: "Giải pháp",
+    products: "Sản phẩm",
     projects: "Dự án",
     innovation: "R&D Lab",
     blog: "Kiến thức",
@@ -14,6 +15,7 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "project
     home: "Home",
     about: "About",
     solutions: "Solutions",
+    products: "Products",
     projects: "Projects",
     innovation: "Innovation",
     blog: "Knowledge",
@@ -23,6 +25,7 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "project
     home: "首页",
     about: "关于",
     solutions: "解决方案",
+    products: "产品",
     projects: "项目",
     innovation: "研发实验室",
     blog: "知识",
@@ -32,6 +35,7 @@ const navLabels: Record<Locale, Record<"home" | "about" | "solutions" | "project
     home: "Beranda",
     about: "Tentang",
     solutions: "Solusi",
+    products: "Produk",
     projects: "Proyek",
     innovation: "R&D Lab",
     blog: "Pengetahuan",
@@ -73,6 +77,7 @@ export function getPrimaryNavigation(locale: Locale): NavItem[] {
         },
       ]
     },
+    { label: labels.products, href: `/${locale}/san-pham` },
     { label: labels.projects, href: `/${locale}/projects` },
     { label: labels.innovation, href: `/${locale}/innovation` },
     { label: labels.blog, href: `/${locale}/blog` },
