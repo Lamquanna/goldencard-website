@@ -155,7 +155,7 @@ export default function Footer({ navItems, locale, siteData }: FooterProps) {
                 📞 <a href={`tel:${siteData.phone}`} className="hover:text-[#D4AF37] transition-colors">{siteData.phone}</a> / <a href={`tel:${siteData.phoneSecondary}`} className="hover:text-[#D4AF37] transition-colors">{siteData.phoneSecondary}</a>
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.875rem" }}>
-                🏢 {siteData.address}
+                🏢 A2206-A2207 Tháp A, Sunrise Riverside, Phước Kiến, Nhà Bè, TP.HCM
               </li>
               <li style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.025em", fontSize: "0.7rem", opacity: 0.8 }}>
                 {locale === 'vi' ? 'Giờ làm việc: 8:00 - 17:30 (T2-T7)' : locale === 'zh' ? '工作时间：8:00 - 17:30' : 'Hours: 8:00 AM - 5:30 PM (Mon-Sat)'}

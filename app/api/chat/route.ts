@@ -5,6 +5,47 @@ import { geminiKeyManager } from '@/lib/api/gemini-key-manager';
 const HOTLINE_PRIMARY = process.env.NEXT_PUBLIC_HOTLINE_PRIMARY || '0333314288';
 const HOTLINE_SECONDARY = process.env.NEXT_PUBLIC_HOTLINE_SECONDARY || '0903117277';
 
+// Rate Limiting: In-memory store (24h window, 2 messages max)
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+const RATE_LIMIT_MAX = 2;
+const RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000; // 24 hours
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitStore.set(ip, { count: 0, resetTime: now + RATE_LIMIT_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT_MAX };
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
+}
+
+function incrementRateLimit(ip: string): void {
+  const entry = rateLimitStore.get(ip);
+  if (entry) {
+    entry.count++;
+  }
+}
+
+const RATE_LIMIT_MESSAGE = `Dạ, để đảm bảo chất lượng tư vấn tốt nhất, mỗi khách hàng được hỗ trợ tối đa 2 câu hỏi qua chat mỗi ngày ạ.
+
+Để được tư vấn chi tiết và nhanh chóng hơn, em mời Anh/Chị gọi trực tiếp Hotline:
+📞 ${HOTLINE_PRIMARY}
+📞 ${HOTLINE_SECONDARY}
+
+Kỹ sư bên em sẽ tư vấn tận tình 24/7 và báo giá miễn phí ngay ạ! ☀️`;
+
 const SYSTEM_PROMPT = `Bạn là Kỹ sư tư vấn bán hàng của Golden Energy - công ty năng lượng mặt trời hàng đầu Việt Nam.
 
 **PHONG CÁCH:**
@@ -152,14 +193,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    console.log(`📩 New chat message: "${message.slice(0, 50)}..."`);
+    // Rate limiting check
+    const ip = request.headers.get('x-forwarded-for') || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    const rateCheck = checkRateLimit(ip);
+    
+    if (!rateCheck.allowed) {
+      console.log(`⚠️ Rate limit exceeded for IP: ${ip}`);
+      return NextResponse.json({
+        response: RATE_LIMIT_MESSAGE,
+        timestamp: new Date().toISOString(),
+        rateLimit: { exceeded: true, remaining: 0 },
+      });
+    }
+
+    console.log(`📩 New chat message: "${message.slice(0, 50)}..." (${rateCheck.remaining - 1} left)`);
 
     const response = await sendMessageWithRetry(message, conversationHistory, pageContext);
+    
+    // Increment rate limit after successful response
+    incrementRateLimit(ip);
 
+    const updatedCheck = checkRateLimit(ip);
+    
     return NextResponse.json({
       response,
       timestamp: new Date().toISOString(),
       fallback: response === FALLBACK_MESSAGE,
+      rateLimit: { remaining: updatedCheck.remaining },
     });
   } catch (error: any) {
     console.error('❌ Chat API error:', error);

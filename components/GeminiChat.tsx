@@ -177,6 +177,19 @@ export function GeminiChat() {
               <X className="w-5 h-5" />
             </button>
           </div>
+          
+          {/* ⚠️ Hotline Banner - PERMANENT, STICKY */}
+          <div className="bg-green-500 px-4 py-2 text-white text-center font-semibold flex items-center justify-center gap-2 shadow-md">
+            <Phone className="w-4 h-4 animate-pulse" />
+            <span className="text-sm">Hotline 24/7:</span>
+            <a 
+              href="tel:0333314288" 
+              className="text-white font-bold underline hover:text-yellow-200"
+            >
+              0333 314 288
+            </a>
+            <span className="text-xs opacity-90">| Miễn phí tư vấn</span>
+          </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">

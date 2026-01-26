@@ -166,8 +166,53 @@ export default async function ProductCategoryPage({ params }: PageProps) {
   
   const content = t[locale as keyof typeof t] || t.vi
   
+  // Generate Schema.org Product List with Prices
+  const productListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: categoryName,
+    description: `Danh sách sản phẩm ${categoryName} chính hãng từ Golden Energy`,
+    numberOfItems: products.length,
+    itemListElement: products.map((product: any, index: number) => ({
+      '@type': 'Product',
+      position: index + 1,
+      name: product.name,
+      brand: product.brand || 'Golden Energy',
+      category: categoryName,
+      ...(product.imageUrl && { image: product.imageUrl }),
+      ...(product.price && {
+        offers: {
+          '@type': 'Offer',
+          price: product.price,
+          priceCurrency: 'VND',
+          availability: product.inStock 
+            ? 'https://schema.org/InStock' 
+            : 'https://schema.org/OutOfStock',
+          seller: {
+            '@type': 'Organization',
+            name: 'Golden Energy Vietnam',
+            url: 'https://goldenenergy.vn'
+          }
+        }
+      }),
+      ...(product.techSpecs && {
+        additionalProperty: Object.entries(product.techSpecs).map(([key, value]) => ({
+          '@type': 'PropertyValue',
+          name: key,
+          value: String(value)
+        }))
+      })
+    }))
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* SEO: Schema.org Product List with REAL PRICES */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productListSchema) }}
+      />
+      
       <Container>
         {/* Breadcrumb */}
         <div className="py-8">
@@ -306,19 +351,16 @@ export default async function ProductCategoryPage({ params }: PageProps) {
                     </div>
                   )}
                   
-                  {/* Price */}
-                  {product.price && (
-                    <div className="mb-4">
-                      <span className="text-sm text-gray-500">{content.from}</span>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {new Intl.NumberFormat('vi-VN', { 
-                          style: 'currency', 
-                          currency: 'VND',
-                          maximumFractionDigits: 0
-                        }).format(product.price)}
-                      </p>
-                    </div>
-                  )}
+                  {/* Price - HIDDEN from UI for better conversion */}
+                  {/* Real price is in Schema.org JSON-LD for SEO */}
+                  <div className="mb-4">
+                    <p className="text-2xl font-bold text-blue-600">
+                      {locale === 'vi' ? 'Liên hệ' : locale === 'zh' ? '联系咨询' : locale === 'id' ? 'Hubungi' : 'Contact'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {locale === 'vi' ? 'Để nhận báo giá tốt nhất' : locale === 'zh' ? '获取最优报价' : locale === 'id' ? 'Dapatkan penawaran terbaik' : 'Get best quote'}
+                    </p>
+                  </div>
                   
                   {/* CTA */}
                   <Link
