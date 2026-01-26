@@ -614,41 +614,54 @@ export default function ProductsPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-20">
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]" />
-        <Container className="relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-yellow-500/20 px-4 py-2 rounded-full mb-6">
-              <Award className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm font-medium text-yellow-300">{t.hero.badge}</span>
+      {/* Hero Section - Modern Gradient Design */}
+      <section className="relative overflow-hidden py-24 md:py-32">
+        {/* Animated Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-400 via-orange-500 to-yellow-500" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-green-400/30 via-transparent to-blue-400/20 mix-blend-multiply" />
+        
+        {/* Geometric Pattern Overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] bg-repeat" />
+        </div>
+        
+        <Container className="relative z-10">
+          <div className="max-w-5xl mx-auto">
+            {/* Badge */}
+            <div className="flex justify-center mb-8 animate-fade-in">
+              <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg border border-white/20">
+                <Award className="w-5 h-5 text-amber-600" />
+                <span className="text-sm font-semibold text-gray-900">{t.hero.badge}</span>
+              </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            {/* Heading */}
+            <h1 className="text-center text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 text-white drop-shadow-2xl leading-tight">
               {t.hero.title}
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-300 mb-12">
+            {/* Subtitle */}
+            <p className="text-center text-lg md:text-2xl text-white/95 mb-12 max-w-3xl mx-auto font-medium drop-shadow-lg">
               {t.hero.subtitle}
             </p>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">4</div>
-                <div className="text-sm text-gray-400">{t.hero.stats.categories}</div>
+            {/* Stats Grid - Modern Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 border border-white/50">
+                <div className="text-5xl font-black bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">4</div>
+                <div className="text-sm font-semibold text-gray-700">{t.hero.stats.categories}</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">50+</div>
-                <div className="text-sm text-gray-400">{t.hero.stats.skus}</div>
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 border border-white/50">
+                <div className="text-5xl font-black bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">50+</div>
+                <div className="text-sm font-semibold text-gray-700">{t.hero.stats.skus}</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">99%</div>
-                <div className="text-sm text-gray-400">{t.hero.stats.uptime}</div>
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 border border-white/50">
+                <div className="text-5xl font-black bg-gradient-to-br from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">99%</div>
+                <div className="text-sm font-semibold text-gray-700">{t.hero.stats.uptime}</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">25</div>
-                <div className="text-sm text-gray-400">{t.hero.stats.warranty}</div>
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 border border-white/50">
+                <div className="text-5xl font-black bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">25</div>
+                <div className="text-sm font-semibold text-gray-700">{t.hero.stats.warranty}</div>
               </div>
             </div>
           </div>

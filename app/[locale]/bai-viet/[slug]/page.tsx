@@ -265,8 +265,8 @@ Sẵn sàng tính toán hệ thống phù hợp cho ngôi nhà của bạn? Sử
 `,
     tags: ['Tấm Pin', 'Hướng Dẫn', 'Monocrystalline', 'Polycrystalline', 'Lựa Chọn']
   },
-  'chinh-sach-moi-2026': {
-    slug: 'chinh-sach-moi-2026',
+  'chinh-sach-dien-mat-troi-2026': {
+    slug: 'chinh-sach-dien-mat-troi-2026',
     title: 'Chính Sách Điện Mặt Trời Mái Nhà 2026: Thay Đổi Quan Trọng Bạn Cần Biết',
     excerpt: 'Tổng hợp các thay đổi mới nhất về chính sách hỗ trợ, giá mua bán điện và thủ tục đăng ký hệ thống điện mặt trời mái nhà năm 2026.',
     category: 'news' as const,
@@ -343,7 +343,7 @@ type ArticleSlug = keyof typeof articles
 // Generate static params for 3 sample articles
 export function generateStaticParams() {
   const locales = ['vi', 'en', 'zh', 'id']
-  const slugs: ArticleSlug[] = ['huong-dan-chon-tam-pin', 'chinh-sach-moi-2026', 'nguyen-ly-hoat-dong-solar']
+  const slugs: ArticleSlug[] = ['huong-dan-chon-tam-pin', 'chinh-sach-dien-mat-troi-2026', 'nguyen-ly-hoat-dong-solar']
   
   return locales.flatMap(locale => 
     slugs.map(slug => ({ locale, slug }))
@@ -441,9 +441,9 @@ const categoryLabels = {
 
 // Related articles data
 const relatedArticlesMap: Record<ArticleSlug, ArticleSlug[]> = {
-  'huong-dan-chon-tam-pin': ['nguyen-ly-hoat-dong-solar', 'chinh-sach-moi-2026'],
-  'chinh-sach-moi-2026': ['huong-dan-chon-tam-pin', 'nguyen-ly-hoat-dong-solar'],
-  'nguyen-ly-hoat-dong-solar': ['huong-dan-chon-tam-pin', 'chinh-sach-moi-2026']
+  'huong-dan-chon-tam-pin': ['nguyen-ly-hoat-dong-solar', 'chinh-sach-dien-mat-troi-2026'],
+  'chinh-sach-dien-mat-troi-2026': ['huong-dan-chon-tam-pin', 'nguyen-ly-hoat-dong-solar'],
+  'nguyen-ly-hoat-dong-solar': ['huong-dan-chon-tam-pin', 'chinh-sach-dien-mat-troi-2026']
 }
 
 export default function ArticlePage({
