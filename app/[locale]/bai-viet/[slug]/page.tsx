@@ -8,6 +8,7 @@ import { ReadingProgress } from '@/components/Blog/ReadingProgress'
 import { SocialShareButtons } from '@/components/Blog/SocialShareButtons'
 import { TableOfContents } from '@/components/Blog/TableOfContents'
 import { Clock, Eye, Calendar, Facebook, Linkedin } from 'lucide-react'
+import { locales } from '@/lib/i18n'
 
 // Mock article database
 const articles = {

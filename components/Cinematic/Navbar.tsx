@@ -66,7 +66,7 @@ export default function Navbar({ navItems, locale }: NavbarProps) {
       <ScrollProgress color="#D4AF37" height={3} />
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
           isScrolled ? "bg-white/95 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "bg-white/90 py-6"
         }`}
         style={{
