@@ -155,11 +155,11 @@ export default function PricingPage() {
                   <span className="font-bold text-orange-600">2,484 tr</span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">On-Grid >100kW</span>
+                  <span className="text-gray-600">On-Grid &gt;100kW</span>
                   <span className="font-bold text-gray-900">30k/kW</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span className="text-gray-600">BESS >100kW</span>
+                  <span className="text-gray-600">BESS &gt;100kW</span>
                   <span className="font-bold text-gray-900">40k/kW</span>
                 </div>
               </div>
@@ -242,11 +242,11 @@ export default function PricingPage() {
                   <span className="font-bold">2,484 triệu</span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
-                  <span>On-Grid >100kW</span>
+                  <span>On-Grid &gt;100kW</span>
                   <span className="font-bold">30,000 VNĐ/kW</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span>BESS >100kW</span>
+                  <span>BESS &gt;100kW</span>
                   <span className="font-bold">40,000 VNĐ/kW</span>
                 </div>
               </div>
