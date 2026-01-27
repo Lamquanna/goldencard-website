@@ -13,14 +13,14 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { parseBody } from 'next-sanity/webhook';
 
 const SANITY_REVALIDATE_SECRET = process.env.SANITY_REVALIDATE_SECRET;
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook signature
-    const signature = request.headers.get('sanity-webhook-signature');
+    // Verify secret token
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
     
     if (!SANITY_REVALIDATE_SECRET) {
       console.error('⚠️ SANITY_REVALIDATE_SECRET not configured');
@@ -30,12 +30,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (token !== SANITY_REVALIDATE_SECRET) {
+      console.error('⚠️ Invalid webhook token');
+      return NextResponse.json(
+        { message: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
     // Parse webhook body
-    const body = await parseBody(
-      await request.text(),
-      signature,
-      SANITY_REVALIDATE_SECRET
-    );
+    const body = await request.json();
 
     if (!body?._type) {
       return NextResponse.json(
@@ -52,12 +56,16 @@ export async function POST(request: NextRequest) {
     switch (_type) {
       case 'product':
         // Revalidate products page
-        revalidatePath('/[locale]/san-pham', 'page');
+        revalidatePath('/vi/san-pham', 'page');
+        revalidatePath('/en/san-pham', 'page');
+        revalidatePath('/zh/san-pham', 'page');
         revalidateTag('products');
         
         // Revalidate specific product page if slug exists
         if (slug?.current) {
-          revalidatePath(`/[locale]/san-pham/${slug.current}`, 'page');
+          revalidatePath(`/vi/san-pham/${slug.current}`, 'page');
+          revalidatePath(`/en/san-pham/${slug.current}`, 'page');
+          revalidatePath(`/zh/san-pham/${slug.current}`, 'page');
         }
         
         console.log('✅ Revalidated product pages');
@@ -65,15 +73,28 @@ export async function POST(request: NextRequest) {
 
       case 'project':
         // Revalidate projects page
-        revalidatePath('/[locale]/du-an', 'page');
+        revalidatePath('/vi/du-an', 'page');
+        revalidatePath('/en/du-an', 'page');
+        revalidatePath('/zh/du-an', 'page');
         revalidateTag('projects');
         
         // Revalidate specific project page if slug exists
         if (slug?.current) {
-          revalidatePath(`/[locale]/du-an/${slug.current}`, 'page');
+          revalidatePath(`/vi/du-an/${slug.current}`, 'page');
+          revalidatePath(`/en/du-an/${slug.current}`, 'page');
+          revalidatePath(`/zh/du-an/${slug.current}`, 'page');
         }
         
         console.log('✅ Revalidated project pages');
+        break;
+
+      case 'pricingPackage':
+        // Revalidate pricing page
+        revalidatePath('/vi/bang-gia', 'page');
+        revalidatePath('/en/bang-gia', 'page');
+        revalidatePath('/zh/bang-gia', 'page');
+        revalidateTag('pricing');
+        console.log('✅ Revalidated pricing page');
         break;
 
       case 'siteSettings':
