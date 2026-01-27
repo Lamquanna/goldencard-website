@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         revalidatePath('/vi/san-pham', 'page');
         revalidatePath('/en/san-pham', 'page');
         revalidatePath('/zh/san-pham', 'page');
-        revalidateTag('products');
+        revalidateTag('products', 'max');
         
         // Revalidate specific product page if slug exists
         if (slug?.current) {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         revalidatePath('/vi/du-an', 'page');
         revalidatePath('/en/du-an', 'page');
         revalidatePath('/zh/du-an', 'page');
-        revalidateTag('projects');
+        revalidateTag('projects', 'max');
         
         // Revalidate specific project page if slug exists
         if (slug?.current) {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         revalidatePath('/vi/bang-gia', 'page');
         revalidatePath('/en/bang-gia', 'page');
         revalidatePath('/zh/bang-gia', 'page');
-        revalidateTag('pricing');
+        revalidateTag('pricing', 'max');
         console.log('✅ Revalidated pricing page');
         break;
 
