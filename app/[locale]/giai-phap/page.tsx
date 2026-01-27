@@ -79,8 +79,8 @@ export default function SolutionsPage({ params }: PageProps) {
           slug: 'dien-mat-troi-ho-gia-dinh',
           title: 'Điện Mặt Trời Hộ Gia Đình',
           icon: '🏠',
-          capacity: '3-10 kW',
-          description: 'Giải pháp tiết kiệm điện cho ngôi nhà của bạn. Giảm hóa đơn điện đến 80%, hoàn vốn trong 5-7 năm.',
+          capacity: '6-18 kW',
+          description: 'Giải pháp tiết kiệm điện cho ngôi nhà của bạn. Tiết kiệm 70-80% hóa đơn, hoàn vốn trong 5-6 năm.',
           features: [
             'Tiết kiệm hóa đơn điện',
             'Tăng giá trị bất động sản',

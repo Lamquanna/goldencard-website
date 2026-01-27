@@ -17,8 +17,11 @@ import {
   TrendingUp
 } from 'lucide-react'
 
-// ISR: Revalidate every 60 seconds
+// ISR: Revalidate every 60 seconds (fallback for webhook failures)
 export const revalidate = 60
+
+// Dynamic rendering (to support real-time updates via webhook)
+export const dynamic = 'force-dynamic'
 
 // Translation type
 interface Translations {

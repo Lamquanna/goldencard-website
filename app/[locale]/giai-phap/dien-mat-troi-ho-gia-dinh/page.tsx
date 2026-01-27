@@ -79,8 +79,8 @@ export default function ResidentialSolarPage({ params }: PageProps) {
         title: 'Điện Mặt Trời Hộ Gia Đình',
         subtitle: 'Tiết kiệm hóa đơn điện, bảo vệ môi trường, tăng giá trị nhà',
         stats: [
-          { value: '80%', label: 'Giảm hóa đơn điện' },
-          { value: '5-7 năm', label: 'Hoàn vốn' },
+          { value: '70-80%', label: 'Tiết kiệm điện' },
+          { value: '5-6 năm', label: 'Hoàn vốn' },
           { value: '25 năm', label: 'Bảo hành' },
         ],
       },
@@ -400,7 +400,7 @@ export default function ResidentialSolarPage({ params }: PageProps) {
       
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white py-20">
+        <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white pt-32 pb-20">
           <Container>
             <div className="max-w-4xl">
               <h1 className="text-5xl md:text-6xl font-bold mb-6">

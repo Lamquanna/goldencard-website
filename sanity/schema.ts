@@ -1,4 +1,5 @@
 import { type SchemaTypeDefinition } from 'sanity'
+import { pricingPackage } from './schemas/pricingPackage'
 
 const siteSettings = {
   name: 'siteSettings',
@@ -925,5 +926,5 @@ const warranty = {
 }
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [siteSettings, product, project, post, solution, warranty],
+  types: [siteSettings, product, project, post, solution, warranty, pricingPackage],
 }

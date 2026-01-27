@@ -80,8 +80,8 @@ export default function CommercialSolarPage({ params }: PageProps) {
         title: 'Điện Mặt Trời Thương Mại',
         subtitle: 'Tối ưu chi phí vận hành, chứng nhận ESG, nâng cao hình ảnh doanh nghiệp xanh',
         stats: [
-          { value: '60-70%', label: 'Giảm chi phí điện' },
-          { value: '4-6 năm', label: 'Hoàn vốn' },
+          { value: '60-70%', label: 'Tiết kiệm điện' },
+          { value: '4-5 năm', label: 'Hoàn vốn' },
           { value: 'ESG', label: 'Chứng nhận' },
         ],
       },
@@ -488,7 +488,7 @@ export default function CommercialSolarPage({ params }: PageProps) {
       
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 text-white py-20">
+        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 text-white pt-32 pb-20">
           <Container>
             <div className="max-w-4xl">
               <h1 className="text-5xl md:text-6xl font-bold mb-6">

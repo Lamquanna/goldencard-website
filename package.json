@@ -10,6 +10,7 @@
     "lint": "eslint",
     "sanity": "sanity dev",
     "sanity:deploy": "sanity deploy",
+    "seed-pricing": "node scripts/seed-pricing-packages.mjs",
     "migrate": "node scripts/migrate-data.mjs",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",

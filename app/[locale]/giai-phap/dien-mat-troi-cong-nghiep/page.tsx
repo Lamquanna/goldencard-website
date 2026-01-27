@@ -80,8 +80,8 @@ export default function IndustrialSolarPage({ params }: PageProps) {
         title: 'Điện Mặt Trời Công Nghiệp',
         subtitle: 'Độc lập lưới điện, tối ưu chi phí sản xuất, đảm bảo liên tục sản xuất với quy mô MW+',
         stats: [
-          { value: '50-60%', label: 'Giảm chi phí điện' },
-          { value: '3-5 năm', label: 'Hoàn vốn' },
+          { value: '50-60%', label: 'Tiết kiệm điện' },
+          { value: '5-7 năm', label: 'Hoàn vốn' },
           { value: '24/7', label: 'Giám sát SCADA' },
         ],
       },
