@@ -63,11 +63,11 @@ export const VIETNAM_SOLAR_CONSTANTS = {
     average: 2500, // Simplified average for calculations
   } as const,
 
-  // System costs (VND/kW installed) - Including equipment + installation
+  // System costs (VND/kW installed) - Updated 2026 based on PRICE.md
   systemCost: {
-    residential: 15_000_000, // 15M VND/kW
-    commercial: 13_000_000, // 13M VND/kW
-    industrial: 11_000_000, // 11M VND/kW
+    residential: 20_000_000, // 20M VND/kW (120M/6kW with battery storage)
+    commercial: 21_670_000, // 21.67M VND/kW (650M/30kW 3-Phase with battery)
+    industrial: 23_000_000, // 23M VND/kW (2,300M/100kW with battery storage)
   } as const,
 
   // Performance factors
