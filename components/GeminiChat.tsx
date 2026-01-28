@@ -5,6 +5,10 @@ import { X, Send, Phone, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useStalker } from '@/lib/hooks/useStalker';
 
+// Hardcoded hotline numbers
+const HOTLINE_PRIMARY = '0333314288';
+const HOTLINE_SECONDARY = '0903117277';
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;

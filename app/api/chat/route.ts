@@ -2,8 +2,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiKeyManager } from '@/lib/api/gemini-key-manager';
 
-const HOTLINE_PRIMARY = process.env.NEXT_PUBLIC_HOTLINE_PRIMARY || '0333314288';
-const HOTLINE_SECONDARY = process.env.NEXT_PUBLIC_HOTLINE_SECONDARY || '0903117277';
+// Hardcoded hotline numbers
+const HOTLINE_PRIMARY = '0333314288';
+const HOTLINE_SECONDARY = '0903117277';
 
 // Rate Limiting: In-memory store (24h window, 2 messages max)
 interface RateLimitEntry {

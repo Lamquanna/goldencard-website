@@ -21,12 +21,13 @@ class GeminiKeyManager {
   }
 
   private initializeKeys() {
+    // Try GOOGLE_API_KEYS first (comma-separated), fallback to single GOOGLE_API_KEY
     const keysString = process.env.GOOGLE_API_KEYS || process.env.GOOGLE_API_KEY || '';
     const keyArray = keysString.split(',').map(k => k.trim()).filter(Boolean);
 
     if (keyArray.length === 0) {
       console.error('⚠️ No Gemini API keys configured!');
-      return;
+      // Don't return, let it continue with empty array (will use fallback responses)
     }
 
     this.keys = keyArray.map(key => ({
@@ -59,7 +60,7 @@ class GeminiKeyManager {
     const availableKeys = this.keys.filter(k => !k.isBlocked);
 
     if (availableKeys.length === 0) {
-      console.error('❌ All API keys are blocked!');
+      console.error('❌ All API keys are blocked or no keys configured!');
       return null;
     }
 
